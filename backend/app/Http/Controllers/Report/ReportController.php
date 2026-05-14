@@ -40,11 +40,11 @@ class ReportController extends Controller
     {
         $dto = new CreateReportDTO(
             userId: $request->user()->id,
-            category:  $request->validated('category'),
-            type:      $request->validated('type'),
-            status:    $request->validated('status'),
-            location:  $request->validated('location_name'),
-            latitude:  $request->validated('latitude'),
+            category: $request->validated('category'),
+            type: $request->validated('type'),
+            status: $request->validated('status'),
+            location: $request->validated('location_name'),
+            latitude: $request->validated('latitude'),
             longitude: $request->validated('longitude'),
         );
 
@@ -52,7 +52,6 @@ class ReportController extends Controller
 
         return response()->json([
             'message' => 'Report created.',
-            'data'    => new ReportResource($report->load('user')),
         ], 201);
     }
 
@@ -61,11 +60,11 @@ class ReportController extends Controller
         $this->authorize('update', $report);
 
         $dto = new UpdateReportDTO(
-            category:     $request->validated('category'),
-            type:         $request->validated('type'),
-            status:       $request->validated('status'),
-            latitude:     $request->validated('latitude'),
-            longitude:    $request->validated('longitude'),
+            category: $request->validated('category'),
+            type: $request->validated('type'),
+            status: $request->validated('status'),
+            latitude: $request->validated('latitude'),
+            longitude: $request->validated('longitude'),
             locationName: $request->validated('location_name'),
         );
 
@@ -73,7 +72,6 @@ class ReportController extends Controller
 
         return response()->json([
             'message' => 'Report updated.',
-            'data'    => new ReportResource($updated->load('user')),
         ]);
     }
 

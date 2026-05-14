@@ -39,13 +39,13 @@ class ArticleController extends Controller
     public function store(StoreArticleRequest $request): JsonResponse
     {
         $dto = new CreateArticleDTO(
-            userId:       $request->user()->id,
-            type:         $request->validated('type'),
-            date:         $request->validated('date'),
-            title:        $request->validated('title'),
-            description:  $request->validated('description'),
-            latitude:     $request->validated('latitude'),
-            longitude:    $request->validated('longitude'),
+            userId: $request->user()->id,
+            type: $request->validated('type'),
+            date: $request->validated('date'),
+            title: $request->validated('title'),
+            description: $request->validated('description'),
+            latitude: $request->validated('latitude'),
+            longitude: $request->validated('longitude'),
             locationName: $request->validated('location_name'),
         );
 
@@ -53,7 +53,6 @@ class ArticleController extends Controller
 
         return response()->json([
             'message' => 'Article created.',
-            'data'    => new ArticleResource($article->load('user')),
         ], 201);
     }
 
@@ -62,12 +61,12 @@ class ArticleController extends Controller
         $this->authorize('update', $article);
 
         $dto = new UpdateArticleDTO(
-            type:         $request->validated('type'),
-            date:         $request->validated('date'),
-            title:        $request->validated('title'),
-            description:  $request->validated('description'),
-            latitude:     $request->validated('latitude'),
-            longitude:    $request->validated('longitude'),
+            type: $request->validated('type'),
+            date: $request->validated('date'),
+            title: $request->validated('title'),
+            description: $request->validated('description'),
+            latitude: $request->validated('latitude'),
+            longitude: $request->validated('longitude'),
             locationName: $request->validated('location_name'),
         );
 
@@ -75,7 +74,6 @@ class ArticleController extends Controller
 
         return response()->json([
             'message' => 'Article updated.',
-            'data'    => new ArticleResource($updated->load('user')),
         ]);
     }
 
