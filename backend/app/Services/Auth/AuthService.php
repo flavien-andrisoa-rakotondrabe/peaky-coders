@@ -6,10 +6,12 @@ use App\DTOs\Auth\AuthResponseDTO;
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
 use App\DTOs\Auth\SocialAuthDTO;
+use App\Mail\WelcomeEmail;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -20,7 +22,7 @@ class AuthService
         private readonly UserRepository $userRepository,
     ) {}
 
-    public function register(RegisterDTO $dto): AuthResponseDTO
+    public function register(RegisterDTO $dto): User
     {
         $user = $this->userRepository->create([
             'first_name'        => $dto->firstName,
@@ -32,13 +34,9 @@ class AuthService
             'profile_completed' => true,
         ]);
 
-        $token = $user->createToken(
-            name: 'auth_token',
-            abilities: ['*'],
-            expiresAt: $this->resolveExpiration($dto->rememberMe),
-        )->plainTextToken;
+        Mail::to($user->email)->send(new WelcomeEmail($user));
 
-        return new AuthResponseDTO(user: $user, accessToken: $token);
+        return $user;
     }
 
     public function login(LoginDTO $dto): AuthResponseDTO
@@ -88,6 +86,10 @@ class AuthService
                 'email_verified_at' => now(),
                 'profile_completed' => false,
             ]);
+
+            if ($user->email) {
+                Mail::to($user->email)->send(new WelcomeEmail($user));
+            }
         }
 
         $token = $user->createToken(
@@ -99,8 +101,10 @@ class AuthService
         return new AuthResponseDTO(user: $user, accessToken: $token);
     }
 
-    public function completeProfile(User $user, array $data): AuthResponseDTO
+    public function completeProfile(User $user, array $data): User
     {
+        $needsWelcomeEmail = $user->email === null && ! empty($data['email']);
+
         $update = [
             'phone'             => $data['phone'],
             'profile_completed' => true,
@@ -118,14 +122,11 @@ class AuthService
         $this->userRepository->update($user, $update);
         $user = $user->fresh();
 
-        $user->tokens()->delete();
-        $token = $user->createToken(
-            name: 'auth_token',
-            abilities: ['*'],
-            expiresAt: now()->addYear(),
-        )->plainTextToken;
+        if ($needsWelcomeEmail) {
+            Mail::to($user->email)->send(new WelcomeEmail($user));
+        }
 
-        return new AuthResponseDTO(user: $user, accessToken: $token);
+        return $user;
     }
 
     public function logout(User $user): void
