@@ -22,17 +22,14 @@ const itemVariants = {
 export default function Hero() {
   return (
     <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-background pt-[70px]">
-
       {/* 🌊 Background glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-green-500/10 pointer-events-none" />
       <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-blue-500/20 blur-[140px] rounded-full" />
       <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-green-500/20 blur-[140px] rounded-full" />
 
       <div className="max-w-[1240px] mx-auto px-6 lg:px-8 w-full grid lg:grid-cols-2 gap-14 items-center">
-
         {/* ================= LEFT ================= */}
         <motion.div variants={heroVariants} initial="hidden" animate="visible">
-
           {/* badge */}
           <motion.div variants={itemVariants} className="mb-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-white/70 backdrop-blur">
@@ -48,11 +45,8 @@ export default function Hero() {
             variants={itemVariants}
             className="text-5xl md:text-6xl font-bold leading-tight"
           >
-            Une ville plus{" "}
-            <GradientText>intelligente</GradientText>,{" "}
-            <br />
-            connectée et{" "}
-            <span className="text-blue-500">propre</span>
+            Une ville plus <GradientText>intelligente</GradientText>, <br />
+            connectée et <span className="text-blue-500">propre</span>
           </motion.h1>
 
           {/* description */}
@@ -61,11 +55,15 @@ export default function Hero() {
             className="mt-6 text-muted-foreground text-lg max-w-[520px]"
           >
             Signalez les problèmes, suivez les événements et visualisez la
-            gestion urbaine en temps réel dans toutes les provinces de Madagascar.
+            gestion urbaine en temps réel dans toutes les provinces de
+            Madagascar.
           </motion.p>
 
           {/* CTAs */}
-          <motion.div variants={itemVariants} className="flex gap-3 mt-8 flex-wrap">
+          <motion.div
+            variants={itemVariants}
+            className="flex gap-3 mt-8 flex-wrap"
+          >
             <Btn variant="primary" href={SITE_CONFIG.mapAppUrl}>
               Explorer la carte <ArrowIcon />
             </Btn>
@@ -91,29 +89,27 @@ export default function Hero() {
         </motion.div>
 
         {/* ================= RIGHT ================= */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
           className="relative h-[580px] hidden lg:block"
-        >
-
-          {/* map card */}
-          <div className="absolute inset-0 rounded-3xl border bg-white shadow-xl overflow-hidden">
+        > */}
+        {/* map card */}
+        {/* <div className="absolute inset-0 rounded-3xl border bg-white shadow-xl overflow-hidden">
             <div className="p-4 border-b flex justify-between items-center">
               <span className="text-xs font-mono uppercase text-muted-foreground">
                 Madagascar Live
               </span>
               <LiveDot color="green" />
-            </div>
+            </div> */}
 
-            <MadagascarMap showPins animated className="h-full" />
-          </div>
+        <MadagascarMap showPins animated className="h-full" />
+        {/* </div> */}
 
-          {/* floating glow */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-green-500/10 blur-2xl" />
-        </motion.div>
-
+        {/* floating glow */}
+        {/* <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-green-500/10 blur-2xl" />
+        </motion.div> */}
       </div>
     </section>
   );

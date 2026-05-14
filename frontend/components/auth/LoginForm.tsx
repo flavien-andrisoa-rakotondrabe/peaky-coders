@@ -1,176 +1,214 @@
-import { Link, useForm } from '@inertiajs/react';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Separator } from '@/components/ui/separator';
-import { FormInput } from '@/components/utils/FormInput';
-import { useLocale } from '@/hooks/useLocale';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { FormInput } from "@/components/utils/FormInput";
+import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
+import { FormCheckbox } from "@/components/utils/FormCheckbox";
+import Link from "next/link";
+
+// 1. Définition du schéma de validation avec Zod
+const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z
+    .string()
+    .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  remember: z.boolean(),
+});
+
+// Typage TypeScript extrait du schéma
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm({
-    onSwitchToSignup,
+  onSwitchToSignup,
 }: {
-    onSwitchToSignup: () => void;
+  onSwitchToSignup: () => void;
 }) {
-    const { locale } = useLocale();
+  const [showPwd, setShowPwd] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [showPwd, setShowPwd] = useState(false);
-    const [loadingOauth, setLoadingOauth] = useState<'google' | null>(null);
+  // 2. Initialisation de React Hook Form
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      remember: false,
+    },
+  });
 
-    const {
-        post,
-        data,
-        setData,
-        errors,
-        hasErrors,
-        clearErrors,
-        processing,
-        reset,
-    } = useForm({
-        email: '',
-        password: '',
-        remember: false,
-    });
+  // 3. Gestion de la soumission
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsSubmitting(true);
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
+    try {
+      // Si tu es sur Next.js (App Router), tu utiliserais un Server Action ou fetch
+      // Si tu es toujours avec Inertia, tu utilises router.post
+      console.log("Données envoyées :", data);
 
-        post(`/${locale}/auth/login`, {
-            onSuccess: () => {
-                reset();
-            },
-        });
-    };
+      // Exemple avec fetch / API :
+      // await authService.login(data);
 
-    return (
-        <div className="space-y-5">
-            <div className="mb-6 space-y-1">
-                <h1 className="font-display text-2xl font-bold text-foreground">
-                    Connexion
-                </h1>
-                <p className="font-body text-sm text-muted-foreground">
-                    Pas encore de compte ?{' '}
-                    <button
-                        type="button"
-                        onClick={onSwitchToSignup}
-                        className="cursor-pointer font-semibold text-accent hover:underline"
-                    >
-                        Créer un compte
-                    </button>
-                </p>
-            </div>
+      reset();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-            <div className="flex flex-col gap-10">
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <FieldGroup>
-                        <FormInput
-                            label={'Email'}
-                            name="email"
-                            type="email"
-                            icon={Mail}
-                            value={data.email}
-                            setData={setData}
-                            error={errors.email}
-                            clearError={clearErrors}
-                            placeholder="jean@email.com"
-                            autoComplete="email"
-                            required
-                        />
+  const facebookOAuth = () => {
+    const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook/redirect`;
 
-                        <FormInput
-                            label="Mot de passe"
-                            name="password"
-                            type={showPwd ? 'text' : 'password'}
-                            icon={Lock}
-                            value={data.password}
-                            setData={setData}
-                            error={errors.password}
-                            clearError={clearErrors}
-                            placeholder="Mot de passe"
-                            autoComplete="current-password"
-                            required
-                            labelAction={
-                                <Link
-                                    href={`/${locale}/auth/forgot-password`}
-                                    className="font-body text-xs text-accent hover:underline"
-                                >
-                                    Mot de passe oublié ?
-                                </Link>
-                            }
-                            rightElement={
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPwd(!showPwd)}
-                                    className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                >
-                                    {showPwd ? (
-                                        <Eye className="h-4 w-4" />
-                                    ) : (
-                                        <EyeOff className="h-4 w-4" />
-                                    )}
-                                </button>
-                            }
-                        />
+    window.location.href = redirectUri;
+  };
 
-                        <Field orientation="horizontal">
-                            <Checkbox
-                                id="remember"
-                                name="remember"
-                                checked={data.remember}
-                                onCheckedChange={(checked: boolean) =>
-                                    setData('remember', checked)
-                                }
-                                className="cursor-pointer border-border bg-muted/30 data-[state=checked]:border-accent data-[state=checked]:bg-accent"
-                            />
-                            <FieldLabel
-                                htmlFor="remember"
-                                className="text-muted-foreground"
-                            >
-                                Se souvenir de moi
-                            </FieldLabel>
-                        </Field>
-                    </FieldGroup>
+  const googleOAuth = () => {
+    const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect`;
 
-                    <Button
-                        type="submit"
-                        disabled={processing || hasErrors}
-                        className="font-body h-12 w-full gap-2 rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90"
-                        size="lg"
-                    >
-                        {processing ? 'Connexion...' : 'Se connecter'}
-                        {!processing && <ArrowRight className="h-4 w-4" />}
-                    </Button>
-                </form>
+    window.location.href = redirectUri;
+  };
 
-                <div className="relative flex items-center justify-center">
-                    <Separator />
-                    <p className="absolute flex h-8 w-8 items-center justify-center rounded-full bg-background text-center text-xs font-semibold text-muted-foreground uppercase">
-                        ou
-                    </p>
-                </div>
+  return (
+    <div className="space-y-5">
+      <div className="mb-6 space-y-1">
+        <h1 className="font-display text-2xl font-bold text-foreground">
+          Connexion
+        </h1>
+        <p className="font-body text-sm text-muted-foreground">
+          Pas encore de compte ?{" "}
+          <button
+            type="button"
+            onClick={onSwitchToSignup}
+            className="cursor-pointer font-semibold text-accent hover:underline"
+          >
+            Créer un compte
+          </button>
+        </p>
+      </div>
 
-                <a
-                    href="/auth/google/redirect"
-                    onClick={() => setLoadingOauth('google')}
+      <div className="flex flex-col gap-10">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <FieldGroup>
+            {/* Email */}
+            <FormInput
+              label="Email"
+              type="email"
+              icon={Mail}
+              placeholder="jean@email.com"
+              autoComplete="email"
+              error={errors.email?.message}
+              {...register("email")}
+            />
+
+            {/* Mot de passe */}
+            <FormInput
+              label="Mot de passe"
+              type={showPwd ? "text" : "password"}
+              icon={Lock}
+              placeholder="Mot de passe"
+              autoComplete="current-password"
+              error={errors.password?.message}
+              {...register("password")}
+              labelAction={
+                <Link
+                  href="/auth/forgot-password"
+                  className="font-body text-xs text-accent hover:underline"
                 >
-                    <Button
-                        size="lg"
-                        variant="outline"
-                        disabled={loadingOauth === 'google'}
-                        className="flex h-12 w-full items-center justify-center gap-3"
-                    >
-                        <img
-                            src="/icons/google.svg"
-                            alt="G"
-                            className="h-6 w-6"
-                        />
-                        <span>Continuer avec Google</span>
-                    </Button>
-                </a>
-            </div>
+                  Mot de passe oublié ?
+                </Link>
+              }
+              rightElement={
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(!showPwd)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  {showPwd ? (
+                    <Eye className="h-4 w-4" />
+                  ) : (
+                    <EyeOff className="h-4 w-4" />
+                  )}
+                </button>
+              }
+            />
+
+            {/* Se souvenir de moi */}
+            <FormCheckbox
+              name="remember"
+              label="Se souvenir de moi"
+              control={control}
+            />
+          </FieldGroup>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="font-body h-12 w-full gap-2 rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90"
+            size="lg"
+          >
+            {isSubmitting ? "Connexion..." : "Se connecter"}
+            {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+          </Button>
+        </form>
+
+        <div className="relative flex items-center justify-center">
+          <Separator />
+          <p className="absolute flex h-8 w-8 items-center justify-center rounded-full bg-background text-center text-xs font-semibold text-muted-foreground uppercase">
+            ou
+          </p>
         </div>
-    );
+
+        <div className="flex flex-col gap-4">
+          <Button
+            size="lg"
+            variant="outline"
+            className="flex h-12 w-full items-center justify-center gap-3 cursor-pointer hover:bg-foreground/10"
+            onClick={facebookOAuth}
+          >
+            <Image
+              src="/icons/facebook.webp"
+              alt="F"
+              height={32}
+              width={32}
+              className="h-8 w-8"
+            />
+
+            <span>Continuer avec Facebook</span>
+          </Button>
+
+          <Button
+            size="lg"
+            variant="outline"
+            className="flex h-12 w-full items-center justify-center gap-3 cursor-pointer hover:bg-foreground/10"
+            onClick={googleOAuth}
+          >
+            <Image
+              src="/icons/google.svg"
+              alt="G"
+              height={20}
+              width={20}
+              className="h-5 w-5"
+            />
+
+            <span>Continuer avec Google</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }

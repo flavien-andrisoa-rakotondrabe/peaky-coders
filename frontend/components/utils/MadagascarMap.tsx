@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { geoIdentity, geoPath } from "d3-geo";
-import RegionMap from "./RegionMap";
 import { CATEGORIES, TEST_DATA } from "@/lib/constants";
 
 export default function Dashboard() {
@@ -63,7 +62,6 @@ export default function Dashboard() {
       <div
         style={{
           flex: 1,
-          background: "#fff",
           padding: "20px",
           borderRadius: 12,
           border: "1px solid #eee",
@@ -148,11 +146,6 @@ export default function Dashboard() {
             );
           })}
         </svg>
-      </div>
-
-      {/* COMPOSANT ISOLÉ */}
-      <div style={{ flex: 1 }}>
-        <RegionMap geoData={geoData} shapeID={selectedID} />
       </div>
     </div>
   );

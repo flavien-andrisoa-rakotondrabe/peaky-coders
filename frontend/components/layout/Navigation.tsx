@@ -6,6 +6,9 @@ import { NAV_LINKS, SITE_CONFIG } from "@/lib/constant";
 import { Btn, ArrowIcon, LiveDot } from "../ui";
 import { cn } from "@/lib/utils";
 
+import Logo from "@/components/utils/Logo";
+import Button3DV2 from "@/components/utils/Button3DV2";
+
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -23,18 +26,13 @@ export default function Header() {
       className={cn(
         "fixed top-0 w-full z-50 transition-all",
         scrolled &&
-          "backdrop-blur-xl bg-white/70 border-b border-border shadow-sm"
+          "backdrop-blur-xl bg-white/70 border-b border-border shadow-sm",
       )}
     >
-      <div className="max-w-[1240px] mx-auto px-6 h-[70px] flex items-center justify-between">
-
+      <div className="max-w-310 mx-auto px-6 h-[70px] flex items-center justify-between">
         {/* logo */}
-        <a className="flex items-center gap-2 font-bold text-lg">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-green-500 text-white grid place-items-center">
-            M
-          </div>
-          {SITE_CONFIG.name}
-        </a>
+
+        <Logo />
 
         {/* links */}
         <div className="hidden md:flex gap-8">
@@ -57,13 +55,10 @@ export default function Header() {
             <span className="text-xs uppercase">Live</span>
           </div>
 
-          <Btn variant="ghost" href={SITE_CONFIG.mapAppUrl}>
-            Login
-          </Btn>
-
-          <Btn variant="primary" href={SITE_CONFIG.mapAppUrl}>
-            Ouvrir <ArrowIcon />
-          </Btn>
+          <Button3DV2
+            label="Explorer"
+            breakpoints={[{ tw: "sm", width: 140, height: 44, fontSize: 14 }]}
+          />
         </div>
 
         {/* mobile */}

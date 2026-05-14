@@ -1,252 +1,171 @@
-import { Link, useForm } from '@inertiajs/react';
-import {
-    Eye,
-    EyeOff,
-    Mail,
-    Lock,
-    ArrowRight,
-    CheckCircle2,
-    User,
-    Phone,
-} from 'lucide-react';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, User, Phone } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import { Button } from '@/components/ui/button';
-import { FormInput } from '@/components/utils/FormInput';
-import { useLocale } from '@/hooks/useLocale';
-import { USER_ROLES } from '@/lib/constants/user';
-import { cn } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
+import { FormInput } from "@/components/utils/FormInput";
+import Link from "next/link";
+
+// 1. Schéma de validation Zod
+const signupSchema = z
+  .object({
+    name: z.string().min(2, "Le nom est requis"),
+    tel: z.string().min(10, "Numéro de téléphone invalide"),
+    email: z.string().email("Email invalide"),
+    password: z.string().min(6, "Minimum 6 caractères"),
+    password_confirmation: z.string(),
+  })
+  .refine((data) => data.password === data.password_confirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["password_confirmation"],
+  });
+
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 export function SignupForm({
-    onSwitchToLogin,
+  onSwitchToLogin,
 }: {
-    onSwitchToLogin: () => void;
+  onSwitchToLogin: () => void;
 }) {
-    const { locale } = useLocale();
+  const [showPwd, setShowPwd] = useState(false);
 
-    const [showPwd, setShowPwd] = useState(false);
+  // 2. Initialisation React Hook Form
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: "",
+      tel: "",
+      email: "",
+      password: "",
+      password_confirmation: "",
+    },
+  });
 
-    const {
-        post,
-        data,
-        setData,
-        errors,
-        hasErrors,
-        clearErrors,
-        processing,
-        reset,
-    } = useForm({
-        firstName: '',
-        lastName: '',
-        tel: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-        role: USER_ROLES[0].value,
-    });
+  // 3. Action de soumission
+  const onSubmit = async (values: SignupFormValues) => {
+    // Simuler l'envoi ou utiliser Inertia post
+    console.log("Données envoyées :", values);
+    // Exemple Inertia : post(`/${locale}/auth/register`, values, { onSuccess: () => reset() });
+  };
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="mb-5 space-y-1">
+        <h1 className="font-display text-2xl font-bold text-foreground">
+          Créer un compte
+        </h1>
+        <p className="font-body text-sm text-muted-foreground">
+          Déjà inscrit ?{" "}
+          <button
+            type="button"
+            onClick={onSwitchToLogin}
+            className="cursor-pointer font-semibold text-accent hover:underline"
+          >
+            Se connecter
+          </button>
+        </p>
+      </div>
 
-        post(`/${locale}/auth/register`, {
-            onSuccess: () => {
-                reset();
-            },
-        });
-    };
+      {/* Ligne Prénom / Nom */}
+      <FormInput
+        label="Nom"
+        icon={User}
+        placeholder="Votre nom"
+        autoComplete="family-name"
+        error={errors.name?.message}
+        {...register("name")}
+      />
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="mb-5 space-y-1">
-                <h1 className="font-display text-2xl font-bold text-foreground">
-                    Créer un compte
-                </h1>
-                <p className="font-body text-sm text-muted-foreground">
-                    Déjà inscrit ?{' '}
-                    <button
-                        type="button"
-                        onClick={onSwitchToLogin}
-                        className="cursor-pointer font-semibold text-accent hover:underline"
-                    >
-                        Se connecter
-                    </button>
-                </p>
-            </div>
+      {/* Téléphone & Email */}
+      <FormInput
+        label="Téléphone"
+        type="tel"
+        icon={Phone}
+        placeholder="+33 6 00 00 00 00"
+        autoComplete="tel"
+        error={errors.tel?.message}
+        {...register("tel")}
+      />
 
-            {/* Role selector */}
-            <div className="grid grid-cols-2 gap-3">
-                {USER_ROLES.map((item) => (
-                    <button
-                        key={`role-${item.value}`}
-                        type="button"
-                        onClick={() => setData('role', item.value)}
-                        className={cn(
-                            'relative flex flex-col items-start gap-1.5 rounded-2xl border-2 p-4 text-left transition-all',
-                            data.role === item.value
-                                ? 'border-accent bg-accent/5 shadow-card'
-                                : 'border-border bg-card hover:border-accent/40',
-                        )}
-                    >
-                        {data.role === item.value && (
-                            <CheckCircle2 className="absolute top-2.5 right-2.5 h-4 w-4 text-accent" />
-                        )}
-                        <item.icon
-                            className={cn(
-                                'h-5 w-5',
-                                data.role === item.value
-                                    ? 'text-accent'
-                                    : 'text-muted-foreground',
-                            )}
-                        />
-                        <span
-                            className={cn(
-                                'font-body text-sm leading-tight font-semibold',
-                                data.role === item.value
-                                    ? 'text-accent'
-                                    : 'text-foreground',
-                            )}
-                        >
-                            {item.label}
-                        </span>
-                        <span className="font-body text-xs text-muted-foreground">
-                            {item.desc}
-                        </span>
-                    </button>
-                ))}
-            </div>
+      <FormInput
+        label="Email"
+        type="email"
+        icon={Mail}
+        placeholder="jean@email.com"
+        autoComplete="email"
+        error={errors.email?.message}
+        {...register("email")}
+      />
 
-            {/* Name row */}
-            <div className="grid grid-cols-2 gap-3">
-                <FormInput
-                    label={'Prénom'}
-                    name="firstName"
-                    icon={User}
-                    value={data.firstName}
-                    setData={setData}
-                    error={errors.firstName}
-                    clearError={clearErrors}
-                    placeholder="Jean"
-                    autoComplete="given-name"
-                    required
-                />
+      {/* Mot de passe avec toggle visuel */}
+      <FormInput
+        label="Mot de passe"
+        type={showPwd ? "text" : "password"}
+        icon={Lock}
+        placeholder="Min. 6 caractères"
+        autoComplete="new-password"
+        error={errors.password?.message}
+        {...register("password")}
+        rightElement={
+          <button
+            type="button"
+            onClick={() => setShowPwd(!showPwd)}
+            className="text-muted-foreground hover:text-foreground outline-none"
+          >
+            {showPwd ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
+          </button>
+        }
+      />
 
-                <FormInput
-                    label={'Nom'}
-                    name="lastName"
-                    icon={User}
-                    value={data.lastName}
-                    setData={setData}
-                    error={errors.lastName}
-                    clearError={clearErrors}
-                    placeholder="Dupont"
-                    autoComplete="family-name"
-                    required
-                />
-            </div>
+      {/* Confirmation mot de passe */}
+      <FormInput
+        label="Confirmer mot de passe"
+        type="password"
+        icon={Lock}
+        placeholder="Confirmez votre mot de passe"
+        autoComplete="new-password"
+        error={errors.password_confirmation?.message}
+        {...register("password_confirmation")}
+      />
 
-            <FormInput
-                label={'Téléphone'}
-                name="tel"
-                type="tel"
-                icon={Phone}
-                value={data.tel}
-                setData={setData}
-                error={errors.tel}
-                clearError={clearErrors}
-                placeholder="+33 6 00 00 00 00"
-                autoComplete="tel"
-                required
-            />
+      {/* Bouton de soumission */}
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        className="font-body h-12 w-full gap-2 rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90 disabled:opacity-50"
+        size="lg"
+      >
+        {isSubmitting ? "Création du compte..." : "Créer mon compte"}
+        {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+      </Button>
 
-            <FormInput
-                label={'Email'}
-                name="email"
-                type="email"
-                icon={Mail}
-                value={data.email}
-                setData={setData}
-                error={errors.email}
-                clearError={clearErrors}
-                placeholder="jean@email.com"
-                autoComplete="email"
-                required
-            />
-
-            <FormInput
-                label={'Mot de passe'}
-                name="password"
-                type={showPwd ? 'text' : 'password'}
-                icon={Lock}
-                value={data.password}
-                setData={setData}
-                error={errors.password}
-                clearError={clearErrors}
-                placeholder="Min. 6 caractères"
-                autoComplete="new-password"
-                required
-            >
-                <button
-                    type="button"
-                    onClick={() => setShowPwd((prev) => !prev)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
-                >
-                    {showPwd ? (
-                        <Eye className="h-4 w-4" />
-                    ) : (
-                        <EyeOff className="h-4 w-4" />
-                    )}
-                </button>
-            </FormInput>
-
-            <FormInput
-                label="Confirmer mot de passe"
-                name="password_confirmation"
-                type="password"
-                icon={Lock}
-                value={data.password_confirmation}
-                setData={setData}
-                error={errors.password_confirmation}
-                clearError={clearErrors}
-                placeholder="Min. 6 caractères"
-                autoComplete="new-password"
-                required
-                onChange={(e) => {
-                    setData('password_confirmation', e.target.value);
-
-                    if (errors.password || errors.password_confirmation) {
-                        clearErrors('password', 'password_confirmation');
-                    }
-                }}
-            />
-
-            <Button
-                type="submit"
-                disabled={processing || hasErrors}
-                className="font-body h-12 w-full gap-2 rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90"
-                size="lg"
-            >
-                {processing ? 'Création du compte...' : 'Créer mon compte'}
-                {!processing && <ArrowRight className="h-4 w-4" />}
-            </Button>
-
-            <p className="font-body text-center text-xs text-muted-foreground">
-                En vous inscrivant, vous acceptez nos{' '}
-                <Link
-                    href={`/${locale}/legal#cgu`}
-                    className="text-accent hover:underline"
-                >
-                    CGU
-                </Link>{' '}
-                et notre{' '}
-                <Link
-                    href={`/${locale}/confidentialite#cgu`}
-                    className="text-accent hover:underline"
-                >
-                    politique de confidentialité
-                </Link>
-                .
-            </p>
-        </form>
-    );
+      {/* Liens légaux */}
+      <p className="font-body text-center text-xs text-muted-foreground px-4">
+        En vous inscrivant, vous acceptez nos{" "}
+        <Link href="/legal#cgu" className="text-accent hover:underline">
+          CGU
+        </Link>{" "}
+        et notre{" "}
+        <Link
+          href="/confidentialite#cgu"
+          className="text-accent hover:underline"
+        >
+          politique de confidentialité
+        </Link>
+        .
+      </p>
+    </form>
+  );
 }
