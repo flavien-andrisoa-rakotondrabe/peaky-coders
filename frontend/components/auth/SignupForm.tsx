@@ -97,7 +97,7 @@ export function SignupForm({
         <FormInput
           label="Prénom"
           icon={User}
-          placeholder="Jean"
+          placeholder="Votre prénom"
           autoComplete="given-name"
           error={errors.first_name?.message}
           {...register("first_name")}
@@ -106,7 +106,7 @@ export function SignupForm({
         <FormInput
           label="Nom"
           icon={User}
-          placeholder="Dupont"
+          placeholder="Votre nom"
           autoComplete="family-name"
           error={errors.last_name?.message}
           {...register("last_name")}
@@ -128,7 +128,7 @@ export function SignupForm({
         label="Email"
         type="email"
         icon={Mail}
-        placeholder="jean@email.com"
+        placeholder="email@domain.com"
         autoComplete="email"
         error={errors.email?.message}
         {...register("email")}

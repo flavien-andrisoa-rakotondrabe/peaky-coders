@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Eye, EyeOff, Lock, User, Phone } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,13 +10,18 @@ import * as z from "zod";
 import { FormInput } from "@/components/utils/FormInput";
 import Logo from "@/components/utils/Logo";
 import Button3DV2 from "@/components/utils/Button3DV2";
+import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 // 1. Schéma de validation
 const completeProfileSchema = z
   .object({
-    firstName: z.string().min(2, "Prénom requis"),
-    lastName: z.string().min(2, "Nom requis"),
-    tel: z.string().min(10, "Numéro de téléphone invalide"),
+    provider: z.string(),
+    provider_id: z.string(),
+    first_name: z.string().min(2, "Prénom requis"),
+    last_name: z.string().min(2, "Nom requis"),
+    email: z.string().email("Email invalide"),
+    phone: z.string().min(10, "Numéro de téléphone invalide"),
     password: z.string().min(6, "Minimum 6 caractères"),
     password_confirmation: z.string(),
   })
@@ -26,16 +31,41 @@ const completeProfileSchema = z
   });
 
 type CompleteProfileValues = z.infer<typeof completeProfileSchema>;
-
-interface Props {
-  socialUser?: {
-    firstName: string;
-    lastName: string;
-  };
+interface SocialUserInterface {
+  provider: string;
+  provider_id: string;
+  email: string | null;
+  last_name: string | null;
+  first_name: string | null;
+  avatar: string | null;
 }
 
-export default function CompleteProfilePage({ socialUser }: Props) {
+export default function CompleteProfilePage() {
+  const router = useRouter();
   const [showPwd, setShowPwd] = useState(false);
+
+  const [socialUser, setSocialUser] = useState<SocialUserInterface | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const fetchSocial = async () => {
+      try {
+        const { data } = await api.get("/api/social/me");
+
+        if (!data) {
+          router.push("/auth");
+          return;
+        }
+
+        setSocialUser(data);
+      } catch {
+        router.push("/auth");
+      }
+    };
+
+    fetchSocial();
+  }, [router]);
 
   // 2. React Hook Form
   const {
@@ -46,9 +76,12 @@ export default function CompleteProfilePage({ socialUser }: Props) {
   } = useForm<CompleteProfileValues>({
     resolver: zodResolver(completeProfileSchema),
     defaultValues: {
-      firstName: socialUser?.firstName || "",
-      lastName: socialUser?.lastName || "",
-      tel: "",
+      provider: socialUser?.provider || "",
+      provider_id: socialUser?.provider_id || "",
+      first_name: socialUser?.first_name || "",
+      last_name: socialUser?.last_name || "",
+      email: socialUser?.email || "",
+      phone: "",
       password: "",
       password_confirmation: "",
     },
@@ -84,19 +117,19 @@ export default function CompleteProfilePage({ socialUser }: Props) {
               <FormInput
                 label="Prénom"
                 icon={User}
-                placeholder="Jean"
+                placeholder="Votre prénom"
                 autoComplete="given-name"
-                error={errors.firstName?.message}
-                {...register("firstName")}
+                error={errors.first_name?.message}
+                {...register("first_name")}
               />
 
               <FormInput
                 label="Nom"
                 icon={User}
-                placeholder="Dupont"
+                placeholder="Votre nom"
                 autoComplete="family-name"
-                error={errors.lastName?.message}
-                {...register("lastName")}
+                error={errors.last_name?.message}
+                {...register("last_name")}
               />
             </div>
 
@@ -106,8 +139,8 @@ export default function CompleteProfilePage({ socialUser }: Props) {
               icon={Phone}
               placeholder="+33 6 00 00 00 00"
               autoComplete="tel"
-              error={errors.tel?.message}
-              {...register("tel")}
+              error={errors.phone?.message}
+              {...register("phone")}
             />
 
             <FormInput

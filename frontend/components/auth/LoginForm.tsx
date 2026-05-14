@@ -85,13 +85,13 @@ export function LoginForm({
   };
 
   const facebookOAuth = () => {
-    const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook/redirect`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/facebook/redirect`;
 
     window.location.href = redirectUri;
   };
 
   const googleOAuth = () => {
-    const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/redirect`;
 
     window.location.href = redirectUri;
   };
@@ -122,7 +122,7 @@ export function LoginForm({
               label="Email"
               type="email"
               icon={Mail}
-              placeholder="jean@email.com"
+              placeholder="email@domain.com"
               autoComplete="email"
               error={errors.email?.message}
               {...register("email")}
