@@ -76,7 +76,6 @@ class AuthController extends Controller
             'last_name'      => $data['last_name'],
             'email'          => $data['email'] ?? null,
             'avatar'         => $data['avatar'] ?? null,
-            'provider'       => $data['provider'],
             'email_required' => empty($data['email']),
         ]);
     }
@@ -107,7 +106,7 @@ class AuthController extends Controller
             password: $request->validated('password'),
         );
 
-        auth()->login($user);
+        auth()->login($user, true);
         $request->session()->regenerate();
 
         return response()->json([
