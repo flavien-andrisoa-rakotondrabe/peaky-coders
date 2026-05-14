@@ -14,8 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Active la gestion des cookies stateful de Sanctum pour SPA (optionnel pour token-based)
         $middleware->statefulApi();
+        $middleware->prependToGroup('api', \App\Http\Middleware\TokenFromCookie::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Retourne systématiquement du JSON pour les requêtes API

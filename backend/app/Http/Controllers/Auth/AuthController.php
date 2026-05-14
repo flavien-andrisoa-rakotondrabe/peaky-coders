@@ -29,9 +29,6 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Compte créé avec succès.',
-            'data' => [
-                'user' => new UserResource($user),
-            ],
         ], 201);
     }
 
@@ -42,19 +39,15 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Connexion réussie.',
-            'data' => [
-                'access_token' => $result->accessToken,
-                'token_type' => $result->tokenType,
-                'user' => new UserResource($result->user),
-            ],
-        ]);
+        ])->cookie('access_token', $result->accessToken, 60 * 24, '/', null, config('session.secure'), true);
     }
 
     public function logout(Request $request): JsonResponse
     {
         $this->authService->logout($request->user());
 
-        return response()->json(['message' => 'Déconnexion réussie.']);
+        return response()->json(['message' => 'Déconnexion réussie.'])
+            ->withoutCookie('access_token');
     }
 
     public function me(Request $request): JsonResponse
@@ -70,9 +63,6 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Profil complété avec succès.',
-            'data' => [
-                'user' => new UserResource($user),
-            ],
         ]);
     }
 
