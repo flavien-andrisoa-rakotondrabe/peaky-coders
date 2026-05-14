@@ -7,7 +7,7 @@ use App\Http\Controllers\Citizen\CitizenController;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Report\ReportController;
 use Illuminate\Support\Facades\Route;
-
+/*
 Route::prefix('auth')->name('auth.')->group(function (): void {
 
     // Routes publiques
@@ -33,7 +33,7 @@ Route::prefix('profile')->name('profile.')->middleware('auth:sanctum')->group(fu
     Route::patch('/', [ProfileController::class, 'update'])->name('update');
     Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
 });
-
+*/
 // Citizen
 Route::post('citizens', [CitizenController::class, 'store'])->name('citizens.store');
 Route::middleware('auth:citizen')->group(function (): void {
