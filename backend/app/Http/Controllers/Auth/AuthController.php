@@ -68,11 +68,15 @@ class AuthController extends Controller
 
     public function completeProfile(CompleteProfileRequest $request): JsonResponse
     {
-        $user = $this->authService->completeProfile($request->user(), $request->validated());
+        $result = $this->authService->completeProfile($request->user(), $request->validated());
 
         return response()->json([
             'message' => 'Profil complété avec succès.',
-            'data'    => new UserResource($user),
+            'data' => [
+                'access_token' => $result->accessToken,
+                'token_type'   => $result->tokenType,
+                'user'         => new UserResource($result->user),
+            ],
         ]);
     }
 

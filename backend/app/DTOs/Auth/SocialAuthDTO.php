@@ -12,6 +12,7 @@ readonly class SocialAuthDTO
         public string $firstName,
         public string $lastName,
         public string $email,
+        public ?string $avatar = null,
     ) {}
 
     public static function fromSocialiteUser(SocialiteUser $user, string $provider): self
@@ -24,6 +25,7 @@ readonly class SocialAuthDTO
             firstName:  $nameParts[0] ?? '',
             lastName:   $nameParts[1] ?? '',
             email:      $user->getEmail(),
+            avatar:     $user->getAvatar(),
         );
     }
 }

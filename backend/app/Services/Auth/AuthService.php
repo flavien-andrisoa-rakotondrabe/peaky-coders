@@ -84,6 +84,7 @@ class AuthService
                 'name'              => $dto->firstName . ' ' . $dto->lastName,
                 'email'             => $dto->email,
                 $idField            => $dto->providerId,
+                'avatar'            => $dto->avatar,
                 'email_verified_at' => now(),
                 'profile_completed' => false,
             ]);
@@ -98,7 +99,7 @@ class AuthService
         return new AuthResponseDTO(user: $user, accessToken: $token);
     }
 
-    public function completeProfile(User $user, array $data): User
+    public function completeProfile(User $user, array $data): AuthResponseDTO
     {
         $update = [
             'phone'             => $data['phone'],
@@ -110,8 +111,16 @@ class AuthService
         }
 
         $this->userRepository->update($user, $update);
+        $user = $user->fresh();
 
-        return $user->fresh();
+        $user->tokens()->delete();
+        $token = $user->createToken(
+            name: 'auth_token',
+            abilities: ['*'],
+            expiresAt: now()->addYear(),
+        )->plainTextToken;
+
+        return new AuthResponseDTO(user: $user, accessToken: $token);
     }
 
     public function logout(User $user): void

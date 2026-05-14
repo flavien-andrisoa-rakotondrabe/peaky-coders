@@ -23,8 +23,10 @@ class ProfileService
     public function update(User $user, UpdateProfileDTO $dto): User
     {
         $data = array_filter([
-            'name' => $dto->name,
-            'email' => $dto->email,
+            'name'   => $dto->name,
+            'email'  => $dto->email,
+            'phone'  => $dto->phone,
+            'avatar' => $dto->avatar,
         ], fn ($value) => $value !== null);
 
         if ($dto->newPassword !== null) {
