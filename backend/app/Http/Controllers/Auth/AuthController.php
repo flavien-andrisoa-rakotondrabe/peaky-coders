@@ -61,6 +61,28 @@ class AuthController extends Controller
         ]);
     }
 
+    public function socialMe(Request $request): JsonResponse
+    {
+        $raw = $request->cookie('social_auth_data');
+
+        if (! $raw) {
+            return response()->json(['message' => 'Aucune session sociale active.'], 404);
+        }
+
+        $data = json_decode($raw, true);
+
+        return response()->json([
+            'data' => [
+                'first_name'     => $data['first_name'],
+                'last_name'      => $data['last_name'],
+                'email'          => $data['email'] ?? null,
+                'avatar'         => $data['avatar'] ?? null,
+                'provider'       => $data['provider'],
+                'email_required' => empty($data['email']),
+            ],
+        ]);
+    }
+
     public function completeSocialProfile(CompleteSocialProfileRequest $request): JsonResponse
     {
         $raw = $request->cookie('social_auth_data');
