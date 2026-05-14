@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ToastProvider from "@/providers/ToastProvider";
 import ReduxProvider from "@/providers/ReduxProvider";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -44,7 +45,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col" cz-shortcut-listen="true">
         <ReduxProvider>
           <TooltipProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </ToastProvider>
           </TooltipProvider>
         </ReduxProvider>
       </body>

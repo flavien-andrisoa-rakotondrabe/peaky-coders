@@ -9,7 +9,7 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/utils/FormInput";
-import Logo from "@/components/utils/Logo";
+import BigLogo from "@/components/utils/BigLogo";
 
 // 1. Schéma de validation Zod
 const forgotPasswordSchema = z.object({
@@ -53,9 +53,7 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm">
         {/* Logo avec Link Next.js */}
-        <Link href="/" className="mb-10 flex items-center gap-2">
-          <Logo />
-        </Link>
+        <BigLogo />
 
         {sent ? (
           /* État Succès */
