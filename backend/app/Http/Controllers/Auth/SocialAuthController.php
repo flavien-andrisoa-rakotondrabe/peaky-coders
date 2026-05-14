@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Auth\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
@@ -41,15 +42,30 @@ class SocialAuthController extends Controller
         return response()->json(['redirect_url' => $url]);
     }
 
-    public function handleFacebookCallback(): RedirectResponse
+    public function handleFacebookCallback(Request $request): RedirectResponse
     {
-        $socialUser = Socialite::driver('facebook')->stateless()->user();
-        $dto = SocialAuthDTO::fromSocialiteUser($socialUser, 'facebook');
-        $result = $this->authService->handleSocialCallback($dto);
-
         $frontend = config('app.frontend_url', config('app.url'));
-        $profileCompleted = $result->user->profile_completed ? 'true' : 'false';
 
-        return redirect($frontend . '/auth/callback?token=' . $result->accessToken . '&profile_completed=' . $profileCompleted);
+        if ($request->has('error') || ! $request->has('code')) {
+            $msg = $request->get('error_description', 'Facebook authentication failed');
+            return redirect($frontend . '/auth/callback?error=' . urlencode($msg));
+        }
+
+        try {
+            $socialUser = Socialite::driver('facebook')->stateless()->user();
+
+            if (! $socialUser->getEmail()) {
+                return redirect($frontend . '/auth/callback?error=' . urlencode('Email permission is required. Please re-authorize and allow email access.'));
+            }
+
+            $dto = SocialAuthDTO::fromSocialiteUser($socialUser, 'facebook');
+            $result = $this->authService->handleSocialCallback($dto);
+
+            $profileCompleted = $result->user->profile_completed ? 'true' : 'false';
+
+            return redirect($frontend . '/auth/callback?token=' . $result->accessToken . '&profile_completed=' . $profileCompleted);
+        } catch (\Exception $e) {
+            return redirect($frontend . '/auth/callback?error=' . urlencode('Facebook authentication failed'));
+        }
     }
 }

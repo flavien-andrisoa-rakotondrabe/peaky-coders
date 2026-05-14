@@ -11,7 +11,7 @@ readonly class SocialAuthDTO
         public string $providerId,
         public string $firstName,
         public string $lastName,
-        public string $email,
+        public ?string $email,
         public ?string $avatar = null,
     ) {}
 
@@ -20,12 +20,12 @@ readonly class SocialAuthDTO
         $nameParts = explode(' ', $user->getName() ?? '', 2);
 
         return new self(
-            provider:   $provider,
+            provider: $provider,
             providerId: $user->getId(),
-            firstName:  $nameParts[0] ?? '',
-            lastName:   $nameParts[1] ?? '',
-            email:      $user->getEmail(),
-            avatar:     $user->getAvatar(),
+            firstName: $nameParts[0] ?? '',
+            lastName: $nameParts[1] ?? '',
+            email: $user->getEmail(),
+            avatar: $user->getAvatar(),
         );
     }
 }
