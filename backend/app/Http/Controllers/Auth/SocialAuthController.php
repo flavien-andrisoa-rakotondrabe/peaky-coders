@@ -29,7 +29,7 @@ class SocialAuthController extends Controller
         $user = $this->authService->findSocialUser($dto);
 
         if ($user) {
-            auth()->login($user);
+            auth()->login($user, true);
             session()->regenerate();
             return redirect($frontend . '/home');
         }
@@ -66,12 +66,12 @@ class SocialAuthController extends Controller
             $user = $this->authService->findSocialUser($dto);
 
             if ($user) {
-                auth()->login($user);
+                auth()->login($user, true);
                 session()->regenerate();
                 return redirect($frontend . '/home');
             }
 
-            $emailRequired = ! $dto->email ? '&email_required=true' : '';
+            $emailRequired = ! $dto->email ? '?email_required=true' : '';
 
             return redirect($frontend . '/auth/complete-profile' . $emailRequired)
                 ->cookie('social_auth_data', json_encode([
