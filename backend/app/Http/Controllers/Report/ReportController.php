@@ -39,13 +39,12 @@ class ReportController extends Controller
     public function store(StoreReportRequest $request): JsonResponse
     {
         $dto = new CreateReportDTO(
-            userId: $request->user()->id,
+            userId:   $request->user()->id,
             category: $request->validated('category'),
-            type: $request->validated('type'),
-            status: $request->validated('status'),
-            location: $request->validated('location_name'),
-            latitude: $request->validated('latitude'),
-            longitude: $request->validated('longitude'),
+            type:     $request->validated('type'),
+            status:   $request->validated('status'),
+            lat:      $request->validated('location.lat'),
+            long:     $request->validated('location.long'),
         );
 
         $report = $this->service->create($dto, $request->file('images', []));
@@ -61,11 +60,10 @@ class ReportController extends Controller
 
         $dto = new UpdateReportDTO(
             category: $request->validated('category'),
-            type: $request->validated('type'),
-            status: $request->validated('status'),
-            latitude: $request->validated('latitude'),
-            longitude: $request->validated('longitude'),
-            locationName: $request->validated('location_name'),
+            type:     $request->validated('type'),
+            status:   $request->validated('status'),
+            lat:      $request->validated('location.lat'),
+            long:     $request->validated('location.long'),
         );
 
         $updated = $this->service->update($report, $dto, $request->file('images', []));

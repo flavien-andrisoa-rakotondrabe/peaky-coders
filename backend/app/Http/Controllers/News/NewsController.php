@@ -39,14 +39,13 @@ class NewsController extends Controller
     public function store(StoreNewsRequest $request): JsonResponse
     {
         $dto = new CreateNewsDTO(
-            userId:       $request->user()->id,
-            type:         $request->validated('type'),
-            date:         $request->validated('date'),
-            title:        $request->validated('title'),
-            description:  $request->validated('description'),
-            latitude:     $request->validated('latitude'),
-            longitude:    $request->validated('longitude'),
-            locationName: $request->validated('location_name'),
+            userId:      $request->user()->id,
+            type:        $request->validated('type'),
+            date:        $request->validated('date'),
+            title:       $request->validated('title'),
+            description: $request->validated('description'),
+            lat:         $request->validated('location.lat'),
+            long:        $request->validated('location.long'),
         );
 
         $news = $this->service->create($dto, $request->file('images', []));
@@ -62,13 +61,12 @@ class NewsController extends Controller
         $this->authorize('update', $news);
 
         $dto = new UpdateNewsDTO(
-            type:         $request->validated('type'),
-            date:         $request->validated('date'),
-            title:        $request->validated('title'),
-            description:  $request->validated('description'),
-            latitude:     $request->validated('latitude'),
-            longitude:    $request->validated('longitude'),
-            locationName: $request->validated('location_name'),
+            type:        $request->validated('type'),
+            date:        $request->validated('date'),
+            title:       $request->validated('title'),
+            description: $request->validated('description'),
+            lat:         $request->validated('location.lat'),
+            long:        $request->validated('location.long'),
         );
 
         $updated = $this->service->update($news, $dto, $request->file('images', []));

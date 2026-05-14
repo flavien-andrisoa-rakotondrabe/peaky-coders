@@ -23,15 +23,14 @@ class NewsService
             ->toArray();
 
         return $this->repository->create([
-            'user_id'       => $dto->userId,
-            'type'          => $dto->type,
-            'date'          => $dto->date,
-            'title'         => $dto->title,
-            'description'   => $dto->description,
-            'images'        => $imagePaths ?: null,
-            'latitude'      => $dto->latitude,
-            'longitude'     => $dto->longitude,
-            'location_name' => $dto->locationName,
+            'user_id'     => $dto->userId,
+            'type'        => $dto->type,
+            'date'        => $dto->date,
+            'title'       => $dto->title,
+            'description' => $dto->description,
+            'images'      => $imagePaths ?: null,
+            'latitude'    => $dto->lat,
+            'longitude'   => $dto->long,
         ]);
     }
 
@@ -55,9 +54,8 @@ class NewsService
             'title'         => $dto->title ?? $news->title,
             'description'   => $dto->description ?? $news->description,
             'images'        => $imagePaths,
-            'latitude'      => $dto->latitude ?? $news->latitude,
-            'longitude'     => $dto->longitude ?? $news->longitude,
-            'location_name' => $dto->locationName ?? $news->location_name,
+            'latitude'  => $dto->lat ?? $news->latitude,
+            'longitude' => $dto->long ?? $news->longitude,
         ]);
     }
 

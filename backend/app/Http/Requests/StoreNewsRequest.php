@@ -21,9 +21,9 @@ class StoreNewsRequest extends FormRequest
             'description'   => ['required', 'string'],
             'images'        => ['nullable', 'array', 'max:5'],
             'images.*'      => ['image', 'max:5120'],
-            'latitude'      => ['required_if:type,evenement', 'nullable', 'numeric'],
-            'longitude'     => ['required_if:type,evenement', 'nullable', 'numeric'],
-            'location_name' => ['nullable', 'string', 'max:255'],
+            'location'      => ['nullable', 'array'],
+            'location.lat'  => ['required_if:type,evenement', 'nullable', 'numeric'],
+            'location.long' => ['required_if:type,evenement', 'nullable', 'numeric'],
         ];
     }
 }

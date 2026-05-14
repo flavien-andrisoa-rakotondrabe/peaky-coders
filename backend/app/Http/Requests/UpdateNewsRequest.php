@@ -21,9 +21,9 @@ class UpdateNewsRequest extends FormRequest
             'description'   => ['sometimes', 'string'],
             'images'        => ['nullable', 'array', 'max:5'],
             'images.*'      => ['image', 'max:5120'],
-            'latitude'      => ['nullable', 'numeric'],
-            'longitude'     => ['nullable', 'numeric'],
-            'location_name' => ['nullable', 'string', 'max:255'],
+            'location'      => ['nullable', 'array'],
+            'location.lat'  => ['nullable', 'numeric'],
+            'location.long' => ['nullable', 'numeric'],
         ];
     }
 }

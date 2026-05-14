@@ -17,9 +17,10 @@ class NewsResource extends JsonResource
             'title'         => $this->title,
             'description'   => $this->description,
             'image_urls'    => collect($this->images ?? [])->map(fn($p) => Storage::url($p))->values(),
-            'latitude'      => $this->latitude,
-            'longitude'     => $this->longitude,
-            'location_name' => $this->location_name,
+            'location'      => [
+                'lat'  => $this->latitude,
+                'long' => $this->longitude,
+            ],
             'created_at'    => $this->created_at,
             'updated_at'    => $this->updated_at,
         ];

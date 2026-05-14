@@ -9,8 +9,7 @@ readonly class UpdateNewsDTO
         public ?string $date,
         public ?string $title,
         public ?string $description,
-        public ?float $latitude,
-        public ?float $longitude,
-        public ?string $locationName,
+        public ?float $lat,
+        public ?float $long,
     ) {}
 }
