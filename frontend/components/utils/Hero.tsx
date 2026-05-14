@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { HERO_STATS, SITE_CONFIG } from "@/lib/constant";
 import { Btn, ArrowIcon, LiveDot } from "../ui";
-import MadagascarMap from "./MadagascarMap";
+import MadagascarMap from "@/components/maps/MadagascarMap";
 import TypingText from "./TypingText";
 
 const heroVariants = {

@@ -221,7 +221,7 @@ export default function Header() {
                   "transition-all duration-200 btn-shimmer",
                 )}
               >
-                Ouvrir un compte
+                Commencer
                 <ArrowRight className="size-3.5" />
               </Button>
             </motion.div>
@@ -299,7 +299,7 @@ export default function Header() {
                 </Button>
                 <Button className="w-full h-10 rounded-xl font-semibold gap-2 bg-[#007a38] hover:bg-[#005a2a] text-white shadow-lg shadow-[#007a38]/25">
                   <ArrowRight className="size-4" />
-                  Ouvrir un compte
+                  Commencer
                 </Button>
               </motion.div>
 
