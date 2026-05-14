@@ -50,10 +50,10 @@ Route::middleware('auth:citizen')->group(function (): void {
 });
 
 // Articles
-Route::get('articles', [ArticleController::class, 'index'])->name('articles.index');
-Route::get('articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+Route::get('news', [ArticleController::class, 'index'])->name('news.index');
+Route::get('news/{article}', [ArticleController::class, 'show'])->name('news.show');
 Route::middleware('auth:citizen')->group(function (): void {
-    Route::post('articles', [ArticleController::class, 'store'])->name('articles.store');
-    Route::post('articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
-    Route::delete('articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+    Route::post('news', [ArticleController::class, 'store'])->name('news.store');
+    Route::post('news/{article}', [ArticleController::class, 'update'])->name('news.update');
+    Route::delete('news/{article}', [ArticleController::class, 'destroy'])->name('news.destroy');
 });
