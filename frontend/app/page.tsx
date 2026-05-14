@@ -10,14 +10,20 @@ import HoverCards from "@/components/utils/HoverCard";
 import CardEvent from "@/components/utils/EventCard";
 import AddEventForm from "@/components/utils/AddEventCard";
 import ParticleBackground from "@/components/utils/ParticuleBackground";
+import Navbar from "@/components/layout/Header";
 
 export default function HomePage() {
   return (
     <main className="overflow-x-hidden">
+      <ParticleBackground/>
       <Header/>
       <Hero/>
       <Categories/>
+      <HowItWorks/>
+      <Testimonial/>
+      <CtaBanner/>
       {/* <ParticleBackground/> */}
+      <Footer/>
     </main>
   );
 }
