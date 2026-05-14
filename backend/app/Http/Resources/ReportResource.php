@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\UserSummaryResource;
 
 class ReportResource extends JsonResource
 {
@@ -11,7 +12,7 @@ class ReportResource extends JsonResource
     {
         return [
             'id'            => $this->id,
-            'user'          => new UserResource($this->whenLoaded('user')),
+            'user'          => new UserSummaryResource($this->whenLoaded('user')),
             'category'      => $this->category,
             'type'          => $this->type,
             'status'        => $this->status,
