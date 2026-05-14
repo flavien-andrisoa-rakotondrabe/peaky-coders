@@ -11,7 +11,7 @@ class ReportResource extends JsonResource
     {
         return [
             'id'            => $this->id,
-            'citizen'       => new CitizenResource($this->whenLoaded('citizen')),
+            'user'          => new UserResource($this->whenLoaded('user')),
             'category'      => $this->category,
             'type'          => $this->type,
             'status'        => $this->status,
@@ -19,6 +19,8 @@ class ReportResource extends JsonResource
             'latitude'      => $this->latitude,
             'longitude'     => $this->longitude,
             'location_name' => $this->location_name,
+            'supports_count' => $this->supports_count ?? 0,
+            'is_supported'   => $this->relationLoaded('supports') ? $this->supports->isNotEmpty() : false,
             'created_at'    => $this->created_at,
             'updated_at'    => $this->updated_at,
         ];

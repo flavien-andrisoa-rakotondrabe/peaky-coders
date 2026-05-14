@@ -8,9 +8,12 @@ class UserRepository
 {
     public function findByGoogleId(string $googleId): ?User
     {
-        return User::query()
-            ->where('google_id', $googleId)
-            ->first();
+        return User::query()->where('google_id', $googleId)->first();
+    }
+
+    public function findByFacebookId(string $facebookId): ?User
+    {
+        return User::query()->where('facebook_id', $facebookId)->first();
     }
 
     public function findByEmail(string $email): ?User

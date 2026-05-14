@@ -2,18 +2,18 @@
 
 namespace App\Policies;
 
-use App\Models\Citizen;
 use App\Models\Report;
+use App\Models\User;
 
 class ReportPolicy
 {
-    public function update(Citizen $citizen, Report $report): bool
+    public function update(User $user, Report $report): bool
     {
-        return (int) $citizen->id === (int) $report->citizen_id;
+        return (int) $user->id === (int) $report->user_id;
     }
 
-    public function delete(Citizen $citizen, Report $report): bool
+    public function delete(User $user, Report $report): bool
     {
-        return (int) $citizen->id === (int) $report->citizen_id;
+        return (int) $user->id === (int) $report->user_id;
     }
 }

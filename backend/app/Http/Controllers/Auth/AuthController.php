@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\CompleteProfileRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -62,6 +63,16 @@ class AuthController extends Controller
     {
         return response()->json([
             'data' => new UserResource($request->user()),
+        ]);
+    }
+
+    public function completeProfile(CompleteProfileRequest $request): JsonResponse
+    {
+        $user = $this->authService->completeProfile($request->user(), $request->validated());
+
+        return response()->json([
+            'message' => 'Profil complété avec succès.',
+            'data'    => new UserResource($user),
         ]);
     }
 

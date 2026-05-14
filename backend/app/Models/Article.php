@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['title', 'description', 'images', 'latitude', 'longitude', 'location_name', 'type', 'citizen_id', 'date'])]
+#[Fillable(['title', 'description', 'images', 'latitude', 'longitude', 'location_name', 'type', 'user_id', 'date'])]
 class Article extends Model
 {
     protected function casts(): array
@@ -17,8 +17,9 @@ class Article extends Model
             'images'   => 'array',
         ];
     }
-    public function citizen()
+
+    public function user()
     {
-        return $this->belongsTo(Citizen::class);
+        return $this->belongsTo(User::class);
     }
 }

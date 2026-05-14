@@ -5,6 +5,7 @@ namespace App\Services\Report;
 use App\DTOs\Report\CreateReportDTO;
 use App\DTOs\Report\UpdateReportDTO;
 use App\Models\Report;
+use App\Models\User;
 use App\Repositories\ReportRepository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +24,7 @@ class ReportService
             ->toArray();
 
         return $this->repository->create([
-            'citizen_id'    => $dto->citizenId,
+            'user_id'       => $dto->userId,
             'category'      => $dto->category,
             'type'          => $dto->type,
             'status'        => $dto->status,
@@ -66,5 +67,23 @@ class ReportService
         }
 
         $this->repository->delete($report);
+    }
+
+    public function toggleSupport(Report $report, User $user): array
+    {
+        $isSupported = $report->supports()->where('user_id', $user->id)->exists();
+
+        if ($isSupported) {
+            $this->repository->unsupport($report, $user);
+            $isSupported = false;
+        } else {
+            $this->repository->support($report, $user);
+            $isSupported = true;
+        }
+
+        return [
+            'supports_count' => $report->supports()->count(),
+            'is_supported'   => $isSupported,
+        ];
     }
 }

@@ -29,7 +29,7 @@ class ArticleController extends Controller
 
     public function show(Article $article): JsonResponse
     {
-        $article->load('citizen');
+        $article->load('user');
 
         return response()->json([
             'data' => new ArticleResource($article),
@@ -39,7 +39,7 @@ class ArticleController extends Controller
     public function store(StoreArticleRequest $request): JsonResponse
     {
         $dto = new CreateArticleDTO(
-            citizenId:    $request->user()->id,
+            userId:       $request->user()->id,
             type:         $request->validated('type'),
             date:         $request->validated('date'),
             title:        $request->validated('title'),
@@ -53,7 +53,7 @@ class ArticleController extends Controller
 
         return response()->json([
             'message' => 'Article created.',
-            'data'    => new ArticleResource($article->load('citizen')),
+            'data'    => new ArticleResource($article->load('user')),
         ], 201);
     }
 
@@ -75,7 +75,7 @@ class ArticleController extends Controller
 
         return response()->json([
             'message' => 'Article updated.',
-            'data'    => new ArticleResource($updated->load('citizen')),
+            'data'    => new ArticleResource($updated->load('user')),
         ]);
     }
 

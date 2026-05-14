@@ -9,12 +9,12 @@ class ArticleRepository
 {
     public function all(): Collection
     {
-        return Article::query()->with('citizen')->latest()->get();
+        return Article::query()->with('user')->latest()->get();
     }
 
     public function find(int $id): ?Article
     {
-        return Article::query()->with('citizen')->find($id);
+        return Article::query()->with('user')->find($id);
     }
 
     public function create(array $data): Article

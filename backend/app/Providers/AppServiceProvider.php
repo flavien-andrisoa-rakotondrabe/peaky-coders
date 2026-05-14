@@ -2,11 +2,7 @@
 
 namespace App\Providers;
 
-use App\Auth\CitizenTokenGuard;
-use App\Repositories\CitizenRepository;
 use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,13 +17,6 @@ class AppServiceProvider extends ServiceProvider
             return $frontend
                 . '/reset-password?token=' . $token
                 . '&email=' . urlencode($notifiable->getEmailForPasswordReset());
-        });
-
-        Auth::extend('citizen-token', function ($app, $name, array $config) {
-            return new CitizenTokenGuard(
-                $app->make(CitizenRepository::class),
-                $app->make(Request::class),
-            );
         });
     }
 }

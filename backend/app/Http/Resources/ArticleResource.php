@@ -11,7 +11,7 @@ class ArticleResource extends JsonResource
     {
         return [
             'id'            => $this->id,
-            'citizen'       => new CitizenResource($this->whenLoaded('citizen')),
+            'user'          => new UserResource($this->whenLoaded('user')),
             'type'          => $this->type,
             'date'          => $this->date?->format('Y-m-d'),
             'title'         => $this->title,

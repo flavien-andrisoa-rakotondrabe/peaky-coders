@@ -5,7 +5,7 @@ namespace App\DTOs\Article;
 readonly class CreateArticleDTO
 {
     public function __construct(
-        public int $citizenId,
+        public int $userId,
         public string $type,
         public ?string $date,
         public string $title,

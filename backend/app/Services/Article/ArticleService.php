@@ -23,7 +23,7 @@ class ArticleService
             ->toArray();
 
         return $this->repository->create([
-            'citizen_id'    => $dto->citizenId,
+            'user_id'       => $dto->userId,
             'type'          => $dto->type,
             'date'          => $dto->date,
             'title'         => $dto->title,

@@ -23,13 +23,13 @@ class ReportController extends Controller
     public function index(): JsonResponse
     {
         return response()->json([
-            'data' => ReportResource::collection($this->repository->all()),
+            'data' => ReportResource::collection($this->repository->all(auth()->id())),
         ]);
     }
 
     public function show(Report $report): JsonResponse
     {
-        $report->load('citizen');
+        $report = $this->repository->find($report->id, auth()->id());
 
         return response()->json([
             'data' => new ReportResource($report),
@@ -39,7 +39,7 @@ class ReportController extends Controller
     public function store(StoreReportRequest $request): JsonResponse
     {
         $dto = new CreateReportDTO(
-            citizenId: $request->user()->id,
+            userId: $request->user()->id,
             category:  $request->validated('category'),
             type:      $request->validated('type'),
             status:    $request->validated('status'),
@@ -52,7 +52,7 @@ class ReportController extends Controller
 
         return response()->json([
             'message' => 'Report created.',
-            'data'    => new ReportResource($report->load('citizen')),
+            'data'    => new ReportResource($report->load('user')),
         ], 201);
     }
 
@@ -73,7 +73,7 @@ class ReportController extends Controller
 
         return response()->json([
             'message' => 'Report updated.',
-            'data'    => new ReportResource($updated->load('citizen')),
+            'data'    => new ReportResource($updated->load('user')),
         ]);
     }
 
