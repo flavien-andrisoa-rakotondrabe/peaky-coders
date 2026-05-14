@@ -15,7 +15,7 @@ class UpdateNewsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type'          => ['sometimes', 'string', Rule::in(['evenement', 'divers'])],
+            'type'          => ['sometimes', 'string', Rule::in(['event', 'divers'])],
             'date'          => ['sometimes', 'date_format:Y-m-d'],
             'title'         => ['sometimes', 'string', 'max:255'],
             'description'   => ['sometimes', 'string'],
