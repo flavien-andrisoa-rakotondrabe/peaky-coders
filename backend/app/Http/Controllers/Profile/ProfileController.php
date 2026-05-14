@@ -9,12 +9,20 @@ use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Services\Profile\ProfileService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
     public function __construct(
         private readonly ProfileService $profileService,
     ) {}
+
+    public function show(Request $request): JsonResponse
+    {
+        return response()->json([
+            'data' => new UserResource($request->user()),
+        ]);
+    }
 
     public function update(UpdateProfileRequest $request): JsonResponse
     {

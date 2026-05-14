@@ -20,7 +20,6 @@ class UpdateProfileRequest extends FormRequest
             'phone'                => ['sometimes', 'string', 'max:20', Rule::unique('users')->ignore($this->user()->id)],
             'current_password'     => ['required_with:password', 'string'],
             'password'             => ['sometimes', 'string', 'min:8', 'confirmed'],
-            'password_confirmation' => ['required_with:password', 'string'],
         ];
     }
 }

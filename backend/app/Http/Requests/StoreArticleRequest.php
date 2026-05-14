@@ -21,8 +21,8 @@ class StoreArticleRequest extends FormRequest
             'description'   => ['required', 'string'],
             'images'        => ['nullable', 'array', 'max:5'],
             'images.*'      => ['image', 'max:5120'],
-            'latitude'      => ['required_if:type,evenement', 'nullable', 'numeric', 'between:-90,90'],
-            'longitude'     => ['required_if:type,evenement', 'nullable', 'numeric', 'between:-180,180'],
+            'latitude'      => ['required_if:type,evenement', 'nullable', 'numeric'],
+            'longitude'     => ['required_if:type,evenement', 'nullable', 'numeric'],
             'location_name' => ['nullable', 'string', 'max:255'],
         ];
     }

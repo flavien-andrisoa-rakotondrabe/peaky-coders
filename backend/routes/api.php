@@ -38,6 +38,7 @@ Route::prefix('auth')->name('auth.')->group(function (): void {
 });
 
 Route::prefix('profile')->name('profile.')->middleware('auth:sanctum')->group(function (): void {
+    Route::get('/', [ProfileController::class, 'show'])->name('show');
     Route::patch('/', [ProfileController::class, 'update'])->name('update');
     Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
 });
