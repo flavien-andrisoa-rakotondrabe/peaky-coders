@@ -32,7 +32,8 @@ class SocialAuthController extends Controller
         $frontend = config('app.frontend_url', config('app.url'));
         $profileCompleted = $result->user->profile_completed ? 'true' : 'false';
 
-        return redirect($frontend . '/auth/callback?token=' . $result->accessToken . '&profile_completed=' . $profileCompleted);
+        return redirect($frontend . '/auth/callback?profile_completed=' . $profileCompleted)
+            ->cookie('access_token', $result->accessToken, 60 * 24, '/', null, config('session.secure'), true);
     }
 
     public function redirectToFacebook(): JsonResponse
@@ -59,7 +60,8 @@ class SocialAuthController extends Controller
             $profileCompleted = $result->user->profile_completed ? 'true' : 'false';
             $emailRequired = ! $result->user->email ? '&email_required=true' : '';
 
-            return redirect($frontend . '/auth/callback?token=' . $result->accessToken . '&profile_completed=' . $profileCompleted . $emailRequired);
+            return redirect($frontend . '/auth/callback?profile_completed=' . $profileCompleted . $emailRequired)
+                ->cookie('access_token', $result->accessToken, 60 * 24, '/', null, config('session.secure'), true);
         } catch (\Exception) {
             return redirect($frontend . '/auth/callback?error=' . urlencode('Facebook authentication failed'));
         }
