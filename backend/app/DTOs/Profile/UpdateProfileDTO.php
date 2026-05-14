@@ -8,7 +8,6 @@ readonly class UpdateProfileDTO
         public ?string $name,
         public ?string $email,
         public ?string $phone = null,
-        public ?string $avatar = null,
         public ?string $currentPassword = null,
         public ?string $newPassword = null,
     ) {}
@@ -19,7 +18,6 @@ readonly class UpdateProfileDTO
             name:            $data['name'] ?? null,
             email:           $data['email'] ?? null,
             phone:           $data['phone'] ?? null,
-            avatar:          $data['avatar'] ?? null,
             currentPassword: $data['current_password'] ?? null,
             newPassword:     $data['password'] ?? null,
         );

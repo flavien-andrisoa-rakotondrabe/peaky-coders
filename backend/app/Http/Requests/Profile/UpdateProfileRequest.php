@@ -18,7 +18,6 @@ class UpdateProfileRequest extends FormRequest
             'name'                 => ['sometimes', 'string', 'max:255'],
             'email'                => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
             'phone'                => ['sometimes', 'string', 'max:20', Rule::unique('users')->ignore($this->user()->id)],
-            'avatar'               => ['sometimes', 'nullable', 'string', 'url', 'max:2048'],
             'current_password'     => ['required_with:password', 'string'],
             'password'             => ['sometimes', 'string', 'min:8', 'confirmed'],
             'password_confirmation' => ['required_with:password', 'string'],

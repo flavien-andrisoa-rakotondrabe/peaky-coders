@@ -26,7 +26,6 @@ class ProfileService
             'name'   => $dto->name,
             'email'  => $dto->email,
             'phone'  => $dto->phone,
-            'avatar' => $dto->avatar,
         ], fn ($value) => $value !== null);
 
         if ($dto->newPassword !== null) {
