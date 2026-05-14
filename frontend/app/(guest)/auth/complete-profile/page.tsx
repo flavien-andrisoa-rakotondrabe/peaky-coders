@@ -233,7 +233,7 @@ export default function CompleteProfilePage() {
             <Button3DV2
               type="submit"
               disabled={isSubmitting}
-              label={isSubmitting ? "Accèssion..." : "Continuer"}
+              label={isSubmitting ? "Accès..." : "Continuer"}
               fullWidth
               breakpoints={[{ tw: "sm", width: 80, height: 48, fontSize: 16 }]}
             />
