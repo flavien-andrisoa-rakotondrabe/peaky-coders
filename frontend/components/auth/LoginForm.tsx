@@ -1,19 +1,20 @@
 "use client";
 
+import Image from "next/image";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import { FormInput } from "@/components/utils/FormInput";
 import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
 import { FormCheckbox } from "@/components/utils/FormCheckbox";
 import Link from "next/link";
+import Button3DV2 from "@/components/utils/Button3DV2";
 
 // 1. Définition du schéma de validation avec Zod
 const loginSchema = z.object({
@@ -155,15 +156,12 @@ export function LoginForm({
             />
           </FieldGroup>
 
-          <Button
+          <Button3DV2
             type="submit"
             disabled={isSubmitting}
-            className="font-body h-12 w-full gap-2 rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90"
-            size="lg"
-          >
-            {isSubmitting ? "Connexion..." : "Se connecter"}
-            {!isSubmitting && <ArrowRight className="h-4 w-4" />}
-          </Button>
+            label={isSubmitting ? "Connexion..." : "Se connecter"}
+            fullWidth
+          />
         </form>
 
         <div className="relative flex items-center justify-center">

@@ -1,17 +1,18 @@
-import { Eye, EyeOff, Mail, Lock, ArrowRight, User, Phone } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/utils/FormInput";
 import Link from "next/link";
+import Button3DV2 from "@/components/utils/Button3DV2";
 
 // 1. Schéma de validation Zod
 const signupSchema = z
   .object({
-    name: z.string().min(2, "Le nom est requis"),
+    firstName: z.string().min(2, "Prénom requis"),
+    lastName: z.string().min(2, "Nom requis"),
     tel: z.string().min(10, "Numéro de téléphone invalide"),
     email: z.string().email("Email invalide"),
     password: z.string().min(6, "Minimum 6 caractères"),
@@ -41,7 +42,8 @@ export function SignupForm({
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       tel: "",
       email: "",
       password: "",
@@ -75,14 +77,25 @@ export function SignupForm({
       </div>
 
       {/* Ligne Prénom / Nom */}
-      <FormInput
-        label="Nom"
-        icon={User}
-        placeholder="Votre nom"
-        autoComplete="family-name"
-        error={errors.name?.message}
-        {...register("name")}
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <FormInput
+          label="Prénom"
+          icon={User}
+          placeholder="Jean"
+          autoComplete="given-name"
+          error={errors.firstName?.message}
+          {...register("firstName")}
+        />
+
+        <FormInput
+          label="Nom"
+          icon={User}
+          placeholder="Dupont"
+          autoComplete="family-name"
+          error={errors.lastName?.message}
+          {...register("lastName")}
+        />
+      </div>
 
       {/* Téléphone & Email */}
       <FormInput
@@ -141,15 +154,12 @@ export function SignupForm({
       />
 
       {/* Bouton de soumission */}
-      <Button
+      <Button3DV2
         type="submit"
         disabled={isSubmitting}
-        className="font-body h-12 w-full gap-2 rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90 disabled:opacity-50"
-        size="lg"
-      >
-        {isSubmitting ? "Création du compte..." : "Créer mon compte"}
-        {!isSubmitting && <ArrowRight className="h-4 w-4" />}
-      </Button>
+        label={isSubmitting ? "Inscription..." : "S'inscrire"}
+        fullWidth
+      />
 
       {/* Liens légaux */}
       <p className="font-body text-center text-xs text-muted-foreground px-4">
