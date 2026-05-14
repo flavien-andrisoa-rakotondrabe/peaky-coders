@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Article\ArticleController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Citizen\CitizenController;
 use App\Http\Controllers\Profile\ProfileController;
+use App\Http\Controllers\Report\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->name('auth.')->group(function (): void {
@@ -29,4 +32,28 @@ Route::prefix('auth')->name('auth.')->group(function (): void {
 Route::prefix('profile')->name('profile.')->middleware('auth:sanctum')->group(function (): void {
     Route::patch('/', [ProfileController::class, 'update'])->name('update');
     Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+});
+
+// Citizen
+Route::post('citizens', [CitizenController::class, 'store'])->name('citizens.store');
+Route::middleware('auth:citizen')->group(function (): void {
+    Route::get('citizens/me', [CitizenController::class, 'me'])->name('citizens.me');
+});
+
+// Reports
+Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('reports/{report}', [ReportController::class, 'show'])->name('reports.show');
+Route::middleware('auth:citizen')->group(function (): void {
+    Route::post('reports', [ReportController::class, 'store'])->name('reports.store');
+    Route::post('reports/{report}', [ReportController::class, 'update'])->name('reports.update');
+    Route::delete('reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
+});
+
+// Articles
+Route::get('articles', [ArticleController::class, 'index'])->name('articles.index');
+Route::get('articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+Route::middleware('auth:citizen')->group(function (): void {
+    Route::post('articles', [ArticleController::class, 'store'])->name('articles.store');
+    Route::post('articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
+    Route::delete('articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 });

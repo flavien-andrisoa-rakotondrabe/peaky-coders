@@ -1,13 +1,12 @@
-# Peaky API
+# Peacky API — Gestion de Déchets
 
-API d'authentification — Laravel 13 + Sanctum
+API REST — Laravel 13 | Signalements & Actualités
 
 ## Stack
 
 - **Laravel 13** / PHP 8.3+
 - **PostgreSQL**
-- **Laravel Sanctum** — authentification par token
-- **Mailpit** — capture des emails en local (`http://localhost:8025`)
+- **Stockage fichiers** — `php artisan storage:link` requis pour les images
 
 ## Installation
 
@@ -16,36 +15,29 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate
+php artisan storage:link
 php artisan serve
 ```
 
 ## Variables d'environnement clés
 
-| Variable                  | Description                                         | Exemple                 |
-| ------------------------- | --------------------------------------------------- | ----------------------- |
-| `APP_URL`                 | URL du backend                                      | `http://localhost`      |
-| `APP_FRONTEND_URL`        | URL du frontend — utilisée dans les emails de reset | `http://localhost:3000` |
-| `DB_*`                    | Connexion PostgreSQL                                | voir `.env`             |
-| `MAIL_HOST` / `MAIL_PORT` | Serveur SMTP local (Mailpit)                        | `localhost` / `1025`    |
-| `CORS_ALLOWED_ORIGINS`    | Origines autorisées (séparées par virgule)          | `http://localhost:3000` |
-
-> `APP_FRONTEND_URL` contrôle le lien dans l'email de réinitialisation de mot de passe.
-> Modifie-le si l'URL de ton frontend change.
+| Variable                     | Description                             | Exemple                 |
+| ---------------------------- | --------------------------------------- | ----------------------- |
+| `APP_URL`                    | URL du backend                          | `http://localhost`      |
+| `DB_*`                       | Connexion PostgreSQL                    | voir `.env`             |
+| `CORS_ALLOWED_ORIGINS`       | Origines autorisées                     | `http://localhost:3000` |
+| `CITIZEN_TOKEN_TTL_MINUTES`  | Durée de vie du token citizen (minutes) | `1440` (= 24h)          |
 
 ---
 
-## Routes API
+## Système d'identification — Citizen Token
 
-Base URL : `http://localhost/api`
+Pas de login classique. L'identification fonctionne ainsi :
 
-| Méthode | Endpoint                | Auth    | Description                       |
-| ------- | ----------------------- | ------- | --------------------------------- |
-| POST    | `/auth/register`        | Non     | Inscription                       |
-| POST    | `/auth/login`           | Non     | Connexion                         |
-| POST    | `/auth/forgot-password` | Non     | Envoie le lien de reset par email |
-| POST    | `/auth/reset-password`  | Non     | Réinitialise le mot de passe      |
-| GET     | `/auth/me`              | Sanctum | Utilisateur connecté              |
-| POST    | `/auth/logout`          | Sanctum | Déconnexion                       |
+1. L'utilisateur fournit son nom → le backend crée un **Citizen** et retourne un **UUID token**
+2. Ce token est stocké dans `localStorage` côté navigateur
+3. Chaque requête protégée envoie ce token dans le header `X-Citizen-Token`
+4. Le token expire après **24h** (configurable via `CITIZEN_TOKEN_TTL_MINUTES` dans `.env`). Quand il expire, refaire l'étape 1
 
 ---
 
@@ -53,166 +45,679 @@ Base URL : `http://localhost/api`
 
 ```
 Accept: application/json
-Content-Type: application/json
 ```
 
-Les routes protégées nécessitent en plus :
+Pour les routes protégées, ajouter :
 
 ```
-Authorization: Bearer {access_token}
+X-Citizen-Token: {ton-uuid-token}
 ```
+
+> Pour les uploads d'images, ne pas mettre `Content-Type: application/json` — Postman le gère automatiquement en `multipart/form-data`.
 
 ---
 
-## Guide de test Postman
+## Tableau des endpoints
 
-### Étape 1 — Register (sans remember_me)
+| Méthode | Endpoint                  | Auth | Description                  |
+| ------- | ------------------------- | ---- | ---------------------------- |
+| POST    | `/api/citizens`           | Non  | Créer un citizen             |
+| GET     | `/api/citizens/me`        | Oui  | Voir son profil citizen       |
+| GET     | `/api/reports`            | Non  | Lister tous les signalements  |
+| GET     | `/api/reports/{id}`       | Non  | Voir un signalement           |
+| POST    | `/api/reports`            | Oui  | Créer un signalement          |
+| POST    | `/api/reports/{id}`       | Oui  | Modifier son signalement      |
+| DELETE  | `/api/reports/{id}`       | Oui  | Supprimer son signalement     |
+| GET     | `/api/articles`           | Non  | Lister toutes les actualités  |
+| GET     | `/api/articles/{id}`      | Non  | Voir une actualité            |
+| POST    | `/api/articles`           | Oui  | Créer une actualité           |
+| POST    | `/api/articles/{id}`      | Oui  | Modifier son actualité        |
+| DELETE  | `/api/articles/{id}`      | Oui  | Supprimer son actualité       |
 
-**POST** `/api/auth/register`
+---
 
+## Guide de test Postman — Étape par étape
+
+---
+
+### PARTIE 1 — Citizen (Identification)
+
+---
+
+#### 1.1 — Créer un citizen
+
+**POST** `http://localhost/api/citizens`
+
+Header :
+```
+Accept: application/json
+```
+
+Body → `raw` → `JSON` :
 ```json
 {
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "password123",
-    "password_confirmation": "password123"
+    "name": "Jean Dupont"
 }
 ```
 
 Réponse **201** :
-
 ```json
 {
-    "message": "Compte créé avec succès.",
+    "message": "Citizen registered.",
     "data": {
-        "access_token": "1|abc...",
-        "token_type": "Bearer",
-        "user": { "id": 1, "name": "John Doe", "email": "john@example.com" }
+        "citizen": {
+            "id": 1,
+            "name": "Jean Dupont",
+            "expires_at": "2027-05-14T07:00:00.000000Z"
+        },
+        "token": "550e8400-e29b-41d4-a716-446655440000"
     }
 }
 ```
 
-Copier le `access_token` pour les étapes suivantes.
+> **Copier le `token`** et le garder pour toutes les requêtes suivantes.
 
 ---
 
-### Étape 2 — Me (vérifier le token)
+#### 1.2 — Vérifier son profil citizen (token valide)
 
-**GET** `/api/auth/me`
-Header : `Authorization: Bearer {access_token}`
+**GET** `http://localhost/api/citizens/me`
 
-Réponse **200** :
-
-```json
-{
-    "data": { "id": 1, "name": "John Doe", "email": "john@example.com" }
-}
+Headers :
 ```
-
----
-
-### Étape 3 — Logout
-
-**POST** `/api/auth/logout`
-Header : `Authorization: Bearer {access_token}`
-
-Réponse **200** :
-
-```json
-{ "message": "Déconnexion réussie." }
-```
-
-Refaire `/me` avec le même token → **401** ✅
-
----
-
-### Étape 4 — Login sans remember_me (token 24h)
-
-**POST** `/api/auth/login`
-
-```json
-{
-    "email": "john@example.com",
-    "password": "password123",
-    "remember_me": false
-}
-```
-
----
-
-### Étape 5 — Login avec remember_me (token 1 an)
-
-**POST** `/api/auth/login`
-
-```json
-{
-    "email": "john@example.com",
-    "password": "password123",
-    "remember_me": true
-}
-```
-
-> Pour vérifier : table `personal_access_tokens`, colonne `expires_at` — comparer les deux tokens.
-
----
-
-### Étape 6 — Forgot Password
-
-**POST** `/api/auth/forgot-password`
-
-```json
-{
-    "email": "john@example.com"
-}
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
 ```
 
 Réponse **200** :
-
-```json
-{ "message": "We have emailed your password reset link!" }
-```
-
-Ouvrir **Mailpit** → `http://localhost:8025`
-
-L'email contient un lien :
-
-```
-http://localhost:3000/reset-password?token=XXXXXXXX&email=john%40example.com
-```
-
-Copier la valeur du paramètre `token`.
-
----
-
-### Étape 7 — Reset Password
-
-**POST** `/api/auth/reset-password`
-
 ```json
 {
-    "token": "XXXXXXXX",
-    "email": "john@example.com",
-    "password": "nouveaumotdepasse",
-    "password_confirmation": "nouveaumotdepasse"
+    "data": {
+        "id": 1,
+        "name": "Jean Dupont",
+        "expires_at": "2027-05-14T07:00:00.000000Z"
+    }
 }
 ```
 
-Réponse **200** :
+---
 
+#### 1.3 — Vérifier son profil sans token (doit échouer)
+
+**GET** `http://localhost/api/citizens/me`
+
+Sans header `X-Citizen-Token`
+
+Réponse **401** :
 ```json
-{ "message": "Your password has been reset!" }
+{
+    "message": "Unauthenticated."
+}
 ```
-
-Vérifier avec un login → **200** avec nouveau token ✅
 
 ---
 
-## Cas d'erreur
+### PARTIE 2 — Signalement (Report)
 
-| Scénario                    | Endpoint              | Réponse              |
-| --------------------------- | --------------------- | -------------------- |
-| Email déjà pris             | POST /register        | 422 + `errors.email` |
-| Mauvais mot de passe        | POST /login           | 422 + `errors.email` |
-| Requête sans token          | GET /me               | 401                  |
-| Token reset invalide/expiré | POST /reset-password  | 422                  |
-| Email inexistant            | POST /forgot-password | 422                  |
+Un signalement a trois catégories : `dechet`, `infra`, `incendie`
+
+- `dechet` et `incendie` : localisation + image
+- `infra` : localisation + image + `type` (texte libre) + `status` (texte libre)
+
+---
+
+#### 2.1 — Lister tous les signalements (public)
+
+**GET** `http://localhost/api/reports`
+
+Header :
+```
+Accept: application/json
+```
+
+Réponse **200** :
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+            "category": "dechet",
+            "type": null,
+            "status": null,
+            "image_url": "http://localhost/storage/reports/image.jpg",
+            "latitude": -18.9103,
+            "longitude": 47.5362,
+            "location_name": "Antananarivo Centre",
+            "created_at": "2026-05-14T08:00:00.000000Z",
+            "updated_at": "2026-05-14T08:00:00.000000Z"
+        }
+    ]
+}
+```
+
+---
+
+#### 2.2 — Créer un signalement — catégorie `dechet`
+
+**POST** `http://localhost/api/reports`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Body → `form-data` :
+
+| Clé            | Type | Valeur                   |
+| -------------- | ---- | ------------------------ |
+| `category`     | Text | `dechet`                 |
+| `latitude`     | Text | `-18.9103`               |
+| `longitude`    | Text | `47.5362`                |
+| `location_name`| Text | `Antananarivo Centre`    |
+| `image`        | File | (sélectionner un fichier)|
+
+Réponse **201** :
+```json
+{
+    "message": "Report created.",
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+        "category": "dechet",
+        "type": null,
+        "status": null,
+        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Antananarivo Centre",
+        "created_at": "...",
+        "updated_at": "..."
+    }
+}
+```
+
+---
+
+#### 2.3 — Créer un signalement — catégorie `incendie`
+
+**POST** `http://localhost/api/reports`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Body → `form-data` :
+
+| Clé            | Type | Valeur              |
+| -------------- | ---- | ------------------- |
+| `category`     | Text | `incendie`          |
+| `latitude`     | Text | `-18.8792`          |
+| `longitude`    | Text | `47.5079`           |
+| `location_name`| Text | `Ivandry`           |
+| `image`        | File | (sélectionner)      |
+
+---
+
+#### 2.4 — Créer un signalement — catégorie `infra`
+
+**POST** `http://localhost/api/reports`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Body → `form-data` :
+
+| Clé            | Type | Valeur                     |
+| -------------- | ---- | -------------------------- |
+| `category`     | Text | `infra`                    |
+| `type`         | Text | `Route endommagée`         |
+| `status`       | Text | `En attente de réparation` |
+| `latitude`     | Text | `-18.9200`                 |
+| `longitude`    | Text | `47.5400`                  |
+| `location_name`| Text | `Analakely`                |
+| `image`        | File | (sélectionner)             |
+
+---
+
+#### 2.5 — Créer un signalement `infra` sans `type` (doit échouer)
+
+**POST** `http://localhost/api/reports`
+
+Body → `form-data` :
+
+| Clé         | Type | Valeur    |
+| ----------- | ---- | --------- |
+| `category`  | Text | `infra`   |
+| `latitude`  | Text | `-18.91`  |
+| `longitude` | Text | `47.53`   |
+
+Réponse **422** :
+```json
+{
+    "message": "The type field is required when category is infra.",
+    "errors": {
+        "type": ["The type field is required when category is infra."],
+        "status": ["The status field is required when category is infra."]
+    }
+}
+```
+
+---
+
+#### 2.6 — Créer un signalement avec une catégorie invalide (doit échouer)
+
+Body → `form-data` :
+
+| Clé         | Type | Valeur    |
+| ----------- | ---- | --------- |
+| `category`  | Text | `bidon`   |
+| `latitude`  | Text | `-18.91`  |
+| `longitude` | Text | `47.53`   |
+
+Réponse **422** :
+```json
+{
+    "message": "The selected category is invalid.",
+    "errors": {
+        "category": ["The selected category is invalid."]
+    }
+}
+```
+
+---
+
+#### 2.7 — Créer un signalement sans être identifié (doit échouer)
+
+Sans header `X-Citizen-Token`
+
+Réponse **401** :
+```json
+{
+    "message": "Unauthenticated."
+}
+```
+
+---
+
+#### 2.8 — Voir un signalement (public)
+
+**GET** `http://localhost/api/reports/1`
+
+Réponse **200** :
+```json
+{
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+        "category": "dechet",
+        "type": null,
+        "status": null,
+        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Antananarivo Centre",
+        "created_at": "...",
+        "updated_at": "..."
+    }
+}
+```
+
+---
+
+#### 2.9 — Modifier son signalement
+
+**POST** `http://localhost/api/reports/1`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Body → `form-data` (envoyer seulement les champs à changer) :
+
+| Clé            | Type | Valeur              |
+| -------------- | ---- | ------------------- |
+| `location_name`| Text | `Ampefiloha`        |
+
+Réponse **200** :
+```json
+{
+    "message": "Report updated.",
+    "data": { "...": "..." }
+}
+```
+
+---
+
+#### 2.10 — Modifier le signalement d'un autre citizen (doit échouer)
+
+Utiliser un token différent de celui qui a créé le signalement.
+
+**POST** `http://localhost/api/reports/1`
+
+Header :
+```
+X-Citizen-Token: autre-uuid-token
+```
+
+Réponse **403** :
+```json
+{
+    "message": "This action is unauthorized."
+}
+```
+
+---
+
+#### 2.11 — Supprimer son signalement
+
+**DELETE** `http://localhost/api/reports/1`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Réponse **200** :
+```json
+{
+    "message": "Report deleted."
+}
+```
+
+---
+
+#### 2.12 — Supprimer un signalement inexistant
+
+**DELETE** `http://localhost/api/reports/9999`
+
+Réponse **404** :
+```json
+{
+    "message": "No query results for model [App\\Models\\Report] 9999"
+}
+```
+
+---
+
+### PARTIE 3 — Actualité (Article)
+
+Une actualité a deux types : `evenement` (avec localisation) ou `divers` (sans localisation).
+
+---
+
+#### 3.1 — Lister toutes les actualités (public)
+
+**GET** `http://localhost/api/articles`
+
+Réponse **200** :
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+            "type": "evenement",
+            "title": "Journée de nettoyage",
+            "description": "Grande journée de nettoyage au parc...",
+            "image_url": "http://localhost/storage/articles/img.jpg",
+            "latitude": -18.9103,
+            "longitude": 47.5362,
+            "location_name": "Parc Tsimbazaza",
+            "created_at": "...",
+            "updated_at": "..."
+        }
+    ]
+}
+```
+
+---
+
+#### 3.2 — Créer une actualité — type `evenement`
+
+**POST** `http://localhost/api/articles`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Body → `form-data` :
+
+| Clé            | Type | Valeur                              |
+| -------------- | ---- | ----------------------------------- |
+| `type`         | Text | `evenement`                         |
+| `title`        | Text | `Journée de nettoyage`              |
+| `description`  | Text | `Grande journée de nettoyage...`    |
+| `latitude`     | Text | `-18.9103`                          |
+| `longitude`    | Text | `47.5362`                           |
+| `location_name`| Text | `Parc Tsimbazaza`                   |
+| `image`        | File | (sélectionner)                      |
+
+Réponse **201** :
+```json
+{
+    "message": "Article created.",
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+        "type": "evenement",
+        "title": "Journée de nettoyage",
+        "description": "Grande journée de nettoyage...",
+        "image_url": "http://localhost/storage/articles/img.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Parc Tsimbazaza",
+        "created_at": "...",
+        "updated_at": "..."
+    }
+}
+```
+
+---
+
+#### 3.3 — Créer une actualité — type `divers` (sans localisation)
+
+**POST** `http://localhost/api/articles`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Body → `form-data` :
+
+| Clé           | Type | Valeur                                   |
+| ------------- | ---- | ---------------------------------------- |
+| `type`        | Text | `divers`                                 |
+| `title`       | Text | `Nouvelle règle de tri des déchets`      |
+| `description` | Text | `Dès ce mois-ci, les plastiques doivent...` |
+
+> `latitude`, `longitude`, `location_name` optionnels pour `divers`.
+
+Réponse **201** :
+```json
+{
+    "message": "Article created.",
+    "data": {
+        "id": 2,
+        "type": "divers",
+        "title": "Nouvelle règle de tri des déchets",
+        "description": "Dès ce mois-ci...",
+        "image_url": null,
+        "latitude": null,
+        "longitude": null,
+        "location_name": null,
+        "created_at": "...",
+        "updated_at": "..."
+    }
+}
+```
+
+---
+
+#### 3.4 — Créer un `evenement` sans latitude (doit échouer)
+
+Body → `form-data` :
+
+| Clé           | Type | Valeur          |
+| ------------- | ---- | --------------- |
+| `type`        | Text | `evenement`     |
+| `title`       | Text | `Test`          |
+| `description` | Text | `Une description` |
+
+Réponse **422** :
+```json
+{
+    "message": "The latitude field is required when type is evenement.",
+    "errors": {
+        "latitude": ["The latitude field is required when type is evenement."],
+        "longitude": ["The longitude field is required when type is evenement."]
+    }
+}
+```
+
+---
+
+#### 3.5 — Créer une actualité avec un type invalide (doit échouer)
+
+Body → `form-data` :
+
+| Clé           | Type | Valeur    |
+| ------------- | ---- | --------- |
+| `type`        | Text | `autre`   |
+| `title`       | Text | `Test`    |
+| `description` | Text | `...`     |
+
+Réponse **422** :
+```json
+{
+    "message": "The selected type is invalid.",
+    "errors": {
+        "type": ["The selected type is invalid."]
+    }
+}
+```
+
+---
+
+#### 3.6 — Créer une actualité sans être identifié (doit échouer)
+
+Sans header `X-Citizen-Token`
+
+Réponse **401** :
+```json
+{
+    "message": "Unauthenticated."
+}
+```
+
+---
+
+#### 3.7 — Voir une actualité (public)
+
+**GET** `http://localhost/api/articles/1`
+
+Réponse **200** : même structure que la création.
+
+---
+
+#### 3.8 — Modifier son actualité
+
+**POST** `http://localhost/api/articles/1`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Body → `form-data` (seulement les champs à changer) :
+
+| Clé     | Type | Valeur                     |
+| ------- | ---- | -------------------------- |
+| `title` | Text | `Journée de nettoyage MAJ` |
+
+Réponse **200** :
+```json
+{
+    "message": "Article updated.",
+    "data": { "...": "..." }
+}
+```
+
+---
+
+#### 3.9 — Modifier l'actualité d'un autre citizen (doit échouer)
+
+Même principe que le report — utiliser un token différent.
+
+Réponse **403** :
+```json
+{
+    "message": "This action is unauthorized."
+}
+```
+
+---
+
+#### 3.10 — Supprimer son actualité
+
+**DELETE** `http://localhost/api/articles/1`
+
+Headers :
+```
+Accept: application/json
+X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+```
+
+Réponse **200** :
+```json
+{
+    "message": "Article deleted."
+}
+```
+
+---
+
+## Récapitulatif des cas d'erreur
+
+| Scénario                                    | Code | Message clé                                         |
+| ------------------------------------------- | ---- | --------------------------------------------------- |
+| Token absent sur une route protégée         | 401  | `Unauthenticated.`                                  |
+| Token expiré                                | 401  | `Unauthenticated.`                                  |
+| Modifier/supprimer la ressource d'un autre  | 403  | `This action is unauthorized.`                      |
+| Ressource introuvable                       | 404  | `No query results for model...`                     |
+| `category` invalide (pas déchet/infra/incendie) | 422 | `The selected category is invalid.`             |
+| `type` absent pour `infra`                  | 422  | `The type field is required when category is infra.`|
+| `status` absent pour `infra`                | 422  | `The status field is required when category is infra.`|
+| `type` invalide pour article                | 422  | `The selected type is invalid.`                     |
+| `latitude` absente pour `evenement`         | 422  | `The latitude field is required when type is evenement.`|
+| Image trop grande (> 5 MB)                  | 422  | `The image field must not be greater than 5120 kilobytes.`|
+
+---
+
+## Note sur les images
+
+Les images sont stockées dans `storage/app/public/`. Pour qu'elles soient accessibles via URL, le lien symbolique doit exister :
+
+```bash
+php artisan storage:link
+```
+
+L'URL retournée dans `image_url` sera de la forme :
+```
+http://localhost/storage/reports/nomfichier.jpg
+http://localhost/storage/articles/nomfichier.jpg
+```
