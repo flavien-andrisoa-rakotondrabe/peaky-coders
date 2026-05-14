@@ -72,14 +72,12 @@ class AuthController extends Controller
         $data = json_decode($raw, true);
 
         return response()->json([
-            'data' => [
-                'first_name'     => $data['first_name'],
-                'last_name'      => $data['last_name'],
-                'email'          => $data['email'] ?? null,
-                'avatar'         => $data['avatar'] ?? null,
-                'provider'       => $data['provider'],
-                'email_required' => empty($data['email']),
-            ],
+            'first_name'     => $data['first_name'],
+            'last_name'      => $data['last_name'],
+            'email'          => $data['email'] ?? null,
+            'avatar'         => $data['avatar'] ?? null,
+            'provider'       => $data['provider'],
+            'email_required' => empty($data['email']),
         ]);
     }
 
@@ -94,18 +92,18 @@ class AuthController extends Controller
         $data = json_decode($raw, true);
 
         $dto = new SocialAuthDTO(
-            provider:   $data['provider'],
+            provider: $data['provider'],
             providerId: $data['provider_id'],
-            firstName:  $data['first_name'],
-            lastName:   $data['last_name'],
-            email:      $data['email'] ?? null,
-            avatar:     $data['avatar'] ?? null,
+            firstName: $data['first_name'],
+            lastName: $data['last_name'],
+            email: $data['email'] ?? null,
+            avatar: $data['avatar'] ?? null,
         );
 
         $user = $this->authService->createSocialUser(
-            dto:      $dto,
-            phone:    $request->validated('phone'),
-            email:    $request->validated('email'),
+            dto: $dto,
+            phone: $request->validated('phone'),
+            email: $request->validated('email'),
             password: $request->validated('password'),
         );
 
@@ -132,8 +130,8 @@ class AuthController extends Controller
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
         $status = $this->authService->resetPassword(
-            token:    $request->validated('token'),
-            email:    $request->validated('email'),
+            token: $request->validated('token'),
+            email: $request->validated('email'),
             password: $request->validated('password'),
         );
 
