@@ -28,7 +28,8 @@ Route::prefix('auth')->name('auth.')->group(function (): void {
 
     Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot-password');
     Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
-    Route::post('social/complete', [AuthController::class, 'completeSocialProfile'])->name('social.complete');
+    Route::post('complete-profile', [AuthController::class, 'completeSocialProfile'])->name('complete-profile');
+    Route::get('social/me', [AuthController::class, 'socialMe'])->name('social.me');
 
     // Routes protégées par Sanctum
     Route::middleware('auth:sanctum')->group(function (): void {
