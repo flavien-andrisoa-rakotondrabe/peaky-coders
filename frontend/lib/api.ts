@@ -2,50 +2,60 @@ import axios from "axios";
 
 /**
  * Routes publiques (guest)
- * → pas de redirection vers /auth
  */
-const guestRoutes = ["/auth"];
+const guestRoutes = [
+  "/auth",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/complete-profile",
+];
+
+/**
+ * Routes système où on NE DOIT JAMAIS rediriger
+ */
+const ignoredRoutes = ["/", "/404", "/500", "/not-found"];
 
 const isGuestRoute = (path: string) => {
   return guestRoutes.some((route) => path.startsWith(route));
 };
 
+const isIgnoredRoute = (path: string) => {
+  return ignoredRoutes.includes(path);
+};
+
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-
-  // Sanctum SPA
   withCredentials: true,
   withXSRFToken: true,
-
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
   },
 });
 
-/**
- * Interceptor global
- */
 api.interceptors.response.use(
-  // SUCCESS
   (response) => response,
 
-  // ERROR
   (error) => {
     const status = error.response?.status;
     const currentPath = window.location.pathname;
 
-    // Si pas de réponse (network error), on laisse passer
+    // pas de status = erreur réseau
     if (!status) {
       return Promise.reject(error);
     }
 
-    // IMPORTANT : laisser Next.js gérer les 404
+    // laisser Next gérer 404
     if (status === 404) {
       return Promise.reject(error);
     }
 
-    // uniquement auth error
+    // NE JAMAIS rediriger sur routes système
+    if (isIgnoredRoute(currentPath)) {
+      return Promise.reject(error);
+    }
+
+    // routes guest
     if (status === 401 && !isGuestRoute(currentPath)) {
       window.location.href = "/auth";
       return;
