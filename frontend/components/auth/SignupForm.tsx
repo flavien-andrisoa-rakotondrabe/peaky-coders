@@ -1,252 +1,198 @@
-import { Link, useForm } from '@inertiajs/react';
-import {
-    Eye,
-    EyeOff,
-    Mail,
-    Lock,
-    ArrowRight,
-    CheckCircle2,
-    User,
-    Phone,
-} from 'lucide-react';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import { Button } from '@/components/ui/button';
-import { FormInput } from '@/components/utils/FormInput';
-import { useLocale } from '@/hooks/useLocale';
-import { USER_ROLES } from '@/lib/constants/user';
-import { cn } from '@/lib/utils';
+import { FormInput } from "@/components/utils/FormInput";
+import Link from "next/link";
+import Button3DV2 from "@/components/utils/Button3DV2";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+
+// 1. Schéma de validation Zod
+const signupSchema = z
+  .object({
+    first_name: z.string().min(2, "Prénom requis"),
+    last_name: z.string().min(2, "Nom requis"),
+    phone: z.string().min(10, "Numéro de téléphone invalide"),
+    email: z.string().email("Email invalide"),
+    password: z.string().min(6, "Minimum 6 caractères"),
+    password_confirmation: z.string(),
+  })
+  .refine((data) => data.password === data.password_confirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["password_confirmation"],
+  });
+
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 export function SignupForm({
-    onSwitchToLogin,
+  onSwitchToLogin,
 }: {
-    onSwitchToLogin: () => void;
+  onSwitchToLogin: () => void;
 }) {
-    const { locale } = useLocale();
+  const [showPwd, setShowPwd] = useState(false);
 
-    const [showPwd, setShowPwd] = useState(false);
+  // 2. Initialisation React Hook Form
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      phone: "",
+      email: "",
+      password: "",
+      password_confirmation: "",
+    },
+  });
 
-    const {
-        post,
-        data,
-        setData,
-        errors,
-        hasErrors,
-        clearErrors,
-        processing,
-        reset,
-    } = useForm({
-        firstName: '',
-        lastName: '',
-        tel: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-        role: USER_ROLES[0].value,
-    });
+  const onSubmit = async (values: SignupFormValues) => {
+    try {
+      await api.get("/sanctum/csrf-cookie");
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
+      const res = await api.post("/api/auth/register", values);
 
-        post(`/${locale}/auth/register`, {
-            onSuccess: () => {
-                reset();
-            },
-        });
-    };
+      if (res.status === 201 || res.status === 200) {
+        toast.success("Inscription réussie !");
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="mb-5 space-y-1">
-                <h1 className="font-display text-2xl font-bold text-foreground">
-                    Créer un compte
-                </h1>
-                <p className="font-body text-sm text-muted-foreground">
-                    Déjà inscrit ?{' '}
-                    <button
-                        type="button"
-                        onClick={onSwitchToLogin}
-                        className="cursor-pointer font-semibold text-accent hover:underline"
-                    >
-                        Se connecter
-                    </button>
-                </p>
-            </div>
+        onSwitchToLogin();
+      }
+    } catch (error: any) {
+      if (error.response && error.response.status === 422) {
+        toast.error("Echec de l'inscription :", error.response.data.errors);
+      } else {
+        toast.error("Une erreur inattendue est survenue.");
+      }
+    } finally {
+    }
+  };
 
-            {/* Role selector */}
-            <div className="grid grid-cols-2 gap-3">
-                {USER_ROLES.map((item) => (
-                    <button
-                        key={`role-${item.value}`}
-                        type="button"
-                        onClick={() => setData('role', item.value)}
-                        className={cn(
-                            'relative flex flex-col items-start gap-1.5 rounded-2xl border-2 p-4 text-left transition-all',
-                            data.role === item.value
-                                ? 'border-accent bg-accent/5 shadow-card'
-                                : 'border-border bg-card hover:border-accent/40',
-                        )}
-                    >
-                        {data.role === item.value && (
-                            <CheckCircle2 className="absolute top-2.5 right-2.5 h-4 w-4 text-accent" />
-                        )}
-                        <item.icon
-                            className={cn(
-                                'h-5 w-5',
-                                data.role === item.value
-                                    ? 'text-accent'
-                                    : 'text-muted-foreground',
-                            )}
-                        />
-                        <span
-                            className={cn(
-                                'font-body text-sm leading-tight font-semibold',
-                                data.role === item.value
-                                    ? 'text-accent'
-                                    : 'text-foreground',
-                            )}
-                        >
-                            {item.label}
-                        </span>
-                        <span className="font-body text-xs text-muted-foreground">
-                            {item.desc}
-                        </span>
-                    </button>
-                ))}
-            </div>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="mb-5 space-y-1">
+        <h1 className="font-display text-2xl font-bold text-foreground">
+          Créer un compte
+        </h1>
+        <p className="font-body text-sm text-muted-foreground">
+          Déjà inscrit ?{" "}
+          <button
+            type="button"
+            onClick={onSwitchToLogin}
+            className="cursor-pointer font-semibold text-accent hover:underline"
+          >
+            Se connecter
+          </button>
+        </p>
+      </div>
 
-            {/* Name row */}
-            <div className="grid grid-cols-2 gap-3">
-                <FormInput
-                    label={'Prénom'}
-                    name="firstName"
-                    icon={User}
-                    value={data.firstName}
-                    setData={setData}
-                    error={errors.firstName}
-                    clearError={clearErrors}
-                    placeholder="Jean"
-                    autoComplete="given-name"
-                    required
-                />
+      {/* Ligne Prénom / Nom */}
+      <div className="grid grid-cols-2 gap-3">
+        <FormInput
+          label="Prénom"
+          icon={User}
+          placeholder="Jean"
+          autoComplete="given-name"
+          error={errors.first_name?.message}
+          {...register("first_name")}
+        />
 
-                <FormInput
-                    label={'Nom'}
-                    name="lastName"
-                    icon={User}
-                    value={data.lastName}
-                    setData={setData}
-                    error={errors.lastName}
-                    clearError={clearErrors}
-                    placeholder="Dupont"
-                    autoComplete="family-name"
-                    required
-                />
-            </div>
+        <FormInput
+          label="Nom"
+          icon={User}
+          placeholder="Dupont"
+          autoComplete="family-name"
+          error={errors.last_name?.message}
+          {...register("last_name")}
+        />
+      </div>
 
-            <FormInput
-                label={'Téléphone'}
-                name="tel"
-                type="tel"
-                icon={Phone}
-                value={data.tel}
-                setData={setData}
-                error={errors.tel}
-                clearError={clearErrors}
-                placeholder="+33 6 00 00 00 00"
-                autoComplete="tel"
-                required
-            />
+      {/* Téléphone & Email */}
+      <FormInput
+        label="Téléphone"
+        type="tel"
+        icon={Phone}
+        placeholder="+33 6 00 00 00 00"
+        autoComplete="tel"
+        error={errors.phone?.message}
+        {...register("phone")}
+      />
 
-            <FormInput
-                label={'Email'}
-                name="email"
-                type="email"
-                icon={Mail}
-                value={data.email}
-                setData={setData}
-                error={errors.email}
-                clearError={clearErrors}
-                placeholder="jean@email.com"
-                autoComplete="email"
-                required
-            />
+      <FormInput
+        label="Email"
+        type="email"
+        icon={Mail}
+        placeholder="jean@email.com"
+        autoComplete="email"
+        error={errors.email?.message}
+        {...register("email")}
+      />
 
-            <FormInput
-                label={'Mot de passe'}
-                name="password"
-                type={showPwd ? 'text' : 'password'}
-                icon={Lock}
-                value={data.password}
-                setData={setData}
-                error={errors.password}
-                clearError={clearErrors}
-                placeholder="Min. 6 caractères"
-                autoComplete="new-password"
-                required
-            >
-                <button
-                    type="button"
-                    onClick={() => setShowPwd((prev) => !prev)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground"
-                >
-                    {showPwd ? (
-                        <Eye className="h-4 w-4" />
-                    ) : (
-                        <EyeOff className="h-4 w-4" />
-                    )}
-                </button>
-            </FormInput>
+      {/* Mot de passe avec toggle visuel */}
+      <FormInput
+        label="Mot de passe"
+        type={showPwd ? "text" : "password"}
+        icon={Lock}
+        placeholder="Min. 6 caractères"
+        autoComplete="new-password"
+        error={errors.password?.message}
+        {...register("password")}
+        rightElement={
+          <button
+            type="button"
+            onClick={() => setShowPwd(!showPwd)}
+            className="text-muted-foreground hover:text-foreground outline-none"
+          >
+            {showPwd ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
+          </button>
+        }
+      />
 
-            <FormInput
-                label="Confirmer mot de passe"
-                name="password_confirmation"
-                type="password"
-                icon={Lock}
-                value={data.password_confirmation}
-                setData={setData}
-                error={errors.password_confirmation}
-                clearError={clearErrors}
-                placeholder="Min. 6 caractères"
-                autoComplete="new-password"
-                required
-                onChange={(e) => {
-                    setData('password_confirmation', e.target.value);
+      {/* Confirmation mot de passe */}
+      <FormInput
+        label="Confirmer mot de passe"
+        type="password"
+        icon={Lock}
+        placeholder="Confirmez votre mot de passe"
+        autoComplete="new-password"
+        error={errors.password_confirmation?.message}
+        {...register("password_confirmation")}
+      />
 
-                    if (errors.password || errors.password_confirmation) {
-                        clearErrors('password', 'password_confirmation');
-                    }
-                }}
-            />
+      {/* Bouton de soumission */}
+      <Button3DV2
+        type="submit"
+        disabled={isSubmitting}
+        label={isSubmitting ? "Inscription..." : "S'inscrire"}
+        fullWidth
+        breakpoints={[{ tw: "sm", width: 80, height: 48, fontSize: 16 }]}
+      />
 
-            <Button
-                type="submit"
-                disabled={processing || hasErrors}
-                className="font-body h-12 w-full gap-2 rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90"
-                size="lg"
-            >
-                {processing ? 'Création du compte...' : 'Créer mon compte'}
-                {!processing && <ArrowRight className="h-4 w-4" />}
-            </Button>
-
-            <p className="font-body text-center text-xs text-muted-foreground">
-                En vous inscrivant, vous acceptez nos{' '}
-                <Link
-                    href={`/${locale}/legal#cgu`}
-                    className="text-accent hover:underline"
-                >
-                    CGU
-                </Link>{' '}
-                et notre{' '}
-                <Link
-                    href={`/${locale}/confidentialite#cgu`}
-                    className="text-accent hover:underline"
-                >
-                    politique de confidentialité
-                </Link>
-                .
-            </p>
-        </form>
-    );
+      {/* Liens légaux */}
+      <p className="font-body text-center text-xs text-muted-foreground px-4">
+        En vous inscrivant, vous acceptez nos{" "}
+        <Link href="/legal#cgu" className="text-accent hover:underline">
+          CGU
+        </Link>{" "}
+        et notre{" "}
+        <Link
+          href="/confidentialite#cgu"
+          className="text-accent hover:underline"
+        >
+          politique de confidentialité
+        </Link>
+        .
+      </p>
+    </form>
+  );
 }

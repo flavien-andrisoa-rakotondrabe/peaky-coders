@@ -23,17 +23,17 @@ php artisan serve
 
 ## Variables d'environnement clés
 
-| Variable                  | Description                          | Exemple                         |
-| ------------------------- | ------------------------------------ | ------------------------------- |
-| `APP_URL`                 | URL du backend                       | `http://localhost`              |
-| `DB_*`                    | Connexion PostgreSQL                 | voir `.env`                     |
-| `CORS_ALLOWED_ORIGINS`    | Origines autorisées                  | `http://localhost:3000`         |
-| `GOOGLE_CLIENT_ID`        | Client ID Google OAuth               | `xxx.apps.googleusercontent.com`|
-| `GOOGLE_CLIENT_SECRET`    | Client secret Google OAuth           | `GOCSPX-xxx`                    |
-| `GOOGLE_REDIRECT_URL`     | Callback Google                      | `http://localhost/api/auth/google/callback` |
-| `FACEBOOK_CLIENT_ID`      | App ID Facebook OAuth                | `1234567890`                    |
-| `FACEBOOK_CLIENT_SECRET`  | App secret Facebook OAuth            | `abc123`                        |
-| `FACEBOOK_REDIRECT_URL`   | Callback Facebook                    | `http://localhost/api/auth/facebook/callback` |
+| Variable                 | Description                | Exemple                                       |
+| ------------------------ | -------------------------- | --------------------------------------------- |
+| `APP_URL`                | URL du backend             | `http://localhost`                            |
+| `DB_*`                   | Connexion PostgreSQL       | voir `.env`                                   |
+| `APP_FRONTEND_URL`       | Origines autorisées        | `http://localhost:3000`                       |
+| `GOOGLE_CLIENT_ID`       | Client ID Google OAuth     | `xxx.apps.googleusercontent.com`              |
+| `GOOGLE_CLIENT_SECRET`   | Client secret Google OAuth | `GOCSPX-xxx`                                  |
+| `GOOGLE_REDIRECT_URL`    | Callback Google            | `http://localhost/api/auth/google/callback`   |
+| `FACEBOOK_CLIENT_ID`     | App ID Facebook OAuth      | `1234567890`                                  |
+| `FACEBOOK_CLIENT_SECRET` | App secret Facebook OAuth  | `abc123`                                      |
+| `FACEBOOK_REDIRECT_URL`  | Callback Facebook          | `http://localhost/api/auth/facebook/callback` |
 
 ---
 
@@ -74,31 +74,31 @@ Authorization: Bearer {access_token}
 
 ## Tableau des endpoints
 
-| Méthode | Endpoint                          | Auth | Description                        |
-| ------- | --------------------------------- | ---- | ---------------------------------- |
-| POST    | `/api/auth/register`              | Non  | Créer un compte                    |
-| POST    | `/api/auth/login`                 | Non  | Se connecter                       |
-| GET     | `/api/auth/google/redirect`       | Non  | URL de connexion Google            |
-| GET     | `/api/auth/google/callback`       | Non  | Callback Google (géré par backend) |
-| GET     | `/api/auth/facebook/redirect`     | Non  | URL de connexion Facebook          |
-| GET     | `/api/auth/facebook/callback`     | Non  | Callback Facebook (géré par backend)|
-| POST    | `/api/auth/forgot-password`       | Non  | Envoyer lien reset mot de passe    |
-| POST    | `/api/auth/reset-password`        | Non  | Réinitialiser le mot de passe      |
-| GET     | `/api/auth/me`                    | Oui  | Voir son profil                    |
-| POST    | `/api/auth/logout`                | Oui  | Se déconnecter                     |
-| POST    | `/api/auth/complete-profile`      | Oui  | Compléter le profil (après OAuth)  |
-| PATCH   | `/api/profile`                    | Oui  | Mettre à jour son profil           |
-| DELETE  | `/api/profile`                    | Oui  | Supprimer son compte               |
-| GET     | `/api/reports`                    | Non  | Lister tous les signalements       |
-| GET     | `/api/reports/{id}`               | Non  | Voir un signalement                |
-| POST    | `/api/reports`                    | Oui  | Créer un signalement               |
-| POST    | `/api/reports/{id}`               | Oui  | Modifier son signalement           |
-| DELETE  | `/api/reports/{id}`               | Oui  | Supprimer son signalement          |
-| GET     | `/api/news`                       | Non  | Lister toutes les actualités       |
-| GET     | `/api/news/{id}`                  | Non  | Voir une actualité                 |
-| POST    | `/api/news`                       | Oui  | Créer une actualité                |
-| POST    | `/api/news/{id}`                  | Oui  | Modifier son actualité             |
-| DELETE  | `/api/news/{id}`                  | Oui  | Supprimer son actualité            |
+| Méthode | Endpoint                      | Auth | Description                          |
+| ------- | ----------------------------- | ---- | ------------------------------------ |
+| POST    | `/api/auth/register`          | Non  | Créer un compte                      |
+| POST    | `/api/auth/login`             | Non  | Se connecter                         |
+| GET     | `/api/auth/google/redirect`   | Non  | URL de connexion Google              |
+| GET     | `/api/auth/google/callback`   | Non  | Callback Google (géré par backend)   |
+| GET     | `/api/auth/facebook/redirect` | Non  | URL de connexion Facebook            |
+| GET     | `/api/auth/facebook/callback` | Non  | Callback Facebook (géré par backend) |
+| POST    | `/api/auth/forgot-password`   | Non  | Envoyer lien reset mot de passe      |
+| POST    | `/api/auth/reset-password`    | Non  | Réinitialiser le mot de passe        |
+| GET     | `/api/auth/me`                | Oui  | Voir son profil                      |
+| POST    | `/api/auth/logout`            | Oui  | Se déconnecter                       |
+| POST    | `/api/auth/complete-profile`  | Oui  | Compléter le profil (après OAuth)    |
+| PATCH   | `/api/profile`                | Oui  | Mettre à jour son profil             |
+| DELETE  | `/api/profile`                | Oui  | Supprimer son compte                 |
+| GET     | `/api/reports`                | Non  | Lister tous les signalements         |
+| GET     | `/api/reports/{id}`           | Non  | Voir un signalement                  |
+| POST    | `/api/reports`                | Oui  | Créer un signalement                 |
+| POST    | `/api/reports/{id}`           | Oui  | Modifier son signalement             |
+| DELETE  | `/api/reports/{id}`           | Oui  | Supprimer son signalement            |
+| GET     | `/api/news`                   | Non  | Lister toutes les actualités         |
+| GET     | `/api/news/{id}`              | Non  | Voir une actualité                   |
+| POST    | `/api/news`                   | Oui  | Créer une actualité                  |
+| POST    | `/api/news/{id}`              | Oui  | Modifier son actualité               |
+| DELETE  | `/api/news/{id}`              | Oui  | Supprimer son actualité              |
 
 ---
 
@@ -106,55 +106,55 @@ Authorization: Bearer {access_token}
 
 ```ts
 interface User {
-  id: number
-  first_name: string
-  last_name: string
-  name: string                   // first_name + last_name
-  email: string
-  phone: string | null
-  profile_completed: boolean     // false si inscrit via OAuth sans avoir complété son profil
-  has_password: boolean          // false si compte créé via OAuth uniquement
-  email_verified_at: string | null
-  created_at: string
-  updated_at: string
+    id: number;
+    first_name: string;
+    last_name: string;
+    name: string; // first_name + last_name
+    email: string;
+    phone: string | null;
+    profile_completed: boolean; // false si inscrit via OAuth sans avoir complété son profil
+    has_password: boolean; // false si compte créé via OAuth uniquement
+    email_verified_at: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 interface AuthResponse {
-  message: string
-  data: {
-    access_token: string
-    token_type: 'Bearer'
-    user: User
-  }
+    message: string;
+    data: {
+        access_token: string;
+        token_type: "Bearer";
+        user: User;
+    };
 }
 
 interface Report {
-  id: number
-  user?: User                    // présent sur show / store / update — absent sur index
-  category: 'dechet' | 'infra' | 'incendie'
-  type: string | null            // requis si category = 'infra'
-  status: string | null          // requis si category = 'infra'
-  image_urls: string[]           // tableau d'URLs, vide [] si aucune image
-  latitude: number
-  longitude: number
-  location_name: string
-  created_at: string             // ISO8601
-  updated_at: string             // ISO8601
+    id: number;
+    user?: User; // présent sur show / store / update — absent sur index
+    category: "dechet" | "infra" | "incendie";
+    type: string | null; // requis si category = 'infra'
+    status: string | null; // requis si category = 'infra'
+    image_urls: string[]; // tableau d'URLs, vide [] si aucune image
+    latitude: number;
+    longitude: number;
+    location_name: string;
+    created_at: string; // ISO8601
+    updated_at: string; // ISO8601
 }
 
 interface Article {
-  id: number
-  user?: User                    // présent sur show / store / update — absent sur index
-  type: 'evenement' | 'divers'
-  date: string                   // format: "YYYY-MM-DD"
-  title: string
-  description: string
-  image_urls: string[]           // tableau d'URLs, vide [] si aucune image
-  latitude: number | null        // requis si type = 'evenement'
-  longitude: number | null       // requis si type = 'evenement'
-  location_name: string | null   // requis si type = 'evenement'
-  created_at: string
-  updated_at: string
+    id: number;
+    user?: User; // présent sur show / store / update — absent sur index
+    type: "evenement" | "divers";
+    date: string; // format: "YYYY-MM-DD"
+    title: string;
+    description: string;
+    image_urls: string[]; // tableau d'URLs, vide [] si aucune image
+    latitude: number | null; // requis si type = 'evenement'
+    longitude: number | null; // requis si type = 'evenement'
+    location_name: string | null; // requis si type = 'evenement'
+    created_at: string;
+    updated_at: string;
 }
 ```
 
@@ -165,6 +165,7 @@ interface Article {
 ### Réponses Auth
 
 **POST /api/auth/register** → `201`
+
 ```json
 {
     "message": "Compte créé avec succès.",
@@ -189,6 +190,7 @@ interface Article {
 ```
 
 **POST /api/auth/login** → `200`
+
 ```json
 {
     "message": "Connexion réussie.",
@@ -201,6 +203,7 @@ interface Article {
 ```
 
 **GET /api/auth/google/redirect** → `200`
+
 ```json
 {
     "redirect_url": "https://accounts.google.com/o/oauth2/auth?..."
@@ -208,6 +211,7 @@ interface Article {
 ```
 
 **GET /api/auth/google/callback** (après consentement Google) — redirige vers le frontend avec token dans l'URL ou retourne :
+
 ```json
 {
     "message": "Connexion réussie.",
@@ -234,6 +238,7 @@ interface Article {
 > Si `profile_completed = false`, rediriger vers l'écran "Compléter le profil".
 
 **POST /api/auth/complete-profile** → `200`
+
 ```json
 {
     "message": "Profil complété avec succès.",
@@ -258,12 +263,25 @@ interface Article {
 ### Réponses Report
 
 **GET /api/reports** → `200`
+
 ```json
 {
     "data": [
         {
             "id": 1,
-            "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "name": "Jean Dupont", "email": "jean@example.com", "phone": "+261341234567", "profile_completed": true, "has_password": true, "email_verified_at": null, "created_at": "...", "updated_at": "..." },
+            "user": {
+                "id": 1,
+                "first_name": "Jean",
+                "last_name": "Dupont",
+                "name": "Jean Dupont",
+                "email": "jean@example.com",
+                "phone": "+261341234567",
+                "profile_completed": true,
+                "has_password": true,
+                "email_verified_at": null,
+                "created_at": "...",
+                "updated_at": "..."
+            },
             "category": "dechet",
             "type": null,
             "status": null,
@@ -279,11 +297,18 @@ interface Article {
 ```
 
 **GET /api/reports/{id}** → `200`
+
 ```json
 {
     "data": {
         "id": 1,
-        "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "name": "Jean Dupont", "...": "..." },
+        "user": {
+            "id": 1,
+            "first_name": "Jean",
+            "last_name": "Dupont",
+            "name": "Jean Dupont",
+            "...": "..."
+        },
         "category": "dechet",
         "type": null,
         "status": null,
@@ -298,6 +323,7 @@ interface Article {
 ```
 
 **POST /api/reports** → `201`
+
 ```json
 {
     "message": "Report created.",
@@ -318,6 +344,7 @@ interface Article {
 ```
 
 **POST /api/reports/{id}** → `200`
+
 ```json
 {
     "message": "Report updated.",
@@ -326,6 +353,7 @@ interface Article {
 ```
 
 **DELETE /api/reports/{id}** → `200`
+
 ```json
 { "message": "Report deleted." }
 ```
@@ -335,12 +363,18 @@ interface Article {
 ### Réponses Article (endpoint : `/api/news`)
 
 **GET /api/news** → `200`
+
 ```json
 {
     "data": [
         {
             "id": 1,
-            "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "...": "..." },
+            "user": {
+                "id": 1,
+                "first_name": "Jean",
+                "last_name": "Dupont",
+                "...": "..."
+            },
             "type": "evenement",
             "date": "2026-06-01",
             "title": "Journée de nettoyage",
@@ -357,6 +391,7 @@ interface Article {
 ```
 
 **POST /api/news** → `201`
+
 ```json
 {
     "message": "Article created.",
@@ -378,6 +413,7 @@ interface Article {
 ```
 
 **DELETE /api/news/{id}** → `200`
+
 ```json
 { "message": "Article deleted." }
 ```
@@ -397,11 +433,13 @@ interface Article {
 **POST** `http://localhost/api/auth/register`
 
 Header :
+
 ```
 Accept: application/json
 ```
 
 Body → `raw` → `JSON` :
+
 ```json
 {
     "first_name": "Jean",
@@ -415,6 +453,7 @@ Body → `raw` → `JSON` :
 ```
 
 Réponse **201** :
+
 ```json
 {
     "message": "Compte créé avec succès.",
@@ -447,6 +486,7 @@ Réponse **201** :
 **POST** `http://localhost/api/auth/login`
 
 Body → `raw` → `JSON` :
+
 ```json
 {
     "email": "jean@example.com",
@@ -464,12 +504,14 @@ Réponse **200** : même structure que le register.
 **GET** `http://localhost/api/auth/me`
 
 Headers :
+
 ```
 Accept: application/json
 Authorization: Bearer 1|abcdefgh...
 ```
 
 Réponse **200** :
+
 ```json
 {
     "data": {
@@ -495,6 +537,7 @@ Réponse **200** :
 **GET** `http://localhost/api/auth/google/redirect`
 
 Réponse **200** :
+
 ```json
 {
     "redirect_url": "https://accounts.google.com/o/oauth2/auth?..."
@@ -512,12 +555,14 @@ Si `user.profile_completed = false`, appeler l'endpoint `complete-profile`.
 **POST** `http://localhost/api/auth/complete-profile`
 
 Headers :
+
 ```
 Accept: application/json
 Authorization: Bearer 3|abc...
 ```
 
 Body → `raw` → `JSON` :
+
 ```json
 {
     "phone": "+261331234567",
@@ -529,6 +574,7 @@ Body → `raw` → `JSON` :
 > `password` est optionnel — l'utilisateur peut vouloir conserver uniquement la connexion Google/Facebook.
 
 Réponse **200** :
+
 ```json
 {
     "message": "Profil complété avec succès.",
@@ -543,11 +589,13 @@ Réponse **200** :
 **POST** `http://localhost/api/auth/logout`
 
 Headers :
+
 ```
 Authorization: Bearer 1|abcdefgh...
 ```
 
 Réponse **200** :
+
 ```json
 {
     "message": "Déconnexion réussie."
@@ -561,6 +609,7 @@ Réponse **200** :
 Sans header `Authorization`
 
 Réponse **401** :
+
 ```json
 {
     "message": "Unauthenticated."
@@ -583,12 +632,18 @@ Un signalement a trois catégories : `dechet`, `infra`, `incendie`
 **GET** `http://localhost/api/reports`
 
 Réponse **200** :
+
 ```json
 {
     "data": [
         {
             "id": 1,
-            "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "...": "..." },
+            "user": {
+                "id": 1,
+                "first_name": "Jean",
+                "last_name": "Dupont",
+                "...": "..."
+            },
             "category": "dechet",
             "type": null,
             "status": null,
@@ -610,6 +665,7 @@ Réponse **200** :
 **POST** `http://localhost/api/reports`
 
 Headers :
+
 ```
 Accept: application/json
 Authorization: Bearer 1|abcdefgh...
@@ -617,15 +673,16 @@ Authorization: Bearer 1|abcdefgh...
 
 Body → `form-data` :
 
-| Clé            | Type | Valeur                        |
-| -------------- | ---- | ----------------------------- |
-| `category`     | Text | `dechet`                      |
-| `latitude`     | Text | `-18.9103`                    |
-| `longitude`    | Text | `47.5362`                     |
-| `location_name`| Text | `Antananarivo Centre`         |
-| `images[]`     | File | (sélectionner 1 à 5 fichiers) |
+| Clé             | Type | Valeur                        |
+| --------------- | ---- | ----------------------------- |
+| `category`      | Text | `dechet`                      |
+| `latitude`      | Text | `-18.9103`                    |
+| `longitude`     | Text | `47.5362`                     |
+| `location_name` | Text | `Antananarivo Centre`         |
+| `images[]`      | File | (sélectionner 1 à 5 fichiers) |
 
 Réponse **201** :
+
 ```json
 {
     "message": "Report created.",
@@ -651,13 +708,13 @@ Réponse **201** :
 
 Body → `form-data` :
 
-| Clé            | Type | Valeur                        |
-| -------------- | ---- | ----------------------------- |
-| `category`     | Text | `incendie`                    |
-| `latitude`     | Text | `-18.8792`                    |
-| `longitude`    | Text | `47.5079`                     |
-| `location_name`| Text | `Ivandry`                     |
-| `images[]`     | File | (sélectionner 1 à 5 fichiers) |
+| Clé             | Type | Valeur                        |
+| --------------- | ---- | ----------------------------- |
+| `category`      | Text | `incendie`                    |
+| `latitude`      | Text | `-18.8792`                    |
+| `longitude`     | Text | `47.5079`                     |
+| `location_name` | Text | `Ivandry`                     |
+| `images[]`      | File | (sélectionner 1 à 5 fichiers) |
 
 ---
 
@@ -665,21 +722,22 @@ Body → `form-data` :
 
 Body → `form-data` :
 
-| Clé            | Type | Valeur                        |
-| -------------- | ---- | ----------------------------- |
-| `category`     | Text | `infra`                       |
-| `type`         | Text | `Route endommagée`            |
-| `status`       | Text | `En attente de réparation`    |
-| `latitude`     | Text | `-18.9200`                    |
-| `longitude`    | Text | `47.5400`                     |
-| `location_name`| Text | `Analakely`                   |
-| `images[]`     | File | (sélectionner 1 à 5 fichiers) |
+| Clé             | Type | Valeur                        |
+| --------------- | ---- | ----------------------------- |
+| `category`      | Text | `infra`                       |
+| `type`          | Text | `Route endommagée`            |
+| `status`        | Text | `En attente de réparation`    |
+| `latitude`      | Text | `-18.9200`                    |
+| `longitude`     | Text | `47.5400`                     |
+| `location_name` | Text | `Analakely`                   |
+| `images[]`      | File | (sélectionner 1 à 5 fichiers) |
 
 ---
 
 #### 2.5 — Créer un signalement `infra` sans `type` (doit échouer)
 
 Réponse **422** :
+
 ```json
 {
     "message": "The type field is required when category is infra.",
@@ -695,6 +753,7 @@ Réponse **422** :
 #### 2.6 — Créer un signalement avec une catégorie invalide (doit échouer)
 
 Réponse **422** :
+
 ```json
 {
     "message": "The selected category is invalid.",
@@ -709,6 +768,7 @@ Réponse **422** :
 #### 2.7 — Créer un signalement sans être connecté (doit échouer)
 
 Réponse **401** :
+
 ```json
 { "message": "Unauthenticated." }
 ```
@@ -728,6 +788,7 @@ Réponse **200** : même structure que le store.
 **POST** `http://localhost/api/reports/1`
 
 Headers :
+
 ```
 Accept: application/json
 Authorization: Bearer 1|abcdefgh...
@@ -735,11 +796,12 @@ Authorization: Bearer 1|abcdefgh...
 
 Body → `form-data` (seulement les champs à changer) :
 
-| Clé            | Type | Valeur       |
-| -------------- | ---- | ------------ |
-| `location_name`| Text | `Ampefiloha` |
+| Clé             | Type | Valeur       |
+| --------------- | ---- | ------------ |
+| `location_name` | Text | `Ampefiloha` |
 
 Réponse **200** :
+
 ```json
 {
     "message": "Report updated.",
@@ -766,6 +828,7 @@ Réponse **200** :
 Utiliser un token différent de celui qui a créé le signalement.
 
 Réponse **403** :
+
 ```json
 { "message": "This action is unauthorized." }
 ```
@@ -777,12 +840,14 @@ Réponse **403** :
 **DELETE** `http://localhost/api/reports/1`
 
 Headers :
+
 ```
 Accept: application/json
 Authorization: Bearer 1|abcdefgh...
 ```
 
 Réponse **200** :
+
 ```json
 { "message": "Report deleted." }
 ```
@@ -794,6 +859,7 @@ Réponse **200** :
 **DELETE** `http://localhost/api/reports/9999`
 
 Réponse **404** :
+
 ```json
 { "message": "No query results for model [App\\Models\\Report] 9999" }
 ```
@@ -811,12 +877,18 @@ Une actualité a deux types : `evenement` (avec localisation) ou `divers` (sans 
 **GET** `http://localhost/api/news`
 
 Réponse **200** :
+
 ```json
 {
     "data": [
         {
             "id": 1,
-            "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "...": "..." },
+            "user": {
+                "id": 1,
+                "first_name": "Jean",
+                "last_name": "Dupont",
+                "...": "..."
+            },
             "type": "evenement",
             "date": "2026-06-01",
             "title": "Journée de nettoyage",
@@ -839,6 +911,7 @@ Réponse **200** :
 **POST** `http://localhost/api/news`
 
 Headers :
+
 ```
 Accept: application/json
 Authorization: Bearer 1|abcdefgh...
@@ -846,18 +919,19 @@ Authorization: Bearer 1|abcdefgh...
 
 Body → `form-data` :
 
-| Clé            | Type | Valeur                           |
-| -------------- | ---- | -------------------------------- |
-| `type`         | Text | `evenement`                      |
-| `date`         | Text | `2026-06-01`                     |
-| `title`        | Text | `Journée de nettoyage`           |
-| `description`  | Text | `Grande journée de nettoyage...` |
-| `latitude`     | Text | `-18.9103`                       |
-| `longitude`    | Text | `47.5362`                        |
-| `location_name`| Text | `Parc Tsimbazaza`                |
-| `images[]`     | File | (sélectionner 1 à 5 fichiers)    |
+| Clé             | Type | Valeur                           |
+| --------------- | ---- | -------------------------------- |
+| `type`          | Text | `evenement`                      |
+| `date`          | Text | `2026-06-01`                     |
+| `title`         | Text | `Journée de nettoyage`           |
+| `description`   | Text | `Grande journée de nettoyage...` |
+| `latitude`      | Text | `-18.9103`                       |
+| `longitude`     | Text | `47.5362`                        |
+| `location_name` | Text | `Parc Tsimbazaza`                |
+| `images[]`      | File | (sélectionner 1 à 5 fichiers)    |
 
 Réponse **201** :
+
 ```json
 {
     "message": "Article created.",
@@ -898,6 +972,7 @@ Body → `form-data` :
 #### 3.4 — Créer un `evenement` sans latitude (doit échouer)
 
 Réponse **422** :
+
 ```json
 {
     "message": "The latitude field is required when type is evenement.",
@@ -923,6 +998,7 @@ Réponse **200** : même structure que la création.
 **POST** `http://localhost/api/news/1`
 
 Headers :
+
 ```
 Accept: application/json
 Authorization: Bearer 1|abcdefgh...
@@ -935,6 +1011,7 @@ Body → `form-data` (seulement les champs à changer) :
 | `title` | Text | `Journée de nettoyage MAJ` |
 
 Réponse **200** :
+
 ```json
 {
     "message": "Article updated.",
@@ -962,6 +1039,7 @@ Réponse **200** :
 **DELETE** `http://localhost/api/news/1`
 
 Réponse **200** :
+
 ```json
 { "message": "Article deleted." }
 ```
@@ -970,21 +1048,21 @@ Réponse **200** :
 
 ## Récapitulatif des cas d'erreur
 
-| Scénario                                         | Code | Message clé                                              |
-| ------------------------------------------------ | ---- | -------------------------------------------------------- |
-| Token absent sur une route protégée              | 401  | `Unauthenticated.`                                       |
-| Token invalide ou révoqué                        | 401  | `Unauthenticated.`                                       |
-| Modifier/supprimer la ressource d'un autre       | 403  | `This action is unauthorized.`                           |
-| Ressource introuvable                            | 404  | `No query results for model...`                          |
-| `category` invalide (pas dechet/infra/incendie)  | 422  | `The selected category is invalid.`                      |
-| `type` absent pour `infra`                       | 422  | `The type field is required when category is infra.`     |
-| `status` absent pour `infra`                     | 422  | `The status field is required when category is infra.`   |
-| `type` invalide pour article                     | 422  | `The selected type is invalid.`                          |
-| `latitude` absente pour `evenement`              | 422  | `The latitude field is required when type is evenement.` |
-| Image trop grande (> 5 MB)                       | 422  | `The images.0 field must not be greater than 5120 kilobytes.` |
-| Email déjà utilisé (register)                    | 422  | `The email has already been taken.`                      |
-| Téléphone déjà utilisé (register)                | 422  | `The phone has already been taken.`                      |
-| Mauvais email/password (login)                   | 422  | `These credentials do not match our records.`            |
+| Scénario                                        | Code | Message clé                                                   |
+| ----------------------------------------------- | ---- | ------------------------------------------------------------- |
+| Token absent sur une route protégée             | 401  | `Unauthenticated.`                                            |
+| Token invalide ou révoqué                       | 401  | `Unauthenticated.`                                            |
+| Modifier/supprimer la ressource d'un autre      | 403  | `This action is unauthorized.`                                |
+| Ressource introuvable                           | 404  | `No query results for model...`                               |
+| `category` invalide (pas dechet/infra/incendie) | 422  | `The selected category is invalid.`                           |
+| `type` absent pour `infra`                      | 422  | `The type field is required when category is infra.`          |
+| `status` absent pour `infra`                    | 422  | `The status field is required when category is infra.`        |
+| `type` invalide pour article                    | 422  | `The selected type is invalid.`                               |
+| `latitude` absente pour `evenement`             | 422  | `The latitude field is required when type is evenement.`      |
+| Image trop grande (> 5 MB)                      | 422  | `The images.0 field must not be greater than 5120 kilobytes.` |
+| Email déjà utilisé (register)                   | 422  | `The email has already been taken.`                           |
+| Téléphone déjà utilisé (register)               | 422  | `The phone has already been taken.`                           |
+| Mauvais email/password (login)                  | 422  | `These credentials do not match our records.`                 |
 
 ---
 
@@ -997,6 +1075,7 @@ php artisan storage:link
 ```
 
 Les URLs retournées dans `image_urls` seront de la forme :
+
 ```
 http://localhost/storage/reports/nomfichier.jpg
 http://localhost/storage/articles/nomfichier.jpg

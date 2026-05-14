@@ -49,15 +49,11 @@ class AuthService
             ]);
         }
 
-        $user->tokens()->delete();
+        auth()->login($user);
 
-        $token = $user->createToken(
-            name: 'auth_token',
-            abilities: ['*'],
-            expiresAt: $this->resolveExpiration($dto->rememberMe),
-        )->plainTextToken;
-
-        return new AuthResponseDTO(user: $user, accessToken: $token);
+        return new AuthResponseDTO(
+            user: $user,
+        );
     }
 
     public function handleSocialCallback(SocialAuthDTO $dto): AuthResponseDTO
@@ -98,7 +94,7 @@ class AuthService
             expiresAt: now()->addDay(),
         )->plainTextToken;
 
-        return new AuthResponseDTO(user: $user, accessToken: $token);
+        return new AuthResponseDTO(user: $user);
     }
 
     public function completeProfile(User $user, array $data): User

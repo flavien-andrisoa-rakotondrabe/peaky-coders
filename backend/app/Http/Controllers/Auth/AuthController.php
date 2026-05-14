@@ -35,11 +35,15 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         $dto = LoginDTO::fromArray($request->validated());
+
         $result = $this->authService->login($dto);
+
+        $request->session()->regenerate();
 
         return response()->json([
             'message' => 'Connexion réussie.',
-        ])->cookie('access_token', $result->accessToken, 60 * 24, '/', null, config('session.secure'), true);
+            'user' => $result->user,
+        ]);
     }
 
     public function logout(Request $request): JsonResponse
