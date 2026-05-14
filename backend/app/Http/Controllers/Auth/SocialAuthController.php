@@ -34,7 +34,7 @@ class SocialAuthController extends Controller
             return redirect($frontend . '/home');
         }
 
-        return redirect($frontend . '/callback')
+        return redirect($frontend . '/auth/complete-profile')
             ->cookie('social_auth_data', json_encode([
                 'provider'    => $dto->provider,
                 'provider_id' => $dto->providerId,
@@ -73,7 +73,7 @@ class SocialAuthController extends Controller
 
             $emailRequired = ! $dto->email ? '&email_required=true' : '';
 
-            return redirect($frontend . '/callback' . $emailRequired)
+            return redirect($frontend . '/auth/complete-profile' . $emailRequired)
                 ->cookie('social_auth_data', json_encode([
                     'provider'    => $dto->provider,
                     'provider_id' => $dto->providerId,
