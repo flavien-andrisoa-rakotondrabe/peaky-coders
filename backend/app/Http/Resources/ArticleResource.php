@@ -11,12 +11,12 @@ class ArticleResource extends JsonResource
     {
         return [
             'id'            => $this->id,
-            'citizen'       => new CitizenResource($this->whenLoaded('citizen')),
+            'user'          => new UserResource($this->whenLoaded('user')),
             'type'          => $this->type,
             'date'          => $this->date?->format('Y-m-d'),
             'title'         => $this->title,
             'description'   => $this->description,
-            'image_url'     => $this->image ? Storage::url($this->image) : null,
+            'image_urls'    => collect($this->images ?? [])->map(fn($p) => Storage::url($p))->values(),
             'latitude'      => $this->latitude,
             'longitude'     => $this->longitude,
             'location_name' => $this->location_name,

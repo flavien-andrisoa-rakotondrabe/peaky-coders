@@ -16,7 +16,8 @@ class UpdateReportRequest extends FormRequest
     {
         return [
             'category'      => ['sometimes', 'string', Rule::in(['dechet', 'infra', 'incendie'])],
-            'image'         => ['nullable', 'image', 'max:5120'],
+            'images'        => ['nullable', 'array', 'max:5'],
+            'images.*'      => ['image', 'max:5120'],
             'latitude'      => ['sometimes', 'numeric', 'between:-90,90'],
             'longitude'     => ['sometimes', 'numeric', 'between:-180,180'],
             'location_name' => ['nullable', 'string', 'max:255'],

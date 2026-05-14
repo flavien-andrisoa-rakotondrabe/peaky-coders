@@ -9,7 +9,6 @@ readonly class UpdateArticleDTO
         public ?string $date,
         public ?string $title,
         public ?string $description,
-        public ?string $image,
         public ?float $latitude,
         public ?float $longitude,
         public ?string $locationName,

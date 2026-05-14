@@ -3,17 +3,17 @@
 namespace App\Policies;
 
 use App\Models\Article;
-use App\Models\Citizen;
+use App\Models\User;
 
 class ArticlePolicy
 {
-    public function update(Citizen $citizen, Article $article): bool
+    public function update(User $user, Article $article): bool
     {
-        return (int) $citizen->id === (int) $article->citizen_id;
+        return (int) $user->id === (int) $article->user_id;
     }
 
-    public function delete(Citizen $citizen, Article $article): bool
+    public function delete(User $user, Article $article): bool
     {
-        return (int) $citizen->id === (int) $article->citizen_id;
+        return (int) $user->id === (int) $article->user_id;
     }
 }

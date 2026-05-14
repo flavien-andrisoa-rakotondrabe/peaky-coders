@@ -23,9 +23,13 @@ class AuthService
     public function register(RegisterDTO $dto): AuthResponseDTO
     {
         $user = $this->userRepository->create([
-            'name' => $dto->name,
-            'email' => $dto->email,
-            'password' => Hash::make($dto->password),
+            'first_name'        => $dto->firstName,
+            'last_name'         => $dto->lastName,
+            'name'              => $dto->firstName . ' ' . $dto->lastName,
+            'email'             => $dto->email,
+            'phone'             => $dto->phone,
+            'password'          => Hash::make($dto->password),
+            'profile_completed' => true,
         ]);
 
         $token = $user->createToken(
@@ -58,22 +62,31 @@ class AuthService
         return new AuthResponseDTO(user: $user, accessToken: $token);
     }
 
-    public function handleGoogleCallback(SocialAuthDTO $dto): AuthResponseDTO
+    public function handleSocialCallback(SocialAuthDTO $dto): AuthResponseDTO
     {
-        $user = $this->userRepository->findByGoogleId($dto->googleId)
-            ?? $this->userRepository->findByEmail($dto->email);
+        $idField = $dto->provider === 'google' ? 'google_id' : 'facebook_id';
+
+        $user = match ($dto->provider) {
+            'google'   => $this->userRepository->findByGoogleId($dto->providerId),
+            'facebook' => $this->userRepository->findByFacebookId($dto->providerId),
+            default    => null,
+        } ?? ($dto->email ? $this->userRepository->findByEmail($dto->email) : null);
 
         if ($user) {
-            if (! $user->google_id) {
-                $this->userRepository->update($user, ['google_id' => $dto->googleId]);
+            if (! $user->{$idField}) {
+                $this->userRepository->update($user, [$idField => $dto->providerId]);
                 $user = $user->fresh();
             }
         } else {
             $user = $this->userRepository->create([
-                'name'              => $dto->name,
+                'first_name'        => $dto->firstName,
+                'last_name'         => $dto->lastName,
+                'name'              => $dto->firstName . ' ' . $dto->lastName,
                 'email'             => $dto->email,
-                'google_id'         => $dto->googleId,
+                $idField            => $dto->providerId,
+                'avatar'            => $dto->avatar,
                 'email_verified_at' => now(),
+                'profile_completed' => false,
             ]);
         }
 
@@ -81,6 +94,35 @@ class AuthService
             name: 'auth_token',
             abilities: ['*'],
             expiresAt: now()->addDay(),
+        )->plainTextToken;
+
+        return new AuthResponseDTO(user: $user, accessToken: $token);
+    }
+
+    public function completeProfile(User $user, array $data): AuthResponseDTO
+    {
+        $update = [
+            'phone'             => $data['phone'],
+            'profile_completed' => true,
+        ];
+
+        if (! empty($data['email'])) {
+            $update['email']             = $data['email'];
+            $update['email_verified_at'] = now();
+        }
+
+        if (! empty($data['password'])) {
+            $update['password'] = Hash::make($data['password']);
+        }
+
+        $this->userRepository->update($user, $update);
+        $user = $user->fresh();
+
+        $user->tokens()->delete();
+        $token = $user->createToken(
+            name: 'auth_token',
+            abilities: ['*'],
+            expiresAt: now()->addYear(),
         )->plainTextToken;
 
         return new AuthResponseDTO(user: $user, accessToken: $token);

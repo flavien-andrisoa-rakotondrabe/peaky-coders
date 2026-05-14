@@ -23,12 +23,13 @@ class ProfileService
     public function update(User $user, UpdateProfileDTO $dto): User
     {
         $data = array_filter([
-            'name' => $dto->name,
-            'email' => $dto->email,
+            'name'   => $dto->name,
+            'email'  => $dto->email,
+            'phone'  => $dto->phone,
         ], fn ($value) => $value !== null);
 
         if ($dto->newPassword !== null) {
-            if ($user->google_id !== null) {
+            if ($user->google_id !== null || $user->facebook_id !== null) {
                 throw new HttpResponseException(response()->json([
                     'message' => 'Les comptes Google ne peuvent pas modifier leur mot de passe ici.',
                 ], 422));

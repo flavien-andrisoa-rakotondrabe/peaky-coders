@@ -6,6 +6,8 @@ API REST — Laravel 13 | Signalements & Actualités
 
 - **Laravel 13** / PHP 8.3+
 - **PostgreSQL**
+- **Laravel Sanctum** — authentification par token Bearer
+- **Laravel Socialite** — OAuth Google & Facebook
 - **Stockage fichiers** — `php artisan storage:link` requis pour les images
 
 ## Installation
@@ -21,23 +23,36 @@ php artisan serve
 
 ## Variables d'environnement clés
 
-| Variable                     | Description                             | Exemple                 |
-| ---------------------------- | --------------------------------------- | ----------------------- |
-| `APP_URL`                    | URL du backend                          | `http://localhost`      |
-| `DB_*`                       | Connexion PostgreSQL                    | voir `.env`             |
-| `CORS_ALLOWED_ORIGINS`       | Origines autorisées                     | `http://localhost:3000` |
-| `CITIZEN_TOKEN_TTL_MINUTES`  | Durée de vie du token citizen (minutes) | `1440` (= 24h)          |
+| Variable                  | Description                          | Exemple                         |
+| ------------------------- | ------------------------------------ | ------------------------------- |
+| `APP_URL`                 | URL du backend                       | `http://localhost`              |
+| `DB_*`                    | Connexion PostgreSQL                 | voir `.env`                     |
+| `CORS_ALLOWED_ORIGINS`    | Origines autorisées                  | `http://localhost:3000`         |
+| `GOOGLE_CLIENT_ID`        | Client ID Google OAuth               | `xxx.apps.googleusercontent.com`|
+| `GOOGLE_CLIENT_SECRET`    | Client secret Google OAuth           | `GOCSPX-xxx`                    |
+| `GOOGLE_REDIRECT_URL`     | Callback Google                      | `http://localhost/api/auth/google/callback` |
+| `FACEBOOK_CLIENT_ID`      | App ID Facebook OAuth                | `1234567890`                    |
+| `FACEBOOK_CLIENT_SECRET`  | App secret Facebook OAuth            | `abc123`                        |
+| `FACEBOOK_REDIRECT_URL`   | Callback Facebook                    | `http://localhost/api/auth/facebook/callback` |
 
 ---
 
-## Système d'identification — Citizen Token
+## Système d'authentification — Sanctum (Bearer Token)
 
-Pas de login classique. L'identification fonctionne ainsi :
+1. L'utilisateur crée un compte (`POST /api/auth/register`) ou se connecte (`POST /api/auth/login`) → le backend retourne un **access_token**
+2. Ce token est stocké dans `localStorage` côté frontend
+3. Chaque requête protégée l'envoie dans le header `Authorization: Bearer {token}`
+4. Au rechargement de la page : relire le token depuis `localStorage` → appeler `GET /api/auth/me` pour restaurer la session
+5. **Durée de vie** : `remember_me = true` → 1 an | `remember_me = false` → 24h
 
-1. L'utilisateur fournit son nom → le backend crée un **Citizen** et retourne un **UUID token**
-2. Ce token est stocké dans `localStorage` côté navigateur
-3. Chaque requête protégée envoie ce token dans le header `X-Citizen-Token`
-4. Le token expire après **24h** (configurable via `CITIZEN_TOKEN_TTL_MINUTES` dans `.env`). Quand il expire, refaire l'étape 1
+### Connexion sociale (Google / Facebook)
+
+Le flux OAuth est stateless (adapté aux SPA / apps mobiles) :
+
+1. Appeler `GET /api/auth/google/redirect` (ou `/facebook/redirect`) → reçoit un `redirect_url`
+2. Rediriger l'utilisateur vers cette URL (page de consentement Google/Facebook)
+3. Après consentement, Google/Facebook redirige vers le callback backend → le backend retourne le même objet `{ access_token, user }`
+4. Si `user.profile_completed = false`, rediriger vers l'écran "Compléter le profil" pour renseigner le numéro de téléphone (et optionnellement un mot de passe)
 
 ---
 
@@ -50,68 +65,94 @@ Accept: application/json
 Pour les routes protégées, ajouter :
 
 ```
-X-Citizen-Token: {ton-uuid-token}
+Authorization: Bearer {access_token}
 ```
 
-> Pour les uploads d'images, ne pas mettre `Content-Type: application/json` — Postman le gère automatiquement en `multipart/form-data`.
+> Pour les uploads d'images, ne pas mettre `Content-Type: application/json` — laisser Postman gérer automatiquement `multipart/form-data`.
 
 ---
 
 ## Tableau des endpoints
 
-| Méthode | Endpoint                  | Auth | Description                  |
-| ------- | ------------------------- | ---- | ---------------------------- |
-| POST    | `/api/citizens`           | Non  | Créer un citizen             |
-| GET     | `/api/citizens/me`        | Oui  | Voir son profil citizen       |
-| GET     | `/api/reports`            | Non  | Lister tous les signalements  |
-| GET     | `/api/reports/{id}`       | Non  | Voir un signalement           |
-| POST    | `/api/reports`            | Oui  | Créer un signalement          |
-| POST    | `/api/reports/{id}`       | Oui  | Modifier son signalement      |
-| DELETE  | `/api/reports/{id}`       | Oui  | Supprimer son signalement     |
-| GET     | `/api/news`               | Non  | Lister toutes les actualités  |
-| GET     | `/api/news/{id}`          | Non  | Voir une actualité            |
-| POST    | `/api/news`               | Oui  | Créer une actualité           |
-| POST    | `/api/news/{id}`          | Oui  | Modifier son actualité        |
-| DELETE  | `/api/news/{id}`          | Oui  | Supprimer son actualité       |
+| Méthode | Endpoint                          | Auth | Description                        |
+| ------- | --------------------------------- | ---- | ---------------------------------- |
+| POST    | `/api/auth/register`              | Non  | Créer un compte                    |
+| POST    | `/api/auth/login`                 | Non  | Se connecter                       |
+| GET     | `/api/auth/google/redirect`       | Non  | URL de connexion Google            |
+| GET     | `/api/auth/google/callback`       | Non  | Callback Google (géré par backend) |
+| GET     | `/api/auth/facebook/redirect`     | Non  | URL de connexion Facebook          |
+| GET     | `/api/auth/facebook/callback`     | Non  | Callback Facebook (géré par backend)|
+| POST    | `/api/auth/forgot-password`       | Non  | Envoyer lien reset mot de passe    |
+| POST    | `/api/auth/reset-password`        | Non  | Réinitialiser le mot de passe      |
+| GET     | `/api/auth/me`                    | Oui  | Voir son profil                    |
+| POST    | `/api/auth/logout`                | Oui  | Se déconnecter                     |
+| POST    | `/api/auth/complete-profile`      | Oui  | Compléter le profil (après OAuth)  |
+| PATCH   | `/api/profile`                    | Oui  | Mettre à jour son profil           |
+| DELETE  | `/api/profile`                    | Oui  | Supprimer son compte               |
+| GET     | `/api/reports`                    | Non  | Lister tous les signalements       |
+| GET     | `/api/reports/{id}`               | Non  | Voir un signalement                |
+| POST    | `/api/reports`                    | Oui  | Créer un signalement               |
+| POST    | `/api/reports/{id}`               | Oui  | Modifier son signalement           |
+| DELETE  | `/api/reports/{id}`               | Oui  | Supprimer son signalement          |
+| GET     | `/api/news`                       | Non  | Lister toutes les actualités       |
+| GET     | `/api/news/{id}`                  | Non  | Voir une actualité                 |
+| POST    | `/api/news`                       | Oui  | Créer une actualité                |
+| POST    | `/api/news/{id}`                  | Oui  | Modifier son actualité             |
+| DELETE  | `/api/news/{id}`                  | Oui  | Supprimer son actualité            |
 
 ---
 
-## Structures de réponse — Report & Article
-
-### Interfaces TypeScript
+## Structures de réponse — Interfaces TypeScript
 
 ```ts
-interface Citizen {
+interface User {
   id: number
-  name: string
-  expires_at: string  // ISO8601, ex: "2027-05-14T07:00:00.000000Z"
+  first_name: string
+  last_name: string
+  name: string                   // first_name + last_name
+  email: string
+  phone: string | null
+  profile_completed: boolean     // false si inscrit via OAuth sans avoir complété son profil
+  has_password: boolean          // false si compte créé via OAuth uniquement
+  email_verified_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+interface AuthResponse {
+  message: string
+  data: {
+    access_token: string
+    token_type: 'Bearer'
+    user: User
+  }
 }
 
 interface Report {
   id: number
-  citizen?: Citizen         // présent sur show / store / update — absent sur index
+  user?: User                    // présent sur show / store / update — absent sur index
   category: 'dechet' | 'infra' | 'incendie'
-  type: string | null       // requis si category = 'infra'
-  status: string | null     // requis si category = 'infra'
-  image_url: string | null  // ex: "http://localhost/storage/reports/abc.jpg"
+  type: string | null            // requis si category = 'infra'
+  status: string | null          // requis si category = 'infra'
+  image_urls: string[]           // tableau d'URLs, vide [] si aucune image
   latitude: number
   longitude: number
   location_name: string
-  created_at: string        // ISO8601
-  updated_at: string        // ISO8601
+  created_at: string             // ISO8601
+  updated_at: string             // ISO8601
 }
 
 interface Article {
   id: number
-  citizen?: Citizen            // présent sur show / store / update — absent sur index
+  user?: User                    // présent sur show / store / update — absent sur index
   type: 'evenement' | 'divers'
-  date: string               // format: "YYYY-MM-DD"
+  date: string                   // format: "YYYY-MM-DD"
   title: string
   description: string
-  image_url: string | null
-  latitude: number | null      // requis si type = 'evenement'
-  longitude: number | null     // requis si type = 'evenement'
-  location_name: string | null // requis si type = 'evenement'
+  image_urls: string[]           // tableau d'URLs, vide [] si aucune image
+  latitude: number | null        // requis si type = 'evenement'
+  longitude: number | null       // requis si type = 'evenement'
+  location_name: string | null   // requis si type = 'evenement'
   created_at: string
   updated_at: string
 }
@@ -119,7 +160,102 @@ interface Article {
 
 ---
 
-### Réponses par endpoint — Reports
+## Réponses JSON détaillées
+
+### Réponses Auth
+
+**POST /api/auth/register** → `201`
+```json
+{
+    "message": "Compte créé avec succès.",
+    "data": {
+        "access_token": "1|abcdefgh...",
+        "token_type": "Bearer",
+        "user": {
+            "id": 1,
+            "first_name": "Jean",
+            "last_name": "Dupont",
+            "name": "Jean Dupont",
+            "email": "jean@example.com",
+            "phone": "+261341234567",
+            "profile_completed": true,
+            "has_password": true,
+            "email_verified_at": null,
+            "created_at": "2026-05-14T08:00:00.000000Z",
+            "updated_at": "2026-05-14T08:00:00.000000Z"
+        }
+    }
+}
+```
+
+**POST /api/auth/login** → `200`
+```json
+{
+    "message": "Connexion réussie.",
+    "data": {
+        "access_token": "2|xyz...",
+        "token_type": "Bearer",
+        "user": { "...": "même structure que register" }
+    }
+}
+```
+
+**GET /api/auth/google/redirect** → `200`
+```json
+{
+    "redirect_url": "https://accounts.google.com/o/oauth2/auth?..."
+}
+```
+
+**GET /api/auth/google/callback** (après consentement Google) — redirige vers le frontend avec token dans l'URL ou retourne :
+```json
+{
+    "message": "Connexion réussie.",
+    "data": {
+        "access_token": "3|abc...",
+        "token_type": "Bearer",
+        "user": {
+            "id": 2,
+            "first_name": "Marie",
+            "last_name": "Martin",
+            "name": "Marie Martin",
+            "email": "marie@gmail.com",
+            "phone": null,
+            "profile_completed": false,
+            "has_password": false,
+            "email_verified_at": null,
+            "created_at": "2026-05-14T08:00:00.000000Z",
+            "updated_at": "2026-05-14T08:00:00.000000Z"
+        }
+    }
+}
+```
+
+> Si `profile_completed = false`, rediriger vers l'écran "Compléter le profil".
+
+**POST /api/auth/complete-profile** → `200`
+```json
+{
+    "message": "Profil complété avec succès.",
+    "data": {
+        "id": 2,
+        "first_name": "Marie",
+        "last_name": "Martin",
+        "name": "Marie Martin",
+        "email": "marie@gmail.com",
+        "phone": "+261331234567",
+        "profile_completed": true,
+        "has_password": true,
+        "email_verified_at": null,
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T08:10:00.000000Z"
+    }
+}
+```
+
+---
+
+### Réponses Report
 
 **GET /api/reports** → `200`
 ```json
@@ -127,11 +263,11 @@ interface Article {
     "data": [
         {
             "id": 1,
-            "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+            "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "name": "Jean Dupont", "email": "jean@example.com", "phone": "+261341234567", "profile_completed": true, "has_password": true, "email_verified_at": null, "created_at": "...", "updated_at": "..." },
             "category": "dechet",
             "type": null,
             "status": null,
-            "image_url": "http://localhost/storage/reports/xyz.jpg",
+            "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
             "latitude": -18.9103,
             "longitude": 47.5362,
             "location_name": "Antananarivo Centre",
@@ -147,11 +283,11 @@ interface Article {
 {
     "data": {
         "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "name": "Jean Dupont", "...": "..." },
         "category": "dechet",
         "type": null,
         "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Antananarivo Centre",
@@ -167,11 +303,11 @@ interface Article {
     "message": "Report created.",
     "data": {
         "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "user": { "...": "..." },
         "category": "infra",
         "type": "Route endommagée",
         "status": "En attente de réparation",
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Antananarivo Centre",
@@ -185,32 +321,18 @@ interface Article {
 ```json
 {
     "message": "Report updated.",
-    "data": {
-        "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
-        "category": "dechet",
-        "type": null,
-        "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
-        "latitude": -18.9103,
-        "longitude": 47.5362,
-        "location_name": "Ampefiloha",
-        "created_at": "2026-05-14T08:00:00.000000Z",
-        "updated_at": "2026-05-14T09:00:00.000000Z"
-    }
+    "data": { "...": "même structure" }
 }
 ```
 
 **DELETE /api/reports/{id}** → `200`
 ```json
-{
-    "message": "Report deleted."
-}
+{ "message": "Report deleted." }
 ```
 
 ---
 
-### Réponses par endpoint — Articles (endpoint : `/api/news`)
+### Réponses Article (endpoint : `/api/news`)
 
 **GET /api/news** → `200`
 ```json
@@ -218,12 +340,12 @@ interface Article {
     "data": [
         {
             "id": 1,
-            "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+            "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "...": "..." },
             "type": "evenement",
             "date": "2026-06-01",
             "title": "Journée de nettoyage",
             "description": "Grande journée de nettoyage au parc...",
-            "image_url": "http://localhost/storage/articles/img.jpg",
+            "image_urls": ["http://localhost/storage/articles/img.jpg"],
             "latitude": -18.9103,
             "longitude": 47.5362,
             "location_name": "Parc Tsimbazaza",
@@ -234,37 +356,18 @@ interface Article {
 }
 ```
 
-**GET /api/news/{id}** → `200`
-```json
-{
-    "data": {
-        "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
-        "type": "evenement",
-        "title": "Journée de nettoyage",
-        "description": "Grande journée de nettoyage au parc...",
-        "image_url": "http://localhost/storage/articles/img.jpg",
-        "latitude": -18.9103,
-        "longitude": 47.5362,
-        "location_name": "Parc Tsimbazaza",
-        "created_at": "2026-05-14T08:00:00.000000Z",
-        "updated_at": "2026-05-14T08:00:00.000000Z"
-    }
-}
-```
-
 **POST /api/news** → `201`
 ```json
 {
     "message": "Article created.",
     "data": {
         "id": 2,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "user": { "...": "..." },
         "type": "divers",
         "date": "2026-05-20",
         "title": "Nouvelle règle de tri des déchets",
         "description": "Dès ce mois-ci, les plastiques doivent...",
-        "image_url": null,
+        "image_urls": [],
         "latitude": null,
         "longitude": null,
         "location_name": null,
@@ -274,31 +377,9 @@ interface Article {
 }
 ```
 
-**POST /api/news/{id}** → `200`
-```json
-{
-    "message": "Article updated.",
-    "data": {
-        "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
-        "type": "evenement",
-        "title": "Journée de nettoyage MAJ",
-        "description": "Grande journée de nettoyage au parc...",
-        "image_url": "http://localhost/storage/articles/img.jpg",
-        "latitude": -18.9103,
-        "longitude": 47.5362,
-        "location_name": "Parc Tsimbazaza",
-        "created_at": "2026-05-14T08:00:00.000000Z",
-        "updated_at": "2026-05-14T09:00:00.000000Z"
-    }
-}
-```
-
 **DELETE /api/news/{id}** → `200`
 ```json
-{
-    "message": "Article deleted."
-}
+{ "message": "Article deleted." }
 ```
 
 ---
@@ -307,13 +388,13 @@ interface Article {
 
 ---
 
-### PARTIE 1 — Citizen (Identification)
+### PARTIE 1 — Authentification
 
 ---
 
-#### 1.1 — Créer un citizen
+#### 1.1 — Créer un compte
 
-**POST** `http://localhost/api/citizens`
+**POST** `http://localhost/api/auth/register`
 
 Header :
 ```
@@ -323,37 +404,69 @@ Accept: application/json
 Body → `raw` → `JSON` :
 ```json
 {
-    "name": "Jean Dupont"
+    "first_name": "Jean",
+    "last_name": "Dupont",
+    "phone": "+261341234567",
+    "email": "jean@example.com",
+    "password": "motdepasse",
+    "password_confirmation": "motdepasse",
+    "remember_me": false
 }
 ```
 
 Réponse **201** :
 ```json
 {
-    "message": "Citizen registered.",
+    "message": "Compte créé avec succès.",
     "data": {
-        "citizen": {
+        "access_token": "1|abcdefgh...",
+        "token_type": "Bearer",
+        "user": {
             "id": 1,
+            "first_name": "Jean",
+            "last_name": "Dupont",
             "name": "Jean Dupont",
-            "expires_at": "2027-05-14T07:00:00.000000Z"
-        },
-        "token": "550e8400-e29b-41d4-a716-446655440000"
+            "email": "jean@example.com",
+            "phone": "+261341234567",
+            "profile_completed": true,
+            "has_password": true,
+            "email_verified_at": null,
+            "created_at": "2026-05-14T08:00:00.000000Z",
+            "updated_at": "2026-05-14T08:00:00.000000Z"
+        }
     }
 }
 ```
 
-> **Copier le `token`** et le garder pour toutes les requêtes suivantes.
+> **Copier le `access_token`** et le garder pour toutes les requêtes suivantes.
 
 ---
 
-#### 1.2 — Vérifier son profil citizen (token valide)
+#### 1.2 — Se connecter
 
-**GET** `http://localhost/api/citizens/me`
+**POST** `http://localhost/api/auth/login`
+
+Body → `raw` → `JSON` :
+```json
+{
+    "email": "jean@example.com",
+    "password": "motdepasse",
+    "remember_me": false
+}
+```
+
+Réponse **200** : même structure que le register.
+
+---
+
+#### 1.3 — Voir son profil
+
+**GET** `http://localhost/api/auth/me`
 
 Headers :
 ```
 Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer 1|abcdefgh...
 ```
 
 Réponse **200** :
@@ -361,19 +474,91 @@ Réponse **200** :
 {
     "data": {
         "id": 1,
+        "first_name": "Jean",
+        "last_name": "Dupont",
         "name": "Jean Dupont",
-        "expires_at": "2027-05-14T07:00:00.000000Z"
+        "email": "jean@example.com",
+        "phone": "+261341234567",
+        "profile_completed": true,
+        "has_password": true,
+        "email_verified_at": null,
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T08:00:00.000000Z"
     }
 }
 ```
 
 ---
 
-#### 1.3 — Vérifier son profil sans token (doit échouer)
+#### 1.4 — Connexion Google
 
-**GET** `http://localhost/api/citizens/me`
+**GET** `http://localhost/api/auth/google/redirect`
 
-Sans header `X-Citizen-Token`
+Réponse **200** :
+```json
+{
+    "redirect_url": "https://accounts.google.com/o/oauth2/auth?..."
+}
+```
+
+Ouvrir cette URL dans un navigateur → l'utilisateur autorise → Google redirige vers le callback → le backend retourne `{ access_token, user }`.
+
+Si `user.profile_completed = false`, appeler l'endpoint `complete-profile`.
+
+---
+
+#### 1.5 — Compléter le profil (après OAuth)
+
+**POST** `http://localhost/api/auth/complete-profile`
+
+Headers :
+```
+Accept: application/json
+Authorization: Bearer 3|abc...
+```
+
+Body → `raw` → `JSON` :
+```json
+{
+    "phone": "+261331234567",
+    "password": "motdepasse",
+    "password_confirmation": "motdepasse"
+}
+```
+
+> `password` est optionnel — l'utilisateur peut vouloir conserver uniquement la connexion Google/Facebook.
+
+Réponse **200** :
+```json
+{
+    "message": "Profil complété avec succès.",
+    "data": { "...": "User complet avec profile_completed: true" }
+}
+```
+
+---
+
+#### 1.6 — Se déconnecter
+
+**POST** `http://localhost/api/auth/logout`
+
+Headers :
+```
+Authorization: Bearer 1|abcdefgh...
+```
+
+Réponse **200** :
+```json
+{
+    "message": "Déconnexion réussie."
+}
+```
+
+---
+
+#### 1.7 — Requête sans token (doit échouer)
+
+Sans header `Authorization`
 
 Réponse **401** :
 ```json
@@ -388,8 +573,8 @@ Réponse **401** :
 
 Un signalement a trois catégories : `dechet`, `infra`, `incendie`
 
-- `dechet` et `incendie` : localisation + image
-- `infra` : localisation + image + `type` (texte libre) + `status` (texte libre)
+- `dechet` et `incendie` : localisation + image(s)
+- `infra` : localisation + image(s) + `type` (texte libre) + `status` (texte libre)
 
 ---
 
@@ -397,22 +582,17 @@ Un signalement a trois catégories : `dechet`, `infra`, `incendie`
 
 **GET** `http://localhost/api/reports`
 
-Header :
-```
-Accept: application/json
-```
-
 Réponse **200** :
 ```json
 {
     "data": [
         {
             "id": 1,
-            "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+            "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "...": "..." },
             "category": "dechet",
             "type": null,
             "status": null,
-            "image_url": "http://localhost/storage/reports/image.jpg",
+            "image_urls": ["http://localhost/storage/reports/image.jpg"],
             "latitude": -18.9103,
             "longitude": 47.5362,
             "location_name": "Antananarivo Centre",
@@ -432,18 +612,18 @@ Réponse **200** :
 Headers :
 ```
 Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer 1|abcdefgh...
 ```
 
 Body → `form-data` :
 
-| Clé            | Type | Valeur                   |
-| -------------- | ---- | ------------------------ |
-| `category`     | Text | `dechet`                 |
-| `latitude`     | Text | `-18.9103`               |
-| `longitude`    | Text | `47.5362`                |
-| `location_name`| Text | `Antananarivo Centre`    |
-| `image`        | File | (sélectionner un fichier)|
+| Clé            | Type | Valeur                        |
+| -------------- | ---- | ----------------------------- |
+| `category`     | Text | `dechet`                      |
+| `latitude`     | Text | `-18.9103`                    |
+| `longitude`    | Text | `47.5362`                     |
+| `location_name`| Text | `Antananarivo Centre`         |
+| `images[]`     | File | (sélectionner 1 à 5 fichiers) |
 
 Réponse **201** :
 ```json
@@ -451,11 +631,11 @@ Réponse **201** :
     "message": "Report created.",
     "data": {
         "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+        "user": { "...": "..." },
         "category": "dechet",
         "type": null,
         "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Antananarivo Centre",
@@ -469,61 +649,35 @@ Réponse **201** :
 
 #### 2.3 — Créer un signalement — catégorie `incendie`
 
-**POST** `http://localhost/api/reports`
-
-Headers :
-```
-Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
-```
-
 Body → `form-data` :
 
-| Clé            | Type | Valeur              |
-| -------------- | ---- | ------------------- |
-| `category`     | Text | `incendie`          |
-| `latitude`     | Text | `-18.8792`          |
-| `longitude`    | Text | `47.5079`           |
-| `location_name`| Text | `Ivandry`           |
-| `image`        | File | (sélectionner)      |
+| Clé            | Type | Valeur                        |
+| -------------- | ---- | ----------------------------- |
+| `category`     | Text | `incendie`                    |
+| `latitude`     | Text | `-18.8792`                    |
+| `longitude`    | Text | `47.5079`                     |
+| `location_name`| Text | `Ivandry`                     |
+| `images[]`     | File | (sélectionner 1 à 5 fichiers) |
 
 ---
 
 #### 2.4 — Créer un signalement — catégorie `infra`
 
-**POST** `http://localhost/api/reports`
-
-Headers :
-```
-Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
-```
-
 Body → `form-data` :
 
-| Clé            | Type | Valeur                     |
-| -------------- | ---- | -------------------------- |
-| `category`     | Text | `infra`                    |
-| `type`         | Text | `Route endommagée`         |
-| `status`       | Text | `En attente de réparation` |
-| `latitude`     | Text | `-18.9200`                 |
-| `longitude`    | Text | `47.5400`                  |
-| `location_name`| Text | `Analakely`                |
-| `image`        | File | (sélectionner)             |
+| Clé            | Type | Valeur                        |
+| -------------- | ---- | ----------------------------- |
+| `category`     | Text | `infra`                       |
+| `type`         | Text | `Route endommagée`            |
+| `status`       | Text | `En attente de réparation`    |
+| `latitude`     | Text | `-18.9200`                    |
+| `longitude`    | Text | `47.5400`                     |
+| `location_name`| Text | `Analakely`                   |
+| `images[]`     | File | (sélectionner 1 à 5 fichiers) |
 
 ---
 
 #### 2.5 — Créer un signalement `infra` sans `type` (doit échouer)
-
-**POST** `http://localhost/api/reports`
-
-Body → `form-data` :
-
-| Clé         | Type | Valeur    |
-| ----------- | ---- | --------- |
-| `category`  | Text | `infra`   |
-| `latitude`  | Text | `-18.91`  |
-| `longitude` | Text | `47.53`   |
 
 Réponse **422** :
 ```json
@@ -540,14 +694,6 @@ Réponse **422** :
 
 #### 2.6 — Créer un signalement avec une catégorie invalide (doit échouer)
 
-Body → `form-data` :
-
-| Clé         | Type | Valeur    |
-| ----------- | ---- | --------- |
-| `category`  | Text | `bidon`   |
-| `latitude`  | Text | `-18.91`  |
-| `longitude` | Text | `47.53`   |
-
 Réponse **422** :
 ```json
 {
@@ -560,15 +706,11 @@ Réponse **422** :
 
 ---
 
-#### 2.7 — Créer un signalement sans être identifié (doit échouer)
-
-Sans header `X-Citizen-Token`
+#### 2.7 — Créer un signalement sans être connecté (doit échouer)
 
 Réponse **401** :
 ```json
-{
-    "message": "Unauthenticated."
-}
+{ "message": "Unauthenticated." }
 ```
 
 ---
@@ -577,24 +719,7 @@ Réponse **401** :
 
 **GET** `http://localhost/api/reports/1`
 
-Réponse **200** :
-```json
-{
-    "data": {
-        "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
-        "category": "dechet",
-        "type": null,
-        "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
-        "latitude": -18.9103,
-        "longitude": 47.5362,
-        "location_name": "Antananarivo Centre",
-        "created_at": "...",
-        "updated_at": "..."
-    }
-}
-```
+Réponse **200** : même structure que le store.
 
 ---
 
@@ -605,14 +730,14 @@ Réponse **200** :
 Headers :
 ```
 Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer 1|abcdefgh...
 ```
 
-Body → `form-data` (envoyer seulement les champs à changer) :
+Body → `form-data` (seulement les champs à changer) :
 
-| Clé            | Type | Valeur              |
-| -------------- | ---- | ------------------- |
-| `location_name`| Text | `Ampefiloha`        |
+| Clé            | Type | Valeur       |
+| -------------- | ---- | ------------ |
+| `location_name`| Text | `Ampefiloha` |
 
 Réponse **200** :
 ```json
@@ -620,11 +745,11 @@ Réponse **200** :
     "message": "Report updated.",
     "data": {
         "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "user": { "...": "..." },
         "category": "dechet",
         "type": null,
         "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Ampefiloha",
@@ -636,22 +761,13 @@ Réponse **200** :
 
 ---
 
-#### 2.10 — Modifier le signalement d'un autre citizen (doit échouer)
+#### 2.10 — Modifier le signalement d'un autre utilisateur (doit échouer)
 
 Utiliser un token différent de celui qui a créé le signalement.
 
-**POST** `http://localhost/api/reports/1`
-
-Header :
-```
-X-Citizen-Token: autre-uuid-token
-```
-
 Réponse **403** :
 ```json
-{
-    "message": "This action is unauthorized."
-}
+{ "message": "This action is unauthorized." }
 ```
 
 ---
@@ -663,14 +779,12 @@ Réponse **403** :
 Headers :
 ```
 Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer 1|abcdefgh...
 ```
 
 Réponse **200** :
 ```json
-{
-    "message": "Report deleted."
-}
+{ "message": "Report deleted." }
 ```
 
 ---
@@ -681,9 +795,7 @@ Réponse **200** :
 
 Réponse **404** :
 ```json
-{
-    "message": "No query results for model [App\\Models\\Report] 9999"
-}
+{ "message": "No query results for model [App\\Models\\Report] 9999" }
 ```
 
 ---
@@ -704,12 +816,12 @@ Réponse **200** :
     "data": [
         {
             "id": 1,
-            "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+            "user": { "id": 1, "first_name": "Jean", "last_name": "Dupont", "...": "..." },
             "type": "evenement",
             "date": "2026-06-01",
             "title": "Journée de nettoyage",
             "description": "Grande journée de nettoyage au parc...",
-            "image_url": "http://localhost/storage/articles/img.jpg",
+            "image_urls": ["http://localhost/storage/articles/img.jpg"],
             "latitude": -18.9103,
             "longitude": 47.5362,
             "location_name": "Parc Tsimbazaza",
@@ -729,21 +841,21 @@ Réponse **200** :
 Headers :
 ```
 Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer 1|abcdefgh...
 ```
 
 Body → `form-data` :
 
-| Clé            | Type | Valeur                              |
-| -------------- | ---- | ----------------------------------- |
-| `type`         | Text | `evenement`                         |
-| `date`         | Text | `2026-06-01`                        |
-| `title`        | Text | `Journée de nettoyage`              |
-| `description`  | Text | `Grande journée de nettoyage...`    |
-| `latitude`     | Text | `-18.9103`                          |
-| `longitude`    | Text | `47.5362`                           |
-| `location_name`| Text | `Parc Tsimbazaza`                   |
-| `image`        | File | (sélectionner)                      |
+| Clé            | Type | Valeur                           |
+| -------------- | ---- | -------------------------------- |
+| `type`         | Text | `evenement`                      |
+| `date`         | Text | `2026-06-01`                     |
+| `title`        | Text | `Journée de nettoyage`           |
+| `description`  | Text | `Grande journée de nettoyage...` |
+| `latitude`     | Text | `-18.9103`                       |
+| `longitude`    | Text | `47.5362`                        |
+| `location_name`| Text | `Parc Tsimbazaza`                |
+| `images[]`     | File | (sélectionner 1 à 5 fichiers)    |
 
 Réponse **201** :
 ```json
@@ -751,11 +863,12 @@ Réponse **201** :
     "message": "Article created.",
     "data": {
         "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
+        "user": { "...": "..." },
         "type": "evenement",
+        "date": "2026-06-01",
         "title": "Journée de nettoyage",
         "description": "Grande journée de nettoyage...",
-        "image_url": "http://localhost/storage/articles/img.jpg",
+        "image_urls": ["http://localhost/storage/articles/img.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Parc Tsimbazaza",
@@ -769,56 +882,20 @@ Réponse **201** :
 
 #### 3.3 — Créer une actualité — type `divers` (sans localisation)
 
-**POST** `http://localhost/api/news`
-
-Headers :
-```
-Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
-```
-
 Body → `form-data` :
 
-| Clé           | Type | Valeur                                   |
-| ------------- | ---- | ---------------------------------------- |
-| `type`        | Text | `divers`                                 |
-| `date`        | Text | `2026-05-20`                             |
-| `title`       | Text | `Nouvelle règle de tri des déchets`      |
+| Clé           | Type | Valeur                                      |
+| ------------- | ---- | ------------------------------------------- |
+| `type`        | Text | `divers`                                    |
+| `date`        | Text | `2026-05-20`                                |
+| `title`       | Text | `Nouvelle règle de tri des déchets`         |
 | `description` | Text | `Dès ce mois-ci, les plastiques doivent...` |
 
-> `latitude`, `longitude`, `location_name` optionnels pour `divers`.
-
-Réponse **201** :
-```json
-{
-    "message": "Article created.",
-    "data": {
-        "id": 2,
-        "type": "divers",
-        "date": "2026-05-20",
-        "title": "Nouvelle règle de tri des déchets",
-        "description": "Dès ce mois-ci...",
-        "image_url": null,
-        "latitude": null,
-        "longitude": null,
-        "location_name": null,
-        "created_at": "...",
-        "updated_at": "..."
-    }
-}
-```
+> `latitude`, `longitude`, `location_name` sont optionnels pour `divers`.
 
 ---
 
 #### 3.4 — Créer un `evenement` sans latitude (doit échouer)
-
-Body → `form-data` :
-
-| Clé           | Type | Valeur          |
-| ------------- | ---- | --------------- |
-| `type`        | Text | `evenement`     |
-| `title`       | Text | `Test`          |
-| `description` | Text | `Une description` |
 
 Réponse **422** :
 ```json
@@ -833,42 +910,7 @@ Réponse **422** :
 
 ---
 
-#### 3.5 — Créer une actualité avec un type invalide (doit échouer)
-
-Body → `form-data` :
-
-| Clé           | Type | Valeur    |
-| ------------- | ---- | --------- |
-| `type`        | Text | `autre`   |
-| `title`       | Text | `Test`    |
-| `description` | Text | `...`     |
-
-Réponse **422** :
-```json
-{
-    "message": "The selected type is invalid.",
-    "errors": {
-        "type": ["The selected type is invalid."]
-    }
-}
-```
-
----
-
-#### 3.6 — Créer une actualité sans être identifié (doit échouer)
-
-Sans header `X-Citizen-Token`
-
-Réponse **401** :
-```json
-{
-    "message": "Unauthenticated."
-}
-```
-
----
-
-#### 3.7 — Voir une actualité (public)
+#### 3.5 — Voir une actualité (public)
 
 **GET** `http://localhost/api/news/1`
 
@@ -876,14 +918,14 @@ Réponse **200** : même structure que la création.
 
 ---
 
-#### 3.8 — Modifier son actualité
+#### 3.6 — Modifier son actualité
 
 **POST** `http://localhost/api/news/1`
 
 Headers :
 ```
 Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer 1|abcdefgh...
 ```
 
 Body → `form-data` (seulement les champs à changer) :
@@ -898,11 +940,12 @@ Réponse **200** :
     "message": "Article updated.",
     "data": {
         "id": 1,
-        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "user": { "...": "..." },
         "type": "evenement",
+        "date": "2026-06-01",
         "title": "Journée de nettoyage MAJ",
         "description": "Grande journée de nettoyage au parc...",
-        "image_url": "http://localhost/storage/articles/img.jpg",
+        "image_urls": ["http://localhost/storage/articles/img.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Parc Tsimbazaza",
@@ -914,52 +957,34 @@ Réponse **200** :
 
 ---
 
-#### 3.9 — Modifier l'actualité d'un autre citizen (doit échouer)
-
-Même principe que le report — utiliser un token différent.
-
-Réponse **403** :
-```json
-{
-    "message": "This action is unauthorized."
-}
-```
-
----
-
-#### 3.10 — Supprimer son actualité
+#### 3.7 — Supprimer son actualité
 
 **DELETE** `http://localhost/api/news/1`
 
-Headers :
-```
-Accept: application/json
-X-Citizen-Token: 550e8400-e29b-41d4-a716-446655440000
-```
-
 Réponse **200** :
 ```json
-{
-    "message": "Article deleted."
-}
+{ "message": "Article deleted." }
 ```
 
 ---
 
 ## Récapitulatif des cas d'erreur
 
-| Scénario                                    | Code | Message clé                                         |
-| ------------------------------------------- | ---- | --------------------------------------------------- |
-| Token absent sur une route protégée         | 401  | `Unauthenticated.`                                  |
-| Token expiré                                | 401  | `Unauthenticated.`                                  |
-| Modifier/supprimer la ressource d'un autre  | 403  | `This action is unauthorized.`                      |
-| Ressource introuvable                       | 404  | `No query results for model...`                     |
-| `category` invalide (pas déchet/infra/incendie) | 422 | `The selected category is invalid.`             |
-| `type` absent pour `infra`                  | 422  | `The type field is required when category is infra.`|
-| `status` absent pour `infra`                | 422  | `The status field is required when category is infra.`|
-| `type` invalide pour article                | 422  | `The selected type is invalid.`                     |
-| `latitude` absente pour `evenement`         | 422  | `The latitude field is required when type is evenement.`|
-| Image trop grande (> 5 MB)                  | 422  | `The image field must not be greater than 5120 kilobytes.`|
+| Scénario                                         | Code | Message clé                                              |
+| ------------------------------------------------ | ---- | -------------------------------------------------------- |
+| Token absent sur une route protégée              | 401  | `Unauthenticated.`                                       |
+| Token invalide ou révoqué                        | 401  | `Unauthenticated.`                                       |
+| Modifier/supprimer la ressource d'un autre       | 403  | `This action is unauthorized.`                           |
+| Ressource introuvable                            | 404  | `No query results for model...`                          |
+| `category` invalide (pas dechet/infra/incendie)  | 422  | `The selected category is invalid.`                      |
+| `type` absent pour `infra`                       | 422  | `The type field is required when category is infra.`     |
+| `status` absent pour `infra`                     | 422  | `The status field is required when category is infra.`   |
+| `type` invalide pour article                     | 422  | `The selected type is invalid.`                          |
+| `latitude` absente pour `evenement`              | 422  | `The latitude field is required when type is evenement.` |
+| Image trop grande (> 5 MB)                       | 422  | `The images.0 field must not be greater than 5120 kilobytes.` |
+| Email déjà utilisé (register)                    | 422  | `The email has already been taken.`                      |
+| Téléphone déjà utilisé (register)                | 422  | `The phone has already been taken.`                      |
+| Mauvais email/password (login)                   | 422  | `These credentials do not match our records.`            |
 
 ---
 
@@ -971,8 +996,12 @@ Les images sont stockées dans `storage/app/public/`. Pour qu'elles soient acces
 php artisan storage:link
 ```
 
-L'URL retournée dans `image_url` sera de la forme :
+Les URLs retournées dans `image_urls` seront de la forme :
 ```
 http://localhost/storage/reports/nomfichier.jpg
 http://localhost/storage/articles/nomfichier.jpg
 ```
+
+Envoyer les images en `form-data` avec la clé `images[]` (avec les crochets). Maximum 5 fichiers, 5 MB chacun.
+
+Si de nouvelles images sont envoyées lors d'une mise à jour, les anciennes sont supprimées et remplacées. Si aucune image n'est envoyée, les images existantes sont conservées.
