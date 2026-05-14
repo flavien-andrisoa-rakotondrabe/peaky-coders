@@ -21,8 +21,8 @@ class UpdateArticleRequest extends FormRequest
             'description'   => ['sometimes', 'string'],
             'images'        => ['nullable', 'array', 'max:5'],
             'images.*'      => ['image', 'max:5120'],
-            'latitude'      => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude'     => ['nullable', 'numeric', 'between:-180,180'],
+            'latitude'      => ['nullable', 'numeric'],
+            'longitude'     => ['nullable', 'numeric'],
             'location_name' => ['nullable', 'string', 'max:255'],
         ];
     }
