@@ -18,9 +18,6 @@ import { FormCheckbox } from "@/components/utils/FormCheckbox";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/providers/AuthProvider";
-import { setUserReducer } from "@/redux/slices/user.slice";
-import { useDispatch } from "react-redux";
 
 // 1. Définition du schéma de validation avec Zod
 const loginSchema = z.object({
@@ -38,8 +35,6 @@ export function LoginForm({
   onSwitchToSignup: () => void;
 }) {
   const router = useRouter();
-  const dispatch = useDispatch();
-  const { refreshUser } = useAuth();
 
   const [showPwd, setShowPwd] = useState(false);
 
@@ -69,8 +64,6 @@ export function LoginForm({
 
       if (res.status === 201 || res.status === 200) {
         toast.success("Connexion réussie !");
-
-        await refreshUser();
 
         router.push("/home");
       }

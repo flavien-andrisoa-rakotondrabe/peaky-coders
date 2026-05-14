@@ -4,12 +4,7 @@ import axios from "axios";
  * Routes publiques (guest)
  * → pas de redirection vers /auth
  */
-const guestRoutes = [
-  "/auth",
-  "/forgot-password",
-  "/reset-password",
-  "/complete-profile",
-];
+const guestRoutes = ["/auth"];
 
 const isGuestRoute = (path: string) => {
   return guestRoutes.some((route) => path.startsWith(route));
