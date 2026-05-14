@@ -1,3 +1,5 @@
+import MadagascarMapPro from "@/components/utils/MadagascarMap";
+import MadagascarMap from "@/components/utils/svgs/MadagascarMap";
 import Image from "next/image";
 
 export default function Home() {
@@ -37,6 +39,9 @@ export default function Home() {
         edit={edit}
         className="grid-cols-3"
       /> */}
+
+      {/* <MadagascarMap /> */}
+      <MadagascarMapPro />
     </>
   );
 }
