@@ -17,9 +17,10 @@ class ReportResource extends JsonResource
             'type'          => $this->type,
             'status'        => $this->status,
             'image_urls'    => collect($this->images ?? [])->map(fn($p) => Storage::url($p))->values(),
-            'latitude'      => $this->latitude,
-            'longitude'     => $this->longitude,
-            'location_name' => $this->location_name,
+            'location'       => [
+                'lat'  => $this->latitude,
+                'lng' => $this->longitude,
+            ],
             'supports_count' => $this->supports_count ?? 0,
             'is_supported'   => $this->relationLoaded('supports') ? $this->supports->isNotEmpty() : false,
             'created_at'    => $this->created_at,

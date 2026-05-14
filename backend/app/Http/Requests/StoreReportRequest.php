@@ -15,14 +15,14 @@ class StoreReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category'      => ['required', 'string', Rule::in(['dechet', 'infra', 'incendie'])],
+            'category'      => ['required', 'string', Rule::in(['dechet', 'infrastructure', 'incendie'])],
             'images'        => ['nullable', 'array', 'max:5'],
             'images.*'      => ['image', 'max:5120'],
-            'latitude'      => ['required', 'numeric'],
-            'longitude'     => ['required', 'numeric'],
-            'location_name' => ['nullable', 'string', 'max:255'],
-            'type'          => ['required_if:category,infra', 'nullable', 'string', 'max:255'],
-            'status'        => ['required_if:category,infra', 'nullable', 'string', 'max:255'],
+            'location'      => ['required', 'array'],
+            'location.lat'  => ['required', 'numeric'],
+            'location.lng' => ['required', 'numeric'],
+            'type'          => ['required_if:category,infrastructure', 'nullable', 'string', 'max:255'],
+            'status'        => ['required_if:category,infrastructure', 'nullable', 'string', 'max:255'],
         ];
     }
 }

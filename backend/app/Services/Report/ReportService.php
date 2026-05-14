@@ -29,9 +29,8 @@ class ReportService
             'type'          => $dto->type,
             'status'        => $dto->status,
             'images'        => $imagePaths ?: null,
-            'latitude'      => $dto->latitude,
-            'longitude'     => $dto->longitude,
-            'location_name' => $dto->location,
+            'latitude'  => $dto->lat,
+            'longitude' => $dto->lng,
         ]);
     }
 
@@ -54,9 +53,8 @@ class ReportService
             'type'          => $dto->type ?? $report->type,
             'status'        => $dto->status ?? $report->status,
             'images'        => $imagePaths,
-            'latitude'      => $dto->latitude ?? $report->latitude,
-            'longitude'     => $dto->longitude ?? $report->longitude,
-            'location_name' => $dto->locationName ?? $report->location_name,
+            'latitude'  => $dto->lat ?? $report->latitude,
+            'longitude' => $dto->lng ?? $report->longitude,
         ]);
     }
 

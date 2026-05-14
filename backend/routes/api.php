@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Article\ArticleController;
+use App\Http\Controllers\News\NewsController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Profile\ProfileController;
@@ -63,10 +63,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
 });
 
 // Actualités
-Route::get('news', [ArticleController::class, 'index'])->name('news.index');
-Route::get('news/{article}', [ArticleController::class, 'show'])->name('news.show');
+Route::get('news', [NewsController::class, 'index'])->name('news.index');
+Route::get('news/{news}', [NewsController::class, 'show'])->name('news.show');
 Route::middleware('auth:sanctum')->group(function (): void {
-    Route::post('news', [ArticleController::class, 'store'])->name('news.store');
-    Route::post('news/{article}', [ArticleController::class, 'update'])->name('news.update');
-    Route::delete('news/{article}', [ArticleController::class, 'destroy'])->name('news.destroy');
+    Route::post('news', [NewsController::class, 'store'])->name('news.store');
+    Route::post('news/{news}', [NewsController::class, 'update'])->name('news.update');
+    Route::delete('news/{news}', [NewsController::class, 'destroy'])->name('news.destroy');
 });
