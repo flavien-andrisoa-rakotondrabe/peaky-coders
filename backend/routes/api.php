@@ -51,7 +51,7 @@ Route::prefix('profile')->name('profile.')->middleware('auth:sanctum')->group(fu
 //     Route::get('citizens/me', [CitizenController::class, 'me'])->name('citizens.me');
 // });
 
-// Reports
+// Signalement
 Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('reports/{report}', [ReportController::class, 'show'])->name('reports.show');
 Route::middleware('auth:sanctum')->group(function (): void {
@@ -61,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('reports/{report}/support', [ReportSupportController::class, 'store'])->name('reports.support');
 });
 
-// Articles
+// Actualités
 Route::get('news', [ArticleController::class, 'index'])->name('news.index');
 Route::get('news/{article}', [ArticleController::class, 'show'])->name('news.show');
 Route::middleware('auth:sanctum')->group(function (): void {
