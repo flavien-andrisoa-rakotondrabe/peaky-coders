@@ -44,7 +44,7 @@ class ReportController extends Controller
             type:     $request->validated('type'),
             status:   $request->validated('status'),
             lat:      $request->validated('location.lat'),
-            long:     $request->validated('location.long'),
+            lng:     $request->validated('location.lng'),
         );
 
         $report = $this->service->create($dto, $request->file('images', []));
@@ -63,7 +63,7 @@ class ReportController extends Controller
             type:     $request->validated('type'),
             status:   $request->validated('status'),
             lat:      $request->validated('location.lat'),
-            long:     $request->validated('location.long'),
+            lng:     $request->validated('location.lng'),
         );
 
         $updated = $this->service->update($report, $dto, $request->file('images', []));

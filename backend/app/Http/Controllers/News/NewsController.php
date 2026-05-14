@@ -45,7 +45,7 @@ class NewsController extends Controller
             title:       $request->validated('title'),
             description: $request->validated('description'),
             lat:         $request->validated('location.lat'),
-            long:        $request->validated('location.long'),
+            lng:        $request->validated('location.lng'),
         );
 
         $news = $this->service->create($dto, $request->file('images', []));
@@ -66,7 +66,7 @@ class NewsController extends Controller
             title:       $request->validated('title'),
             description: $request->validated('description'),
             lat:         $request->validated('location.lat'),
-            long:        $request->validated('location.long'),
+            lng:        $request->validated('location.lng'),
         );
 
         $updated = $this->service->update($news, $dto, $request->file('images', []));

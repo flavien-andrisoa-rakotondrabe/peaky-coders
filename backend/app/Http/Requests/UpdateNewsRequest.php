@@ -23,7 +23,7 @@ class UpdateNewsRequest extends FormRequest
             'images.*'      => ['image', 'max:5120'],
             'location'      => ['nullable', 'array'],
             'location.lat'  => ['nullable', 'numeric'],
-            'location.long' => ['nullable', 'numeric'],
+            'location.lng' => ['nullable', 'numeric'],
         ];
     }
 }

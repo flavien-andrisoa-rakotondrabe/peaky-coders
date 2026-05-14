@@ -10,6 +10,6 @@ readonly class CreateReportDTO
         public ?string $type,
         public ?string $status,
         public ?float $lat,
-        public ?float $long,
+        public ?float $lng,
     ) {}
 }

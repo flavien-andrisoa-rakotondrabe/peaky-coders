@@ -20,7 +20,7 @@ class StoreReportRequest extends FormRequest
             'images.*'      => ['image', 'max:5120'],
             'location'      => ['required', 'array'],
             'location.lat'  => ['required', 'numeric'],
-            'location.long' => ['required', 'numeric'],
+            'location.lng' => ['required', 'numeric'],
             'type'          => ['required_if:category,infrastructure', 'nullable', 'string', 'max:255'],
             'status'        => ['required_if:category,infrastructure', 'nullable', 'string', 'max:255'],
         ];

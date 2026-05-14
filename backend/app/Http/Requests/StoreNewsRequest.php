@@ -23,7 +23,7 @@ class StoreNewsRequest extends FormRequest
             'images.*'      => ['image', 'max:5120'],
             'location'      => ['nullable', 'array'],
             'location.lat'  => ['required_if:type,event', 'nullable', 'numeric'],
-            'location.long' => ['required_if:type,event', 'nullable', 'numeric'],
+            'location.lng' => ['required_if:type,event', 'nullable', 'numeric'],
         ];
     }
 }

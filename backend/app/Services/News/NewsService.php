@@ -30,7 +30,7 @@ class NewsService
             'description' => $dto->description,
             'images'      => $imagePaths ?: null,
             'latitude'    => $dto->lat,
-            'longitude'   => $dto->long,
+            'longitude'   => $dto->lng,
         ]);
     }
 
@@ -55,7 +55,7 @@ class NewsService
             'description'   => $dto->description ?? $news->description,
             'images'        => $imagePaths,
             'latitude'  => $dto->lat ?? $news->latitude,
-            'longitude' => $dto->long ?? $news->longitude,
+            'longitude' => $dto->lng ?? $news->longitude,
         ]);
     }
 

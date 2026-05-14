@@ -20,7 +20,7 @@ class UpdateReportRequest extends FormRequest
             'images.*'      => ['image', 'max:5120'],
             'location'      => ['nullable', 'array'],
             'location.lat'  => ['sometimes', 'numeric'],
-            'location.long' => ['sometimes', 'numeric'],
+            'location.lng' => ['sometimes', 'numeric'],
             'type'          => ['nullable', 'string', 'max:255'],
             'status'        => ['nullable', 'string', 'max:255'],
         ];

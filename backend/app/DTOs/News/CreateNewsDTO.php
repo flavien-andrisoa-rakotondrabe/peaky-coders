@@ -11,6 +11,6 @@ readonly class CreateNewsDTO
         public string $title,
         public string $description,
         public ?float $lat,
-        public ?float $long,
+        public ?float $lng,
     ) {}
 }

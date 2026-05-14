@@ -30,7 +30,7 @@ class ReportService
             'status'        => $dto->status,
             'images'        => $imagePaths ?: null,
             'latitude'  => $dto->lat,
-            'longitude' => $dto->long,
+            'longitude' => $dto->lng,
         ]);
     }
 
@@ -54,7 +54,7 @@ class ReportService
             'status'        => $dto->status ?? $report->status,
             'images'        => $imagePaths,
             'latitude'  => $dto->lat ?? $report->latitude,
-            'longitude' => $dto->long ?? $report->longitude,
+            'longitude' => $dto->lng ?? $report->longitude,
         ]);
     }
 
