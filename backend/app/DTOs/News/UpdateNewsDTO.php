@@ -1,8 +1,8 @@
 <?php
 
-namespace App\DTOs\Article;
+namespace App\DTOs\News;
 
-readonly class UpdateArticleDTO
+readonly class UpdateNewsDTO
 {
     public function __construct(
         public ?string $type,

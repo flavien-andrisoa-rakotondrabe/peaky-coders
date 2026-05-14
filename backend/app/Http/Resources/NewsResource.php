@@ -4,9 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Resources\UserSummaryResource;
 
-class ArticleResource extends JsonResource
+class NewsResource extends JsonResource
 {
     public function toArray($request): array
     {

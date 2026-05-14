@@ -1,8 +1,8 @@
 <?php
 
-namespace App\DTOs\Article;
+namespace App\DTOs\News;
 
-readonly class CreateArticleDTO
+readonly class CreateNewsDTO
 {
     public function __construct(
         public int $userId,
