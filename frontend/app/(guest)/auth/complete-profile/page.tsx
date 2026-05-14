@@ -44,48 +44,53 @@ export default function CompleteProfilePage() {
   const router = useRouter();
   const [showPwd, setShowPwd] = useState(false);
 
-  const [socialUser, setSocialUser] = useState<SocialUserInterface | null>(
-    null,
-  );
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CompleteProfileValues>({
+    resolver: zodResolver(completeProfileSchema),
+    defaultValues: {
+      provider: "",
+      provider_id: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      password: "",
+      password_confirmation: "",
+    },
+  });
 
   useEffect(() => {
     const fetchSocial = async () => {
       try {
-        const { data } = await api.get("/api/social/me");
+        const { data } = await api.get("/api/auth/social/me");
 
         if (!data) {
           router.push("/auth");
           return;
         }
 
-        setSocialUser(data);
+        reset({
+          provider: data.provider || "",
+          provider_id: data.provider_id || "",
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          email: data.email || "",
+          phone: "",
+          password: "",
+          password_confirmation: "",
+        });
       } catch {
         router.push("/auth");
       }
     };
 
     fetchSocial();
-  }, [router]);
-
-  // 2. React Hook Form
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors, isSubmitting },
-  } = useForm<CompleteProfileValues>({
-    resolver: zodResolver(completeProfileSchema),
-    defaultValues: {
-      provider: socialUser?.provider || "",
-      provider_id: socialUser?.provider_id || "",
-      first_name: socialUser?.first_name || "",
-      last_name: socialUser?.last_name || "",
-      email: socialUser?.email || "",
-      phone: "",
-      password: "",
-      password_confirmation: "",
-    },
-  });
+  }, [router, reset]);
 
   const onSubmit = async (values: CompleteProfileValues) => {
     console.log("Submit profile:", values);
