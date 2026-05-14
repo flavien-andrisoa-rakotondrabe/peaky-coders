@@ -9,7 +9,8 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/utils/FormInput";
-import BigLogo from "@/components/utils/BigLogo";
+import Logo from "@/components/utils/Logo";
+import Button3DV2 from "@/components/utils/Button3DV2";
 
 // 1. Schéma de validation Zod
 const forgotPasswordSchema = z.object({
@@ -53,7 +54,11 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm">
         {/* Logo avec Link Next.js */}
-        <BigLogo />
+        <div className="mb-10">
+          <Link href="/">
+            <Logo />
+          </Link>
+        </div>
 
         {sent ? (
           /* État Succès */
@@ -103,14 +108,15 @@ export default function ForgotPasswordPage() {
                 {...register("email")}
               />
 
-              <Button
+              <Button3DV2
                 type="submit"
                 disabled={isSubmitting}
-                className="font-body h-12 w-full rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90 disabled:opacity-70"
-                size="lg"
-              >
-                {isSubmitting ? "Envoi en cours..." : "Envoyer le lien"}
-              </Button>
+                label={isSubmitting ? "Envoi en cours..." : "Envoyer le lien"}
+                fullWidth
+                breakpoints={[
+                  { tw: "sm", width: 80, height: 48, fontSize: 16 },
+                ]}
+              />
             </form>
 
             <div className="mt-5 text-center">

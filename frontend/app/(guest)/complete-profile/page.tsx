@@ -62,9 +62,11 @@ export default function CompleteProfilePage({ socialUser }: Props) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-sm">
-        <Link href="/" className="mb-10 flex items-center gap-2">
-          <Logo />
-        </Link>
+        <div className="mb-10">
+          <Link href="/">
+            <Logo />
+          </Link>
+        </div>
 
         <div className="flex flex-col gap-4">
           <div className="mb-5 space-y-1">

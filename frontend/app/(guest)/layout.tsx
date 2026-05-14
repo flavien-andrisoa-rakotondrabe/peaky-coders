@@ -9,15 +9,15 @@ export default function GuestLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { token, loading } = useAuth();
+  const { loading, authenticated } = useAuth();
 
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && token) {
+    if (!loading && authenticated) {
       router.replace("/home");
     }
-  }, [token, loading, router]);
+  }, [authenticated, loading, router]);
 
   if (loading) {
     return null;

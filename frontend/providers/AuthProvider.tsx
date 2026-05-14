@@ -1,19 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { api } from "@/lib/api";
 import { clearUserReducer, setUserReducer } from "@/redux/slices/user.slice";
-import { useDispatch } from "react-redux";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-};
 
 type AuthContextType = {
-  user: User | null;
   loading: boolean;
   authenticated: boolean;
 
@@ -22,7 +15,6 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
   loading: true,
   authenticated: false,
 
@@ -33,51 +25,44 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();
 
-  const [user, setUser] = useState<User | null>(null);
+  const user = useSelector((state: any) => state.user.user);
 
   const [loading, setLoading] = useState(true);
 
-  // Récupère l'utilisateur connecté
+  // refresh user
   const refreshUser = async () => {
     try {
-      const res = await api.get("/api/user");
+      const res = await api.get("/api/profile");
 
-      setUser(res.data);
+      dispatch(setUserReducer(res.data));
     } catch {
-      setUser(null);
+      dispatch(clearUserReducer());
     }
   };
 
-  // Logout
+  // logout
   const logout = async () => {
     try {
       await api.post("/api/auth/logout");
     } finally {
-      setUser(null);
+      dispatch(clearUserReducer());
     }
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await api.get("/api/profile");
-
-        dispatch(setUserReducer(res.data));
-      } catch {
-        dispatch(clearUserReducer());
-      }
+    const init = async () => {
+      await refreshUser();
+      setLoading(false);
     };
 
-    fetchUser();
+    init();
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
         loading,
         authenticated: !!user,
-
         refreshUser,
         logout,
       }}

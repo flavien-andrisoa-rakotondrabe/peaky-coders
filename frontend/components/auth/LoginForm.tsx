@@ -39,6 +39,8 @@ export function LoginForm({
 }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { refreshUser } = useAuth();
+
   const [showPwd, setShowPwd] = useState(false);
 
   // 2. Initialisation de React Hook Form
@@ -68,9 +70,7 @@ export function LoginForm({
       if (res.status === 201 || res.status === 200) {
         toast.success("Connexion réussie !");
 
-        const userRes = await api.get("/api/profile");
-
-        dispatch(setUserReducer(userRes.data));
+        await refreshUser();
 
         router.push("/home");
       }
@@ -173,7 +173,7 @@ export function LoginForm({
             disabled={isSubmitting}
             label={isSubmitting ? "Connexion..." : "Se connecter"}
             fullWidth
-            breakpoints={[{ tw: "sm", width: 80, height: 48, fontSize: 16 }]}
+            breakpoints={[{ tw: "sm", width: 120, height: 48, fontSize: 16 }]}
           />
         </form>
 
