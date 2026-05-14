@@ -47,24 +47,20 @@ class SocialAuthController extends Controller
         $frontend = config('app.frontend_url', config('app.url'));
 
         if ($request->has('error') || ! $request->has('code')) {
-            $msg = $request->get('error_description', 'Facebook authentication failed');
+            $msg = $request->input('error_description', 'Facebook authentication failed');
             return redirect($frontend . '/auth/callback?error=' . urlencode($msg));
         }
 
         try {
             $socialUser = Socialite::driver('facebook')->stateless()->user();
-
-            if (! $socialUser->getEmail()) {
-                return redirect($frontend . '/auth/callback?error=' . urlencode('Email permission is required. Please re-authorize and allow email access.'));
-            }
-
             $dto = SocialAuthDTO::fromSocialiteUser($socialUser, 'facebook');
             $result = $this->authService->handleSocialCallback($dto);
 
             $profileCompleted = $result->user->profile_completed ? 'true' : 'false';
+            $emailRequired = ! $result->user->email ? '&email_required=true' : '';
 
-            return redirect($frontend . '/auth/callback?token=' . $result->accessToken . '&profile_completed=' . $profileCompleted);
-        } catch (\Exception $e) {
+            return redirect($frontend . '/auth/callback?token=' . $result->accessToken . '&profile_completed=' . $profileCompleted . $emailRequired);
+        } catch (\Exception) {
             return redirect($frontend . '/auth/callback?error=' . urlencode('Facebook authentication failed'));
         }
     }

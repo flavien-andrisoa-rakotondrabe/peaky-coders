@@ -70,7 +70,7 @@ class AuthService
             'google'   => $this->userRepository->findByGoogleId($dto->providerId),
             'facebook' => $this->userRepository->findByFacebookId($dto->providerId),
             default    => null,
-        } ?? $this->userRepository->findByEmail($dto->email);
+        } ?? ($dto->email ? $this->userRepository->findByEmail($dto->email) : null);
 
         if ($user) {
             if (! $user->{$idField}) {
@@ -106,7 +106,12 @@ class AuthService
             'profile_completed' => true,
         ];
 
-        if (!empty($data['password'])) {
+        if (! empty($data['email'])) {
+            $update['email']             = $data['email'];
+            $update['email_verified_at'] = now();
+        }
+
+        if (! empty($data['password'])) {
             $update['password'] = Hash::make($data['password']);
         }
 
