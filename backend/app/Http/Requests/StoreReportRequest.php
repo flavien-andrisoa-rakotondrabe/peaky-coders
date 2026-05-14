@@ -16,7 +16,8 @@ class StoreReportRequest extends FormRequest
     {
         return [
             'category'      => ['required', 'string', Rule::in(['dechet', 'infra', 'incendie'])],
-            'image'         => ['nullable', 'image', 'max:5120'],
+            'images'        => ['nullable', 'array', 'max:5'],
+            'images.*'      => ['image', 'max:5120'],
             'latitude'      => ['required', 'numeric', 'between:-90,90'],
             'longitude'     => ['required', 'numeric', 'between:-180,180'],
             'location_name' => ['nullable', 'string', 'max:255'],

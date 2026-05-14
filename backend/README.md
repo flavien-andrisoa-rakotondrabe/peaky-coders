@@ -93,7 +93,7 @@ interface Report {
   category: 'dechet' | 'infra' | 'incendie'
   type: string | null       // requis si category = 'infra'
   status: string | null     // requis si category = 'infra'
-  image_url: string | null  // ex: "http://localhost/storage/reports/abc.jpg"
+  image_urls: string[]      // tableau d'URLs, vide [] si aucune image
   latitude: number
   longitude: number
   location_name: string
@@ -108,7 +108,7 @@ interface Article {
   date: string               // format: "YYYY-MM-DD"
   title: string
   description: string
-  image_url: string | null
+  image_urls: string[]         // tableau d'URLs, vide [] si aucune image
   latitude: number | null      // requis si type = 'evenement'
   longitude: number | null     // requis si type = 'evenement'
   location_name: string | null // requis si type = 'evenement'
@@ -131,7 +131,7 @@ interface Article {
             "category": "dechet",
             "type": null,
             "status": null,
-            "image_url": "http://localhost/storage/reports/xyz.jpg",
+            "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
             "latitude": -18.9103,
             "longitude": 47.5362,
             "location_name": "Antananarivo Centre",
@@ -151,7 +151,7 @@ interface Article {
         "category": "dechet",
         "type": null,
         "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Antananarivo Centre",
@@ -171,7 +171,7 @@ interface Article {
         "category": "infra",
         "type": "Route endommagée",
         "status": "En attente de réparation",
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Antananarivo Centre",
@@ -191,7 +191,7 @@ interface Article {
         "category": "dechet",
         "type": null,
         "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Ampefiloha",
@@ -223,7 +223,7 @@ interface Article {
             "date": "2026-06-01",
             "title": "Journée de nettoyage",
             "description": "Grande journée de nettoyage au parc...",
-            "image_url": "http://localhost/storage/articles/img.jpg",
+            "image_urls": ["http://localhost/storage/articles/img.jpg"],
             "latitude": -18.9103,
             "longitude": 47.5362,
             "location_name": "Parc Tsimbazaza",
@@ -243,7 +243,7 @@ interface Article {
         "type": "evenement",
         "title": "Journée de nettoyage",
         "description": "Grande journée de nettoyage au parc...",
-        "image_url": "http://localhost/storage/articles/img.jpg",
+        "image_urls": ["http://localhost/storage/articles/img.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Parc Tsimbazaza",
@@ -264,7 +264,7 @@ interface Article {
         "date": "2026-05-20",
         "title": "Nouvelle règle de tri des déchets",
         "description": "Dès ce mois-ci, les plastiques doivent...",
-        "image_url": null,
+        "image_urls": [],
         "latitude": null,
         "longitude": null,
         "location_name": null,
@@ -284,7 +284,7 @@ interface Article {
         "type": "evenement",
         "title": "Journée de nettoyage MAJ",
         "description": "Grande journée de nettoyage au parc...",
-        "image_url": "http://localhost/storage/articles/img.jpg",
+        "image_urls": ["http://localhost/storage/articles/img.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Parc Tsimbazaza",
@@ -412,7 +412,7 @@ Réponse **200** :
             "category": "dechet",
             "type": null,
             "status": null,
-            "image_url": "http://localhost/storage/reports/image.jpg",
+            "image_urls": ["http://localhost/storage/reports/image.jpg"],
             "latitude": -18.9103,
             "longitude": 47.5362,
             "location_name": "Antananarivo Centre",
@@ -443,7 +443,7 @@ Body → `form-data` :
 | `latitude`     | Text | `-18.9103`               |
 | `longitude`    | Text | `47.5362`                |
 | `location_name`| Text | `Antananarivo Centre`    |
-| `image`        | File | (sélectionner un fichier)|
+| `images[]`     | File | (sélectionner 1 à 5 fichiers)|
 
 Réponse **201** :
 ```json
@@ -455,7 +455,7 @@ Réponse **201** :
         "category": "dechet",
         "type": null,
         "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Antananarivo Centre",
@@ -485,7 +485,7 @@ Body → `form-data` :
 | `latitude`     | Text | `-18.8792`          |
 | `longitude`    | Text | `47.5079`           |
 | `location_name`| Text | `Ivandry`           |
-| `image`        | File | (sélectionner)      |
+| `images[]`     | File | (sélectionner 1 à 5 fichiers)|
 
 ---
 
@@ -509,7 +509,7 @@ Body → `form-data` :
 | `latitude`     | Text | `-18.9200`                 |
 | `longitude`    | Text | `47.5400`                  |
 | `location_name`| Text | `Analakely`                |
-| `image`        | File | (sélectionner)             |
+| `images[]`     | File | (sélectionner 1 à 5 fichiers)|
 
 ---
 
@@ -586,7 +586,7 @@ Réponse **200** :
         "category": "dechet",
         "type": null,
         "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Antananarivo Centre",
@@ -624,7 +624,7 @@ Réponse **200** :
         "category": "dechet",
         "type": null,
         "status": null,
-        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "image_urls": ["http://localhost/storage/reports/xyz.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Ampefiloha",
@@ -709,7 +709,7 @@ Réponse **200** :
             "date": "2026-06-01",
             "title": "Journée de nettoyage",
             "description": "Grande journée de nettoyage au parc...",
-            "image_url": "http://localhost/storage/articles/img.jpg",
+            "image_urls": ["http://localhost/storage/articles/img.jpg"],
             "latitude": -18.9103,
             "longitude": 47.5362,
             "location_name": "Parc Tsimbazaza",
@@ -755,7 +755,7 @@ Réponse **201** :
         "type": "evenement",
         "title": "Journée de nettoyage",
         "description": "Grande journée de nettoyage...",
-        "image_url": "http://localhost/storage/articles/img.jpg",
+        "image_urls": ["http://localhost/storage/articles/img.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Parc Tsimbazaza",
@@ -798,7 +798,7 @@ Réponse **201** :
         "date": "2026-05-20",
         "title": "Nouvelle règle de tri des déchets",
         "description": "Dès ce mois-ci...",
-        "image_url": null,
+        "image_urls": [],
         "latitude": null,
         "longitude": null,
         "location_name": null,
@@ -902,7 +902,7 @@ Réponse **200** :
         "type": "evenement",
         "title": "Journée de nettoyage MAJ",
         "description": "Grande journée de nettoyage au parc...",
-        "image_url": "http://localhost/storage/articles/img.jpg",
+        "image_urls": ["http://localhost/storage/articles/img.jpg"],
         "latitude": -18.9103,
         "longitude": 47.5362,
         "location_name": "Parc Tsimbazaza",
@@ -971,7 +971,7 @@ Les images sont stockées dans `storage/app/public/`. Pour qu'elles soient acces
 php artisan storage:link
 ```
 
-L'URL retournée dans `image_url` sera de la forme :
+Les URLs retournées dans `image_urls` seront de la forme :
 ```
 http://localhost/storage/reports/nomfichier.jpg
 http://localhost/storage/articles/nomfichier.jpg

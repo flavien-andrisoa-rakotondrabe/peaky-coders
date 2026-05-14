@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['citizen_id', 'category', 'type', 'status', 'image', 'latitude', 'longitude', 'location_name'])]
+#[Fillable(['citizen_id', 'category', 'type', 'status', 'images', 'latitude', 'longitude', 'location_name'])]
 class Report extends Model
 {
     protected function casts(): array
@@ -13,6 +13,7 @@ class Report extends Model
         return [
             'latitude' => 'float',
             'longitude' => 'float',
+            'images'   => 'array',
         ];
     }
     public function citizen()

@@ -12,6 +12,5 @@ readonly class CreateReportDTO
     public ?string $location,
     public ?float $latitude,
     public ?float $longitude,
-    public ?string $image,
   ) {}
 }

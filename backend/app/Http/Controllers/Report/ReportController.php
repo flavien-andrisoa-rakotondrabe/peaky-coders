@@ -46,10 +46,9 @@ class ReportController extends Controller
             location:  $request->validated('location_name'),
             latitude:  $request->validated('latitude'),
             longitude: $request->validated('longitude'),
-            image:     null,
         );
 
-        $report = $this->service->create($dto, $request->file('image'));
+        $report = $this->service->create($dto, $request->file('images', []));
 
         return response()->json([
             'message' => 'Report created.',
@@ -65,13 +64,12 @@ class ReportController extends Controller
             category:     $request->validated('category'),
             type:         $request->validated('type'),
             status:       $request->validated('status'),
-            image:        null,
             latitude:     $request->validated('latitude'),
             longitude:    $request->validated('longitude'),
             locationName: $request->validated('location_name'),
         );
 
-        $updated = $this->service->update($report, $dto, $request->file('image'));
+        $updated = $this->service->update($report, $dto, $request->file('images', []));
 
         return response()->json([
             'message' => 'Report updated.',

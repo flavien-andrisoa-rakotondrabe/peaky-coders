@@ -15,7 +15,7 @@ class ReportResource extends JsonResource
             'category'      => $this->category,
             'type'          => $this->type,
             'status'        => $this->status,
-            'image_url'     => $this->image ? Storage::url($this->image) : null,
+            'image_urls'    => collect($this->images ?? [])->map(fn($p) => Storage::url($p))->values(),
             'latitude'      => $this->latitude,
             'longitude'     => $this->longitude,
             'location_name' => $this->location_name,

@@ -44,13 +44,12 @@ class ArticleController extends Controller
             date:         $request->validated('date'),
             title:        $request->validated('title'),
             description:  $request->validated('description'),
-            image:        null,
             latitude:     $request->validated('latitude'),
             longitude:    $request->validated('longitude'),
             locationName: $request->validated('location_name'),
         );
 
-        $article = $this->service->create($dto, $request->file('image'));
+        $article = $this->service->create($dto, $request->file('images', []));
 
         return response()->json([
             'message' => 'Article created.',
@@ -67,13 +66,12 @@ class ArticleController extends Controller
             date:         $request->validated('date'),
             title:        $request->validated('title'),
             description:  $request->validated('description'),
-            image:        null,
             latitude:     $request->validated('latitude'),
             longitude:    $request->validated('longitude'),
             locationName: $request->validated('location_name'),
         );
 
-        $updated = $this->service->update($article, $dto, $request->file('image'));
+        $updated = $this->service->update($article, $dto, $request->file('images', []));
 
         return response()->json([
             'message' => 'Article updated.',

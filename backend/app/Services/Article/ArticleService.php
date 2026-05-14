@@ -15,9 +15,12 @@ class ArticleService
         private readonly ArticleRepository $repository,
     ) {}
 
-    public function create(CreateArticleDTO $dto, ?UploadedFile $image): Article
+    public function create(CreateArticleDTO $dto, array $images): Article
     {
-        $imagePath = $image ? $image->store('articles', 'public') : null;
+        $imagePaths = collect($images)
+            ->map(fn(UploadedFile $file) => $file->store('articles', 'public'))
+            ->values()
+            ->toArray();
 
         return $this->repository->create([
             'citizen_id'    => $dto->citizenId,
@@ -25,25 +28,33 @@ class ArticleService
             'date'          => $dto->date,
             'title'         => $dto->title,
             'description'   => $dto->description,
-            'image'         => $imagePath,
+            'images'        => $imagePaths ?: null,
             'latitude'      => $dto->latitude,
             'longitude'     => $dto->longitude,
             'location_name' => $dto->locationName,
         ]);
     }
 
-    public function update(Article $article, UpdateArticleDTO $dto, ?UploadedFile $image): Article
+    public function update(Article $article, UpdateArticleDTO $dto, array $images): Article
     {
-        $imagePath = $image
-            ? $image->store('articles', 'public')
-            : $article->image;
+        if (!empty($images)) {
+            foreach ($article->images ?? [] as $path) {
+                Storage::disk('public')->delete($path);
+            }
+            $imagePaths = collect($images)
+                ->map(fn(UploadedFile $file) => $file->store('articles', 'public'))
+                ->values()
+                ->toArray();
+        } else {
+            $imagePaths = $article->images;
+        }
 
         return $this->repository->update($article, [
             'type'          => $dto->type ?? $article->type,
             'date'          => $dto->date ?? $article->date,
             'title'         => $dto->title ?? $article->title,
             'description'   => $dto->description ?? $article->description,
-            'image'         => $imagePath,
+            'images'        => $imagePaths,
             'latitude'      => $dto->latitude ?? $article->latitude,
             'longitude'     => $dto->longitude ?? $article->longitude,
             'location_name' => $dto->locationName ?? $article->location_name,
@@ -52,8 +63,8 @@ class ArticleService
 
     public function delete(Article $article): void
     {
-        if ($article->image) {
-            Storage::disk('public')->delete($article->image);
+        foreach ($article->images ?? [] as $path) {
+            Storage::disk('public')->delete($path);
         }
 
         $this->repository->delete($article);
