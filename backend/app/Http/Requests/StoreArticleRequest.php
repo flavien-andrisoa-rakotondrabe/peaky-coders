@@ -16,6 +16,7 @@ class StoreArticleRequest extends FormRequest
     {
         return [
             'type'          => ['required', 'string', Rule::in(['evenement', 'divers'])],
+            'date'          => ['required', 'date_format:Y-m-d'],
             'title'         => ['required', 'string', 'max:255'],
             'description'   => ['required', 'string'],
             'image'         => ['nullable', 'image', 'max:5120'],

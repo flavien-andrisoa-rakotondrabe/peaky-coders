@@ -13,6 +13,7 @@ class ArticleResource extends JsonResource
             'id'            => $this->id,
             'citizen'       => new CitizenResource($this->whenLoaded('citizen')),
             'type'          => $this->type,
+            'date'          => $this->date?->format('Y-m-d'),
             'title'         => $this->title,
             'description'   => $this->description,
             'image_url'     => $this->image ? Storage::url($this->image) : null,

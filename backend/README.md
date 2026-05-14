@@ -105,6 +105,7 @@ interface Article {
   id: number
   citizen?: Citizen            // présent sur show / store / update — absent sur index
   type: 'evenement' | 'divers'
+  date: string               // format: "YYYY-MM-DD"
   title: string
   description: string
   image_url: string | null
@@ -219,6 +220,7 @@ interface Article {
             "id": 1,
             "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
             "type": "evenement",
+            "date": "2026-06-01",
             "title": "Journée de nettoyage",
             "description": "Grande journée de nettoyage au parc...",
             "image_url": "http://localhost/storage/articles/img.jpg",
@@ -259,6 +261,7 @@ interface Article {
         "id": 2,
         "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
         "type": "divers",
+        "date": "2026-05-20",
         "title": "Nouvelle règle de tri des déchets",
         "description": "Dès ce mois-ci, les plastiques doivent...",
         "image_url": null,
@@ -703,6 +706,7 @@ Réponse **200** :
             "id": 1,
             "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "..." },
             "type": "evenement",
+            "date": "2026-06-01",
             "title": "Journée de nettoyage",
             "description": "Grande journée de nettoyage au parc...",
             "image_url": "http://localhost/storage/articles/img.jpg",
@@ -733,6 +737,7 @@ Body → `form-data` :
 | Clé            | Type | Valeur                              |
 | -------------- | ---- | ----------------------------------- |
 | `type`         | Text | `evenement`                         |
+| `date`         | Text | `2026-06-01`                        |
 | `title`        | Text | `Journée de nettoyage`              |
 | `description`  | Text | `Grande journée de nettoyage...`    |
 | `latitude`     | Text | `-18.9103`                          |
@@ -777,6 +782,7 @@ Body → `form-data` :
 | Clé           | Type | Valeur                                   |
 | ------------- | ---- | ---------------------------------------- |
 | `type`        | Text | `divers`                                 |
+| `date`        | Text | `2026-05-20`                             |
 | `title`       | Text | `Nouvelle règle de tri des déchets`      |
 | `description` | Text | `Dès ce mois-ci, les plastiques doivent...` |
 
@@ -789,6 +795,7 @@ Réponse **201** :
     "data": {
         "id": 2,
         "type": "divers",
+        "date": "2026-05-20",
         "title": "Nouvelle règle de tri des déchets",
         "description": "Dès ce mois-ci...",
         "image_url": null,

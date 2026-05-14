@@ -22,6 +22,7 @@ class ArticleService
         return $this->repository->create([
             'citizen_id'    => $dto->citizenId,
             'type'          => $dto->type,
+            'date'          => $dto->date,
             'title'         => $dto->title,
             'description'   => $dto->description,
             'image'         => $imagePath,
@@ -39,6 +40,7 @@ class ArticleService
 
         return $this->repository->update($article, [
             'type'          => $dto->type ?? $article->type,
+            'date'          => $dto->date ?? $article->date,
             'title'         => $dto->title ?? $article->title,
             'description'   => $dto->description ?? $article->description,
             'image'         => $imagePath,

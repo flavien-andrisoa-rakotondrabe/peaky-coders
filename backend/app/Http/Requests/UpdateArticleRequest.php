@@ -16,6 +16,7 @@ class UpdateArticleRequest extends FormRequest
     {
         return [
             'type'          => ['sometimes', 'string', Rule::in(['evenement', 'divers'])],
+            'date'          => ['sometimes', 'date_format:Y-m-d'],
             'title'         => ['sometimes', 'string', 'max:255'],
             'description'   => ['sometimes', 'string'],
             'image'         => ['nullable', 'image', 'max:5120'],

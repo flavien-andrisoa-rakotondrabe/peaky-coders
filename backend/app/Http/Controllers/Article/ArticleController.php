@@ -41,6 +41,7 @@ class ArticleController extends Controller
         $dto = new CreateArticleDTO(
             citizenId:    $request->user()->id,
             type:         $request->validated('type'),
+            date:         $request->validated('date'),
             title:        $request->validated('title'),
             description:  $request->validated('description'),
             image:        null,
@@ -63,6 +64,7 @@ class ArticleController extends Controller
 
         $dto = new UpdateArticleDTO(
             type:         $request->validated('type'),
+            date:         $request->validated('date'),
             title:        $request->validated('title'),
             description:  $request->validated('description'),
             image:        null,
