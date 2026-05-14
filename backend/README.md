@@ -68,11 +68,235 @@ X-Citizen-Token: {ton-uuid-token}
 | POST    | `/api/reports`            | Oui  | Créer un signalement          |
 | POST    | `/api/reports/{id}`       | Oui  | Modifier son signalement      |
 | DELETE  | `/api/reports/{id}`       | Oui  | Supprimer son signalement     |
-| GET     | `/api/articles`           | Non  | Lister toutes les actualités  |
-| GET     | `/api/articles/{id}`      | Non  | Voir une actualité            |
-| POST    | `/api/articles`           | Oui  | Créer une actualité           |
-| POST    | `/api/articles/{id}`      | Oui  | Modifier son actualité        |
-| DELETE  | `/api/articles/{id}`      | Oui  | Supprimer son actualité       |
+| GET     | `/api/news`               | Non  | Lister toutes les actualités  |
+| GET     | `/api/news/{id}`          | Non  | Voir une actualité            |
+| POST    | `/api/news`               | Oui  | Créer une actualité           |
+| POST    | `/api/news/{id}`          | Oui  | Modifier son actualité        |
+| DELETE  | `/api/news/{id}`          | Oui  | Supprimer son actualité       |
+
+---
+
+## Structures de réponse — Report & Article
+
+### Interfaces TypeScript
+
+```ts
+interface Citizen {
+  id: number
+  name: string
+  expires_at: string  // ISO8601, ex: "2027-05-14T07:00:00.000000Z"
+}
+
+interface Report {
+  id: number
+  citizen?: Citizen         // présent sur show / store / update — absent sur index
+  category: 'dechet' | 'infra' | 'incendie'
+  type: string | null       // requis si category = 'infra'
+  status: string | null     // requis si category = 'infra'
+  image_url: string | null  // ex: "http://localhost/storage/reports/abc.jpg"
+  latitude: number
+  longitude: number
+  location_name: string
+  created_at: string        // ISO8601
+  updated_at: string        // ISO8601
+}
+
+interface Article {
+  id: number
+  citizen?: Citizen            // présent sur show / store / update — absent sur index
+  type: 'evenement' | 'divers'
+  title: string
+  description: string
+  image_url: string | null
+  latitude: number | null      // requis si type = 'evenement'
+  longitude: number | null     // requis si type = 'evenement'
+  location_name: string | null // requis si type = 'evenement'
+  created_at: string
+  updated_at: string
+}
+```
+
+---
+
+### Réponses par endpoint — Reports
+
+**GET /api/reports** → `200`
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+            "category": "dechet",
+            "type": null,
+            "status": null,
+            "image_url": "http://localhost/storage/reports/xyz.jpg",
+            "latitude": -18.9103,
+            "longitude": 47.5362,
+            "location_name": "Antananarivo Centre",
+            "created_at": "2026-05-14T08:00:00.000000Z",
+            "updated_at": "2026-05-14T08:00:00.000000Z"
+        }
+    ]
+}
+```
+
+**GET /api/reports/{id}** → `200`
+```json
+{
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "category": "dechet",
+        "type": null,
+        "status": null,
+        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Antananarivo Centre",
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T08:00:00.000000Z"
+    }
+}
+```
+
+**POST /api/reports** → `201`
+```json
+{
+    "message": "Report created.",
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "category": "infra",
+        "type": "Route endommagée",
+        "status": "En attente de réparation",
+        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Antananarivo Centre",
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T08:00:00.000000Z"
+    }
+}
+```
+
+**POST /api/reports/{id}** → `200`
+```json
+{
+    "message": "Report updated.",
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "category": "dechet",
+        "type": null,
+        "status": null,
+        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Ampefiloha",
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T09:00:00.000000Z"
+    }
+}
+```
+
+**DELETE /api/reports/{id}** → `200`
+```json
+{
+    "message": "Report deleted."
+}
+```
+
+---
+
+### Réponses par endpoint — Articles (endpoint : `/api/news`)
+
+**GET /api/news** → `200`
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+            "type": "evenement",
+            "title": "Journée de nettoyage",
+            "description": "Grande journée de nettoyage au parc...",
+            "image_url": "http://localhost/storage/articles/img.jpg",
+            "latitude": -18.9103,
+            "longitude": 47.5362,
+            "location_name": "Parc Tsimbazaza",
+            "created_at": "2026-05-14T08:00:00.000000Z",
+            "updated_at": "2026-05-14T08:00:00.000000Z"
+        }
+    ]
+}
+```
+
+**GET /api/news/{id}** → `200`
+```json
+{
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "type": "evenement",
+        "title": "Journée de nettoyage",
+        "description": "Grande journée de nettoyage au parc...",
+        "image_url": "http://localhost/storage/articles/img.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Parc Tsimbazaza",
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T08:00:00.000000Z"
+    }
+}
+```
+
+**POST /api/news** → `201`
+```json
+{
+    "message": "Article created.",
+    "data": {
+        "id": 2,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "type": "divers",
+        "title": "Nouvelle règle de tri des déchets",
+        "description": "Dès ce mois-ci, les plastiques doivent...",
+        "image_url": null,
+        "latitude": null,
+        "longitude": null,
+        "location_name": null,
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T08:00:00.000000Z"
+    }
+}
+```
+
+**POST /api/news/{id}** → `200`
+```json
+{
+    "message": "Article updated.",
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "type": "evenement",
+        "title": "Journée de nettoyage MAJ",
+        "description": "Grande journée de nettoyage au parc...",
+        "image_url": "http://localhost/storage/articles/img.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Parc Tsimbazaza",
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T09:00:00.000000Z"
+    }
+}
+```
+
+**DELETE /api/news/{id}** → `200`
+```json
+{
+    "message": "Article deleted."
+}
+```
 
 ---
 
@@ -391,7 +615,19 @@ Réponse **200** :
 ```json
 {
     "message": "Report updated.",
-    "data": { "...": "..." }
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "category": "dechet",
+        "type": null,
+        "status": null,
+        "image_url": "http://localhost/storage/reports/xyz.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Ampefiloha",
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T09:00:00.000000Z"
+    }
 }
 ```
 
@@ -457,7 +693,7 @@ Une actualité a deux types : `evenement` (avec localisation) ou `divers` (sans 
 
 #### 3.1 — Lister toutes les actualités (public)
 
-**GET** `http://localhost/api/articles`
+**GET** `http://localhost/api/news`
 
 Réponse **200** :
 ```json
@@ -484,7 +720,7 @@ Réponse **200** :
 
 #### 3.2 — Créer une actualité — type `evenement`
 
-**POST** `http://localhost/api/articles`
+**POST** `http://localhost/api/news`
 
 Headers :
 ```
@@ -528,7 +764,7 @@ Réponse **201** :
 
 #### 3.3 — Créer une actualité — type `divers` (sans localisation)
 
-**POST** `http://localhost/api/articles`
+**POST** `http://localhost/api/news`
 
 Headers :
 ```
@@ -627,7 +863,7 @@ Réponse **401** :
 
 #### 3.7 — Voir une actualité (public)
 
-**GET** `http://localhost/api/articles/1`
+**GET** `http://localhost/api/news/1`
 
 Réponse **200** : même structure que la création.
 
@@ -635,7 +871,7 @@ Réponse **200** : même structure que la création.
 
 #### 3.8 — Modifier son actualité
 
-**POST** `http://localhost/api/articles/1`
+**POST** `http://localhost/api/news/1`
 
 Headers :
 ```
@@ -653,7 +889,19 @@ Réponse **200** :
 ```json
 {
     "message": "Article updated.",
-    "data": { "...": "..." }
+    "data": {
+        "id": 1,
+        "citizen": { "id": 1, "name": "Jean Dupont", "expires_at": "2027-05-14T07:00:00.000000Z" },
+        "type": "evenement",
+        "title": "Journée de nettoyage MAJ",
+        "description": "Grande journée de nettoyage au parc...",
+        "image_url": "http://localhost/storage/articles/img.jpg",
+        "latitude": -18.9103,
+        "longitude": 47.5362,
+        "location_name": "Parc Tsimbazaza",
+        "created_at": "2026-05-14T08:00:00.000000Z",
+        "updated_at": "2026-05-14T09:00:00.000000Z"
+    }
 }
 ```
 
@@ -674,7 +922,7 @@ Réponse **403** :
 
 #### 3.10 — Supprimer son actualité
 
-**DELETE** `http://localhost/api/articles/1`
+**DELETE** `http://localhost/api/news/1`
 
 Headers :
 ```
