@@ -22,7 +22,7 @@ class AuthService
         private readonly UserRepository $userRepository,
     ) {}
 
-    public function register(RegisterDTO $dto): AuthResponseDTO
+    public function register(RegisterDTO $dto): User
     {
         $user = $this->userRepository->create([
             'first_name'        => $dto->firstName,
@@ -36,13 +36,7 @@ class AuthService
 
         Mail::to($user->email)->send(new WelcomeEmail($user));
 
-        $token = $user->createToken(
-            name: 'auth_token',
-            abilities: ['*'],
-            expiresAt: $this->resolveExpiration($dto->rememberMe),
-        )->plainTextToken;
-
-        return new AuthResponseDTO(user: $user, accessToken: $token);
+        return $user;
     }
 
     public function login(LoginDTO $dto): AuthResponseDTO
@@ -107,7 +101,7 @@ class AuthService
         return new AuthResponseDTO(user: $user, accessToken: $token);
     }
 
-    public function completeProfile(User $user, array $data): AuthResponseDTO
+    public function completeProfile(User $user, array $data): User
     {
         $needsWelcomeEmail = $user->email === null && ! empty($data['email']);
 
@@ -132,14 +126,7 @@ class AuthService
             Mail::to($user->email)->send(new WelcomeEmail($user));
         }
 
-        $user->tokens()->delete();
-        $token = $user->createToken(
-            name: 'auth_token',
-            abilities: ['*'],
-            expiresAt: now()->addYear(),
-        )->plainTextToken;
-
-        return new AuthResponseDTO(user: $user, accessToken: $token);
+        return $user;
     }
 
     public function logout(User $user): void

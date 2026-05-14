@@ -25,14 +25,12 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $dto = RegisterDTO::fromArray($request->validated());
-        $result = $this->authService->register($dto);
+        $user = $this->authService->register($dto);
 
         return response()->json([
             'message' => 'Compte créé avec succès.',
             'data' => [
-                'access_token' => $result->accessToken,
-                'token_type' => $result->tokenType,
-                'user' => new UserResource($result->user),
+                'user' => new UserResource($user),
             ],
         ], 201);
     }
@@ -68,14 +66,12 @@ class AuthController extends Controller
 
     public function completeProfile(CompleteProfileRequest $request): JsonResponse
     {
-        $result = $this->authService->completeProfile($request->user(), $request->validated());
+        $user = $this->authService->completeProfile($request->user(), $request->validated());
 
         return response()->json([
             'message' => 'Profil complété avec succès.',
             'data' => [
-                'access_token' => $result->accessToken,
-                'token_type'   => $result->tokenType,
-                'user'         => new UserResource($result->user),
+                'user' => new UserResource($user),
             ],
         ]);
     }
