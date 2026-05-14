@@ -2,7 +2,6 @@
 
 namespace App\Services\Auth;
 
-use App\DTOs\Auth\AuthResponseDTO;
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
 use App\DTOs\Auth\SocialAuthDTO;
@@ -39,7 +38,7 @@ class AuthService
         return $user;
     }
 
-    public function login(LoginDTO $dto): AuthResponseDTO
+    public function login(LoginDTO $dto): User
     {
         $user = $this->userRepository->findByEmail($dto->email);
 
@@ -49,14 +48,10 @@ class AuthService
             ]);
         }
 
-        auth()->login($user);
-
-        return new AuthResponseDTO(
-            user: $user,
-        );
+        return $user;
     }
 
-    public function handleSocialCallback(SocialAuthDTO $dto): AuthResponseDTO
+    public function findSocialUser(SocialAuthDTO $dto): ?User
     {
         $idField = $dto->provider === 'google' ? 'google_id' : 'facebook_id';
 
@@ -66,68 +61,44 @@ class AuthService
             default    => null,
         } ?? ($dto->email ? $this->userRepository->findByEmail($dto->email) : null);
 
-        if ($user) {
-            if (! $user->{$idField}) {
-                $this->userRepository->update($user, [$idField => $dto->providerId]);
-                $user = $user->fresh();
-            }
-        } else {
-            $user = $this->userRepository->create([
-                'first_name'        => $dto->firstName,
-                'last_name'         => $dto->lastName,
-                'name'              => $dto->firstName . ' ' . $dto->lastName,
-                'email'             => $dto->email,
-                $idField            => $dto->providerId,
-                'avatar'            => $dto->avatar,
-                'email_verified_at' => now(),
-                'profile_completed' => false,
-            ]);
-
-            if ($user->email) {
-                Mail::to($user->email)->send(new WelcomeEmail($user));
-            }
-        }
-
-        $token = $user->createToken(
-            name: 'auth_token',
-            abilities: ['*'],
-            expiresAt: now()->addDay(),
-        )->plainTextToken;
-
-        return new AuthResponseDTO(user: $user);
-    }
-
-    public function completeProfile(User $user, array $data): User
-    {
-        $needsWelcomeEmail = $user->email === null && ! empty($data['email']);
-
-        $update = [
-            'phone'             => $data['phone'],
-            'profile_completed' => true,
-        ];
-
-        if (! empty($data['email'])) {
-            $update['email']             = $data['email'];
-            $update['email_verified_at'] = now();
-        }
-
-        if (! empty($data['password'])) {
-            $update['password'] = Hash::make($data['password']);
-        }
-
-        $this->userRepository->update($user, $update);
-        $user = $user->fresh();
-
-        if ($needsWelcomeEmail) {
-            Mail::to($user->email)->send(new WelcomeEmail($user));
+        if ($user && ! $user->{$idField}) {
+            $this->userRepository->update($user, [$idField => $dto->providerId]);
+            $user = $user->fresh();
         }
 
         return $user;
     }
 
-    public function logout(User $user): void
+    public function createSocialUser(SocialAuthDTO $dto, string $phone, ?string $email, ?string $password): User
     {
-        $user->currentAccessToken()->delete();
+        $idField    = $dto->provider === 'google' ? 'google_id' : 'facebook_id';
+        $userEmail  = $dto->email ?? $email;
+
+        $user = $this->userRepository->create([
+            'first_name'        => $dto->firstName,
+            'last_name'         => $dto->lastName,
+            'name'              => $dto->firstName . ' ' . $dto->lastName,
+            'email'             => $userEmail,
+            $idField            => $dto->providerId,
+            'avatar'            => $dto->avatar,
+            'email_verified_at' => now(),
+            'profile_completed' => true,
+            'phone'             => $phone,
+            'password'          => $password ? Hash::make($password) : null,
+        ]);
+
+        if ($userEmail) {
+            Mail::to($userEmail)->send(new WelcomeEmail($user));
+        }
+
+        return $user;
+    }
+
+    public function logout(): void
+    {
+        auth()->logout();
+        session()->invalidate();
+        session()->regenerateToken();
     }
 
     public function sendPasswordResetLink(string $email): string
@@ -139,23 +110,18 @@ class AuthService
     {
         return Password::reset(
             credentials: [
-                'token' => $token,
-                'email' => $email,
+                'token'    => $token,
+                'email'    => $email,
                 'password' => $password,
             ],
             callback: function ($user, string $password): void {
                 $user->forceFill([
-                    'password' => Hash::make($password),
+                    'password'       => Hash::make($password),
                     'remember_token' => Str::random(60),
                 ])->save();
 
                 event(new PasswordReset($user));
             },
         );
-    }
-
-    private function resolveExpiration(bool $rememberMe): \DateTimeInterface
-    {
-        return $rememberMe ? now()->addYear() : now()->addDay();
     }
 }

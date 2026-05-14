@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
+use App\DTOs\Auth\SocialAuthDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\CompleteProfileRequest;
+use App\Http\Requests\Auth\CompleteSocialProfileRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -24,7 +25,7 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request): JsonResponse
     {
-        $dto = RegisterDTO::fromArray($request->validated());
+        $dto  = RegisterDTO::fromArray($request->validated());
         $user = $this->authService->register($dto);
 
         return response()->json([
@@ -34,24 +35,23 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        $dto = LoginDTO::fromArray($request->validated());
+        $dto  = LoginDTO::fromArray($request->validated());
+        $user = $this->authService->login($dto);
 
-        $result = $this->authService->login($dto);
-
+        auth()->login($user);
         $request->session()->regenerate();
 
         return response()->json([
             'message' => 'Connexion réussie.',
-            'user' => $result->user,
+            'user'    => new UserResource($user),
         ]);
     }
 
-    public function logout(Request $request): JsonResponse
+    public function logout(): JsonResponse
     {
-        $this->authService->logout($request->user());
+        $this->authService->logout();
 
-        return response()->json(['message' => 'Déconnexion réussie.'])
-            ->withoutCookie('access_token');
+        return response()->json(['message' => 'Déconnexion réussie.']);
     }
 
     public function me(Request $request): JsonResponse
@@ -61,13 +61,39 @@ class AuthController extends Controller
         ]);
     }
 
-    public function completeProfile(CompleteProfileRequest $request): JsonResponse
+    public function completeSocialProfile(CompleteSocialProfileRequest $request): JsonResponse
     {
-        $user = $this->authService->completeProfile($request->user(), $request->validated());
+        $raw = $request->cookie('social_auth_data');
+
+        if (! $raw) {
+            return response()->json(['message' => 'Session expirée, recommencez la connexion.'], 422);
+        }
+
+        $data = json_decode($raw, true);
+
+        $dto = new SocialAuthDTO(
+            provider:   $data['provider'],
+            providerId: $data['provider_id'],
+            firstName:  $data['first_name'],
+            lastName:   $data['last_name'],
+            email:      $data['email'] ?? null,
+            avatar:     $data['avatar'] ?? null,
+        );
+
+        $user = $this->authService->createSocialUser(
+            dto:      $dto,
+            phone:    $request->validated('phone'),
+            email:    $request->validated('email'),
+            password: $request->validated('password'),
+        );
+
+        auth()->login($user);
+        $request->session()->regenerate();
 
         return response()->json([
-            'message' => 'Profil complété avec succès.',
-        ]);
+            'message' => 'Compte créé avec succès.',
+            'user'    => new UserResource($user),
+        ], 201)->withoutCookie('social_auth_data');
     }
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
@@ -84,8 +110,8 @@ class AuthController extends Controller
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
         $status = $this->authService->resetPassword(
-            token: $request->validated('token'),
-            email: $request->validated('email'),
+            token:    $request->validated('token'),
+            email:    $request->validated('email'),
             password: $request->validated('password'),
         );
 

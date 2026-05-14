@@ -15,7 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
-        $middleware->prependToGroup('api', \App\Http\Middleware\TokenFromCookie::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Retourne systématiquement du JSON pour les requêtes API

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\DTOs\Auth\SocialAuthDTO;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\AuthService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
@@ -18,27 +17,37 @@ class SocialAuthController extends Controller
 
     public function redirectToGoogle(): RedirectResponse
     {
-        return Socialite::driver('google')
-            ->stateless()
-            ->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     public function handleGoogleCallback(): RedirectResponse
     {
         $socialUser = Socialite::driver('google')->stateless()->user();
-        $dto = SocialAuthDTO::fromSocialiteUser($socialUser, 'google');
-        $result = $this->authService->handleSocialCallback($dto);
+        $dto        = SocialAuthDTO::fromSocialiteUser($socialUser, 'google');
+        $frontend   = config('app.frontend_url', config('app.url'));
 
-        $frontend = config('app.frontend_url', config('app.url'));
-        $profileCompleted = $result->user->profile_completed ? 'true' : 'false';
+        $user = $this->authService->findSocialUser($dto);
 
-        return redirect($frontend . '/auth/callback?profile_completed=' . $profileCompleted)
-            ->cookie('access_token', $result->accessToken, 60 * 24, '/', null, config('session.secure'), true);
+        if ($user) {
+            auth()->login($user);
+            session()->regenerate();
+            return redirect($frontend . '/home');
+        }
+
+        return redirect($frontend . '/callback')
+            ->cookie('social_auth_data', json_encode([
+                'provider'    => $dto->provider,
+                'provider_id' => $dto->providerId,
+                'first_name'  => $dto->firstName,
+                'last_name'   => $dto->lastName,
+                'email'       => $dto->email,
+                'avatar'      => $dto->avatar,
+            ]), 60, '/', null, config('session.secure'), true);
     }
 
     public function redirectToFacebook(): RedirectResponse
     {
-        return  Socialite::driver('facebook')->stateless()->redirect();
+        return Socialite::driver('facebook')->stateless()->redirect();
     }
 
     public function handleFacebookCallback(Request $request): RedirectResponse
@@ -47,21 +56,34 @@ class SocialAuthController extends Controller
 
         if ($request->has('error') || ! $request->has('code')) {
             $msg = $request->input('error_description', 'Facebook authentication failed');
-            return redirect($frontend . '/auth/callback?error=' . urlencode($msg));
+            return redirect($frontend . '/callback?error=' . urlencode($msg));
         }
 
         try {
             $socialUser = Socialite::driver('facebook')->stateless()->user();
-            $dto = SocialAuthDTO::fromSocialiteUser($socialUser, 'facebook');
-            $result = $this->authService->handleSocialCallback($dto);
+            $dto        = SocialAuthDTO::fromSocialiteUser($socialUser, 'facebook');
 
-            $profileCompleted = $result->user->profile_completed ? 'true' : 'false';
-            $emailRequired = ! $result->user->email ? '&email_required=true' : '';
+            $user = $this->authService->findSocialUser($dto);
 
-            return redirect($frontend . '/auth/callback?profile_completed=' . $profileCompleted . $emailRequired)
-                ->cookie('access_token', $result->accessToken, 60 * 24, '/', null, config('session.secure'), true);
+            if ($user) {
+                auth()->login($user);
+                session()->regenerate();
+                return redirect($frontend . '/home');
+            }
+
+            $emailRequired = ! $dto->email ? '&email_required=true' : '';
+
+            return redirect($frontend . '/callback' . $emailRequired)
+                ->cookie('social_auth_data', json_encode([
+                    'provider'    => $dto->provider,
+                    'provider_id' => $dto->providerId,
+                    'first_name'  => $dto->firstName,
+                    'last_name'   => $dto->lastName,
+                    'email'       => $dto->email,
+                    'avatar'      => $dto->avatar,
+                ]), 60, '/', null, config('session.secure'), true);
         } catch (\Exception) {
-            return redirect($frontend . '/auth/callback?error=' . urlencode('Facebook authentication failed'));
+            return redirect($frontend . '/callback?error=' . urlencode('Facebook authentication failed'));
         }
     }
 }
