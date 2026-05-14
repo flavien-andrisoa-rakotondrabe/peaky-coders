@@ -8,7 +8,5 @@ readonly class AuthResponseDTO
 {
     public function __construct(
         public User $user,
-        public string $accessToken,
-        public string $tokenType = 'Bearer',
     ) {}
 }
