@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  turbopack: {
+      // Définit le dossier actuel comme racine du projet
+      root: __dirname,
+    },
 };
 
 export default nextConfig;

@@ -1,42 +1,23 @@
-import Image from "next/image";
+import Header from "@/components/layout/Navigation";
+import Footer from "@/components/layout/Footer";
+import Hero from "@/components/utils/Hero";
+import Categories from "@/components/utils/Categories";
+import HowItWorks from "@/components/utils/HowItWork";
+import Testimonial from "@/components/utils/Testimonial";
+import Features from "@/components/utils/Features";
+import CtaBanner from "@/components/utils/CtaBanner";
+import HoverCards from "@/components/utils/HoverCard";
+import CardEvent from "@/components/utils/EventCard";
+import AddEventForm from "@/components/utils/AddEventCard";
+import ParticleBackground from "@/components/utils/ParticuleBackground";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <>
-      {/* <FormTextArea
-      label={"Biographie"}
-      name="bio"
-      icon={FileText}
-      value={data.bio || ""}
-      setData={setData}
-      error={errors.bio}
-      clearError={clearErrors}
-      edit={edit}
-      className="min-h-25"
-      placeholder={"Présentez-vous..."}
-    /> */}
-
-      {/* <FormSelect
-        label={"Catégorie *"}
-        name="category"
-        value={data.category}
-        options={TICKET_CATEGORIES}
-        setData={setData}
-        error={errors.category}
-        clearError={clearErrors}
-      /> */}
-
-      {/* <FormRadioGroup
-        label={"Méthode de versement"}
-        name="payoutMethod"
-        options={PAYOUT_METHODS}
-        value={data.payoutMethod || ""}
-        setData={setData}
-        error={errors.payoutMethod}
-        clearError={clearErrors}
-        edit={edit}
-        className="grid-cols-3"
-      /> */}
-    </>
+    <main className="overflow-x-hidden">
+      <Header/>
+      <Hero/>
+      <Categories/>
+      {/* <ParticleBackground/> */}
+    </main>
   );
 }
