@@ -16,11 +16,11 @@ class SocialAuthController extends Controller
         private readonly AuthService $authService,
     ) {}
 
-    public function redirectToGoogle(): JsonResponse
+    public function redirectToGoogle(): RedirectResponse
     {
-        $url = Socialite::driver('google')->stateless()->redirect()->getTargetUrl();
-
-        return response()->json(['redirect_url' => $url]);
+        return Socialite::driver('google')
+            ->stateless()
+            ->redirect();
     }
 
     public function handleGoogleCallback(): RedirectResponse
@@ -36,11 +36,9 @@ class SocialAuthController extends Controller
             ->cookie('access_token', $result->accessToken, 60 * 24, '/', null, config('session.secure'), true);
     }
 
-    public function redirectToFacebook(): JsonResponse
+    public function redirectToFacebook(): RedirectResponse
     {
-        $url = Socialite::driver('facebook')->stateless()->redirect()->getTargetUrl();
-
-        return response()->json(['redirect_url' => $url]);
+        return  Socialite::driver('facebook')->stateless()->redirect();
     }
 
     public function handleFacebookCallback(Request $request): RedirectResponse
