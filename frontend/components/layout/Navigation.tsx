@@ -57,7 +57,7 @@ export default function Header() {
 
           <Button3DV2
             label="Explorer"
-            breakpoints={[{ tw: "sm", width: 140, height: 44, fontSize: 14 }]}
+            breakpoints={[{ tw: "sm", width: 80, height: 48, fontSize: 16 }]}
           />
         </div>
 

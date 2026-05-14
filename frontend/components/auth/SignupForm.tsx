@@ -7,13 +7,15 @@ import * as z from "zod";
 import { FormInput } from "@/components/utils/FormInput";
 import Link from "next/link";
 import Button3DV2 from "@/components/utils/Button3DV2";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 // 1. Schéma de validation Zod
 const signupSchema = z
   .object({
-    firstName: z.string().min(2, "Prénom requis"),
-    lastName: z.string().min(2, "Nom requis"),
-    tel: z.string().min(10, "Numéro de téléphone invalide"),
+    first_name: z.string().min(2, "Prénom requis"),
+    last_name: z.string().min(2, "Nom requis"),
+    phone: z.string().min(10, "Numéro de téléphone invalide"),
     email: z.string().email("Email invalide"),
     password: z.string().min(6, "Minimum 6 caractères"),
     password_confirmation: z.string(),
@@ -42,20 +44,34 @@ export function SignupForm({
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      tel: "",
+      first_name: "",
+      last_name: "",
+      phone: "",
       email: "",
       password: "",
       password_confirmation: "",
     },
   });
 
-  // 3. Action de soumission
   const onSubmit = async (values: SignupFormValues) => {
-    // Simuler l'envoi ou utiliser Inertia post
-    console.log("Données envoyées :", values);
-    // Exemple Inertia : post(`/${locale}/auth/register`, values, { onSuccess: () => reset() });
+    try {
+      await api.get("/sanctum/csrf-cookie");
+
+      const res = await api.post("/api/auth/register", values);
+
+      if (res.status === 201 || res.status === 200) {
+        toast.success("Inscription réussie !");
+
+        onSwitchToLogin();
+      }
+    } catch (error: any) {
+      if (error.response && error.response.status === 422) {
+        toast.error("Echec de l'inscription :", error.response.data.errors);
+      } else {
+        toast.error("Une erreur inattendue est survenue.");
+      }
+    } finally {
+    }
   };
 
   return (
@@ -83,8 +99,8 @@ export function SignupForm({
           icon={User}
           placeholder="Jean"
           autoComplete="given-name"
-          error={errors.firstName?.message}
-          {...register("firstName")}
+          error={errors.first_name?.message}
+          {...register("first_name")}
         />
 
         <FormInput
@@ -92,8 +108,8 @@ export function SignupForm({
           icon={User}
           placeholder="Dupont"
           autoComplete="family-name"
-          error={errors.lastName?.message}
-          {...register("lastName")}
+          error={errors.last_name?.message}
+          {...register("last_name")}
         />
       </div>
 
@@ -104,8 +120,8 @@ export function SignupForm({
         icon={Phone}
         placeholder="+33 6 00 00 00 00"
         autoComplete="tel"
-        error={errors.tel?.message}
-        {...register("tel")}
+        error={errors.phone?.message}
+        {...register("phone")}
       />
 
       <FormInput
@@ -159,6 +175,7 @@ export function SignupForm({
         disabled={isSubmitting}
         label={isSubmitting ? "Inscription..." : "S'inscrire"}
         fullWidth
+        breakpoints={[{ tw: "sm", width: 80, height: 48, fontSize: 16 }]}
       />
 
       {/* Liens légaux */}

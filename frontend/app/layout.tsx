@@ -4,6 +4,8 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import ToastProvider from "@/providers/ToastProvider";
+import ReduxProvider from "@/providers/ReduxProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -40,7 +42,11 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col" cz-shortcut-listen="true">
-        <TooltipProvider>{children}</TooltipProvider>
+        <ReduxProvider>
+          <TooltipProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </TooltipProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import Button3DV2 from "@/components/utils/Button3DV2";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,15 +15,14 @@ import { FieldGroup } from "@/components/ui/field";
 import { FormInput } from "@/components/utils/FormInput";
 import { Separator } from "@/components/ui/separator";
 import { FormCheckbox } from "@/components/utils/FormCheckbox";
-import Link from "next/link";
-import Button3DV2 from "@/components/utils/Button3DV2";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // 1. Définition du schéma de validation avec Zod
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
-  password: z
-    .string()
-    .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  password: z.string(),
   remember: z.boolean(),
 });
 
@@ -33,16 +34,17 @@ export function LoginForm({
 }: {
   onSwitchToSignup: () => void;
 }) {
+  const router = useRouter();
   const [showPwd, setShowPwd] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 2. Initialisation de React Hook Form
   const {
     register,
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     reset,
+    setError,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -53,22 +55,24 @@ export function LoginForm({
   });
 
   // 3. Gestion de la soumission
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsSubmitting(true);
-
+  const onSubmit = async (values: LoginFormValues) => {
     try {
-      // Si tu es sur Next.js (App Router), tu utiliserais un Server Action ou fetch
-      // Si tu es toujours avec Inertia, tu utilises router.post
-      console.log("Données envoyées :", data);
+      await api.get("/sanctum/csrf-cookie");
 
-      // Exemple avec fetch / API :
-      // await authService.login(data);
+      const res = await api.post("/api/auth/login", values);
 
-      reset();
-    } catch (error) {
-      console.error(error);
+      if (res.status === 201 || res.status === 200) {
+        toast.success("Connexion réussie !");
+
+        router.push("/home");
+      }
+    } catch (error: any) {
+      if (error.response && error.response.status === 422) {
+        setError("email", { message: "Informations non valides." });
+      } else {
+        toast.error("Une erreur inattendue est survenue.");
+      }
     } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -161,6 +165,7 @@ export function LoginForm({
             disabled={isSubmitting}
             label={isSubmitting ? "Connexion..." : "Se connecter"}
             fullWidth
+            breakpoints={[{ tw: "sm", width: 80, height: 48, fontSize: 16 }]}
           />
         </form>
 

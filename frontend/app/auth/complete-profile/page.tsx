@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, EyeOff, Lock, ArrowRight, User, Phone } from "lucide-react";
+import { Eye, EyeOff, Lock, User, Phone } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/utils/FormInput";
 import Logo from "@/components/utils/Logo";
+import Button3DV2 from "@/components/utils/Button3DV2";
 
 // 1. Schéma de validation
 const completeProfileSchema = z
@@ -51,7 +51,6 @@ export default function CompleteProfilePage({ socialUser }: Props) {
       tel: "",
       password: "",
       password_confirmation: "",
-      role: "client",
     },
   });
 
@@ -142,15 +141,13 @@ export default function CompleteProfilePage({ socialUser }: Props) {
               {...register("password_confirmation")}
             />
 
-            <Button
+            <Button3DV2
               type="submit"
               disabled={isSubmitting}
-              className="font-body h-12 w-full gap-2 rounded-xl bg-gradient-coral text-base font-semibold text-white shadow-hero hover:opacity-90 disabled:opacity-50"
-              size="lg"
-            >
-              {isSubmitting ? "Chargement..." : "Continuer"}
-              {!isSubmitting && <ArrowRight className="h-4 w-4" />}
-            </Button>
+              label={isSubmitting ? "Accèssion..." : "Continuer"}
+              fullWidth
+              breakpoints={[{ tw: "sm", width: 80, height: 48, fontSize: 16 }]}
+            />
           </form>
 
           <p className="font-body mt-2 text-center text-xs text-muted-foreground px-4">
