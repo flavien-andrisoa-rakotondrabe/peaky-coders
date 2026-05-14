@@ -6,10 +6,12 @@ use App\DTOs\Auth\AuthResponseDTO;
 use App\DTOs\Auth\LoginDTO;
 use App\DTOs\Auth\RegisterDTO;
 use App\DTOs\Auth\SocialAuthDTO;
+use App\Mail\WelcomeEmail;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -31,6 +33,8 @@ class AuthService
             'password'          => Hash::make($dto->password),
             'profile_completed' => true,
         ]);
+
+        Mail::to($user->email)->send(new WelcomeEmail($user));
 
         $token = $user->createToken(
             name: 'auth_token',
@@ -88,6 +92,10 @@ class AuthService
                 'email_verified_at' => now(),
                 'profile_completed' => false,
             ]);
+
+            if ($user->email) {
+                Mail::to($user->email)->send(new WelcomeEmail($user));
+            }
         }
 
         $token = $user->createToken(
@@ -101,6 +109,8 @@ class AuthService
 
     public function completeProfile(User $user, array $data): AuthResponseDTO
     {
+        $needsWelcomeEmail = $user->email === null && ! empty($data['email']);
+
         $update = [
             'phone'             => $data['phone'],
             'profile_completed' => true,
@@ -117,6 +127,10 @@ class AuthService
 
         $this->userRepository->update($user, $update);
         $user = $user->fresh();
+
+        if ($needsWelcomeEmail) {
+            Mail::to($user->email)->send(new WelcomeEmail($user));
+        }
 
         $user->tokens()->delete();
         $token = $user->createToken(
