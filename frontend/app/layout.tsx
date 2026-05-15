@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+// import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Fira_Code } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { cn } from "@/lib/utils";
@@ -7,17 +8,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ToastProvider from "@/providers/ToastProvider";
 import ReduxProvider from "@/providers/ReduxProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import LeafletProvider from "@/providers/LeafletProvider";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const slabo = Fira_Code({
+  weight: "400",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-fira",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -33,20 +30,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(
-        "h-full",
-        "antialiased",
-        geistSans.variable,
-        geistMono.variable,
-        "font-sans",
-        inter.variable,
-      )}
+      className={cn("h-full", "antialiased", "font-sans", slabo.variable)}
     >
       <body className="min-h-full flex flex-col" cz-shortcut-listen="true">
         <ReduxProvider>
           <TooltipProvider>
             <ToastProvider>
-              <AuthProvider>{children}</AuthProvider>
+              <LeafletProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </LeafletProvider>
             </ToastProvider>
           </TooltipProvider>
         </ReduxProvider>

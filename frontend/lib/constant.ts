@@ -172,8 +172,8 @@ export const FEATURES = [
 // ---------- TESTIMONIAL ----------
 export const TESTIMONIAL = {
   quote:
-    "On a remplacé trois cahiers papier et un groupe WhatsApp par une seule carte partagée. Aujourd'hui, les agents savent où intervenir avant même qu'on les appelle.",
-  highlight: "une seule carte partagée.",
+    "Une seule carte partagée pour intervenir plus vite.",
+  highlight: "intervenir",
   author: "Rivo Rakotomalala",
   role: "Adjoint au maire · Fokontany Analakely, Antananarivo",
   initials: "RR",

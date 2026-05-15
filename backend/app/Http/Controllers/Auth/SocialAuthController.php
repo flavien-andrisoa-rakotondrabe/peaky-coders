@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use App\DTOs\Auth\SocialAuthDTO;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\AuthService;
@@ -55,35 +57,91 @@ class SocialAuthController extends Controller
         $frontend = config('app.frontend_url', config('app.url'));
 
         if ($request->has('error') || ! $request->has('code')) {
-            $msg = $request->input('error_description', 'Facebook authentication failed');
-            return redirect($frontend . '/callback?error=' . urlencode($msg));
+            $msg = $request->input(
+                'error_description',
+                'Facebook authentication failed'
+            );
+
+            return redirect(
+                $frontend . '/auth/complete-profile?error=' . urlencode($msg)
+            );
         }
 
         try {
-            $socialUser = Socialite::driver('facebook')->stateless()->user();
-            $dto        = SocialAuthDTO::fromSocialiteUser($socialUser, 'facebook');
+            $socialUser = Socialite::driver('facebook')
+                ->stateless()
+                ->scopes(['email'])
+                ->user();
 
-            $user = $this->authService->findSocialUser($dto);
+            $dto = SocialAuthDTO::fromSocialiteUser(
+                $socialUser,
+                'facebook'
+            );
 
+            /**
+             * Cherche d'abord par provider/provider_id
+             */
+            $user = User::query()
+                ->where('facebook_id', $dto->providerId)
+                ->first();
+
+            /**
+             * Si pas trouvé et email existe,
+             * essaye de retrouver le compte par email
+             */
+            if (! $user && $dto->email) {
+
+                $user = User::where('email', $dto->email)->first();
+
+                /**
+                 * Lie le compte Facebook au compte existant
+                 */
+                if ($user) {
+                    $user->update([
+                        //'provider'    => $dto->provider,
+                        'facebook_id' => $dto->providerId,
+                        'avatar'      => $dto->avatar,
+                    ]);
+                }
+            }
+
+            /**
+             * Utilisateur trouvé => login
+             */
             if ($user) {
                 auth()->login($user, true);
-                session()->regenerate();
+
+                $request->session()->regenerate();
+
                 return redirect($frontend . '/home');
             }
 
-            $emailRequired = ! $dto->email ? '?email_required=true' : '';
-
-            return redirect($frontend . '/auth/complete-profile' . $emailRequired)
-                ->cookie('social_auth_data', json_encode([
+            return redirect(
+                $frontend . '/auth/complete-profile'
+            )->cookie(
+                'social_auth_data',
+                json_encode([
                     'provider'    => $dto->provider,
                     'provider_id' => $dto->providerId,
                     'first_name'  => $dto->firstName,
                     'last_name'   => $dto->lastName,
                     'email'       => $dto->email,
                     'avatar'      => $dto->avatar,
-                ]), 60, '/', null, config('session.secure'), true);
-        } catch (\Exception) {
-            return redirect($frontend . '/callback?error=' . urlencode('Facebook authentication failed'));
+                ]),
+                60,
+                '/',
+                null,
+                config('session.secure'),
+                true
+            );
+
+        } catch (\Throwable $e) {
+
+            return redirect(
+                $frontend . '/callback?error=' . urlencode(
+                    $e->getMessage()
+                )
+            );
         }
     }
 }

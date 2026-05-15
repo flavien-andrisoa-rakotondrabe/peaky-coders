@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 
 // ─── Types ────────────────────────────────────────────────────
-type Category = "Actualité" | "Déchets" | "Infrastructure" | "Urgence";
+type Category = "actu" | "dechet" | "infra" | "urgence";
 
 interface MarkerPopupProps {
   category?: Category;
@@ -26,39 +26,39 @@ interface MarkerPopupProps {
 }
 
 // ─── Config catégories ────────────────────────────────────────
-const CAT: Record<
+export const CAT: Record<
   Category,
-  { border: string; dot: string; badge: string; badgeText: string }
+  { border: string; dot: string; className: string; badgeText: string }
 > = {
-  Actualité: {
+  actu: {
     border: "border-l-blue-400",
-    dot:    "bg-blue-500",
-    badge:  "bg-blue-50 border-blue-200 text-blue-700",
+    dot: "bg-blue-500",
+    className: "bg-blue-50 border-blue-200 text-blue-700",
     badgeText: "ACTUALITÉ",
   },
-  Déchets: {
+  dechet: {
     border: "border-l-violet-400",
-    dot:    "bg-violet-500",
-    badge:  "bg-violet-50 border-violet-200 text-violet-700",
+    dot: "bg-violet-500",
+    className: "bg-violet-50 border-violet-200 text-violet-700",
     badgeText: "DÉCHETS",
   },
-  Infrastructure: {
+  infra: {
     border: "border-l-amber-400",
-    dot:    "bg-amber-500",
-    badge:  "bg-amber-50 border-amber-200 text-amber-700",
+    dot: "bg-amber-500",
+    className: "bg-amber-50 border-amber-200 text-amber-700",
     badgeText: "INFRASTRUCTURE",
   },
-  Urgence: {
+  urgence: {
     border: "border-l-red-400",
-    dot:    "bg-red-500",
-    badge:  "bg-red-50 border-red-200 text-red-700",
+    dot: "bg-red-500",
+    className: "bg-red-50 border-red-200 text-red-700",
     badgeText: "URGENCE",
   },
 };
 
 // ─── MarkerPopup ──────────────────────────────────────────────
 export default function CardEvent({
-  category = "Actualité",
+  category = "actu",
   title = "Festival des Baleines à Antsiranana",
   location = "Antsiranana",
   sublocation = "Baie de Diego",
@@ -75,24 +75,24 @@ export default function CardEvent({
       <Card
         onClick={onClick}
         className={`
-          w-[340px] rounded-xl border border-gray-200/90 bg-white
+          w-[340px] rounded-xl bg-white
           shadow-[0_4px_24px_rgba(0,0,0,0.09)]
-          border-l-[3px] ${cat.border}
           p-0 gap-0 overflow-hidden
           cursor-pointer group
-          transition-shadow duration-200
+          transition-shadow duration-200 ring-0
           hover:shadow-[0_6px_28px_rgba(0,0,0,0.13)]
         `}
       >
         <div className="px-4 py-3.5 flex flex-col gap-2">
-
           {/* ── Ligne 1 : titre + temps ── */}
           <div className="flex items-start justify-between gap-3">
-            <h3 className="font-semibold text-[13.5px] leading-snug tracking-tight text-gray-900 flex-1">
+            <h3 className="font-semibold text-[16px] leading-snug tracking-tight text-gray-900 flex-1">
               {title}
             </h3>
             <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-              <span className="text-[11px] text-gray-400 tabular-nums">{timeAgo}</span>
+              <span className="text-[11px] text-gray-400 tabular-nums">
+                {timeAgo}
+              </span>
 
               {/* Bouton favoris */}
               <Tooltip>
@@ -104,12 +104,16 @@ export default function CardEvent({
                       e.stopPropagation();
                       setFavorited((f) => !f);
                     }}
-                    aria-label={favorited ? "Retirer des favoris" : "Ajouter aux favoris"}
+                    aria-label={
+                      favorited ? "Retirer des favoris" : "Ajouter aux favoris"
+                    }
                     className={`
                       h-6 w-6 rounded-full -mr-1 transition-all duration-200
-                      ${favorited
-                        ? "text-red-500 bg-red-50"
-                        : "text-gray-300 hover:text-red-400 hover:bg-red-50"}
+                      ${
+                        favorited
+                          ? "text-red-500 bg-red-50"
+                          : "text-gray-300 hover:text-red-400 hover:bg-red-50"
+                      }
                     `}
                   >
                     <svg
@@ -121,7 +125,7 @@ export default function CardEvent({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                     </svg>
                   </Button>
                 </TooltipTrigger>
@@ -141,8 +145,8 @@ export default function CardEvent({
               strokeWidth="2"
               className="w-3 h-3 shrink-0 text-gray-400"
             >
-              <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/>
-              <circle cx="12" cy="9" r="2.5"/>
+              <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" />
+              <circle cx="12" cy="9" r="2.5" />
             </svg>
             <span className="font-medium text-gray-500">{location}</span>
             {sublocation && (

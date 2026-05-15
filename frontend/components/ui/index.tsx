@@ -1,11 +1,12 @@
-// components/ui/index.tsx
 "use client";
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import Link from "next/link";
 
-// ─── SectionWrapper ───────────────────────────────────────────
+// ───────────────────────────────
+// Section Wrapper
+// ───────────────────────────────
 export function SectionWrapper({
   id,
   className = "",
@@ -22,7 +23,9 @@ export function SectionWrapper({
   );
 }
 
-// ─── Container ────────────────────────────────────────────────
+// ───────────────────────────────
+// Container
+// ───────────────────────────────
 export function Container({
   className = "",
   children,
@@ -31,28 +34,36 @@ export function Container({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10 ${className}`}>
+    <div
+      className={`mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10 ${className}`}
+    >
       {children}
     </div>
   );
 }
 
-// ─── SectionEyebrow ───────────────────────────────────────────
+// ───────────────────────────────
+// Section Eyebrow (SOFT RED/GREEN ACCENT)
+// ───────────────────────────────
 export function SectionEyebrow({ num, label }: { num: string; label: string }) {
   return (
     <div className="flex items-center gap-2 mb-4">
-      <span className="font-mono text-[11px] text-orange-1 font-semibold tracking-widest uppercase">
+      <span className="font-mono text-[11px] text-red-400 font-semibold tracking-widest uppercase">
         {num}
       </span>
-      <span className="w-5 h-px bg-orange-1/40" />
-      <span className="font-mono text-[11px] text-ink-3 uppercase tracking-widest">
+
+      <span className="w-5 h-px bg-green-400/40" />
+
+      <span className="font-mono text-[11px] text-muted-foreground uppercase tracking-widest">
         {label}
       </span>
     </div>
   );
 }
 
-// ─── FadeIn ───────────────────────────────────────────────────
+// ───────────────────────────────
+// Fade In
+// ───────────────────────────────
 export function FadeIn({
   className = "",
   children,
@@ -78,7 +89,9 @@ export function FadeIn({
   );
 }
 
-// ─── StaggerChildren ──────────────────────────────────────────
+// ───────────────────────────────
+// Stagger
+// ───────────────────────────────
 const staggerContainer = (staggerDelay = 0.08) => ({
   hidden: {},
   show: {
@@ -114,7 +127,9 @@ export function StaggerChildren({
   );
 }
 
-// ─── staggerItem (variants object, not a component) ───────────
+// ───────────────────────────────
+// Item
+// ───────────────────────────────
 export const staggerItem = {
   hidden: { opacity: 0, y: 22 },
   show: {
@@ -124,7 +139,9 @@ export const staggerItem = {
   },
 };
 
-// ─── GradientText ─────────────────────────────────────────────
+// ───────────────────────────────
+// Gradient Text (REMOVED → replaced with accent text only)
+// ───────────────────────────────
 export function GradientText({
   children,
   className = "",
@@ -133,13 +150,15 @@ export function GradientText({
   className?: string;
 }) {
   return (
-    <span className={`bg-gradient-text bg-clip-text text-transparent ${className}`}>
+    <span className={`text-red-400 font-semibold ${className}`}>
       {children}
     </span>
   );
 }
 
-// ─── ArrowIcon ────────────────────────────────────────────────
+// ───────────────────────────────
+// Arrow Icon
+// ───────────────────────────────
 export function ArrowIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg
@@ -156,14 +175,15 @@ export function ArrowIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-// ─── Btn ──────────────────────────────────────────────────────
+// ───────────────────────────────
+// Button (CLEAN RED/GREEN SYSTEM)
+// ───────────────────────────────
 const BTN_VARIANTS = {
   primary:
-    "bg-gradient-main text-white shadow-btn hover:opacity-90 active:scale-[0.98]",
-  ghost:
-    "bg-transparent text-ink border border-line hover:bg-bg-2 hover:border-ink-3/30",
-  outline:
-    "bg-surface text-ink border border-line hover:border-orange-1 hover:text-orange-1",
+    "bg-green-500 text-white hover:bg-green-600 active:scale-[0.98] shadow-sm",
+  danger:
+    "bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] shadow-sm",
+  ghost: "bg-transparent text-foreground border border-border hover:bg-muted",
 };
 
 export function Btn({
@@ -180,7 +200,8 @@ export function Btn({
   className?: string;
 }) {
   const base =
-    "inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-heading font-semibold text-[14px] tracking-[-0.01em] transition-all duration-200 cursor-pointer";
+    "inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-[14px] transition-all duration-200";
+
   const styles = `${base} ${BTN_VARIANTS[variant]} ${className}`;
 
   if (href) {
@@ -197,12 +218,14 @@ export function Btn({
     </button>
   );
 }
-// ─── LiveDot ──────────────────────────────────────────────────
+
+// ───────────────────────────────
+// Live Dot (SOFT SYSTEM COLORS)
+// ───────────────────────────────
 const DOT_COLORS = {
-  green:  { ring: "bg-green-500/20",  dot: "bg-green-500"  },
-  orange: { ring: "bg-orange-500/20", dot: "bg-orange-500" },
-  red:    { ring: "bg-red-500/20",    dot: "bg-red-500"    },
-  blue:   { ring: "bg-blue-500/20",   dot: "bg-blue-500"   },
+  green: { ring: "bg-green-500/20", dot: "bg-green-500" },
+  red: { ring: "bg-red-500/20", dot: "bg-red-500" },
+  gray: { ring: "bg-gray-500/20", dot: "bg-gray-500" },
 };
 
 export function LiveDot({
@@ -213,8 +236,10 @@ export function LiveDot({
   const { ring, dot } = DOT_COLORS[color];
 
   return (
-    <span className={`relative inline-flex items-center justify-center w-3 h-3`}>
-      <span className={`absolute w-full h-full rounded-full ${ring} animate-ping opacity-75`} />
+    <span className="relative inline-flex items-center justify-center w-3 h-3">
+      <span
+        className={`absolute w-full h-full rounded-full ${ring} animate-ping opacity-70`}
+      />
       <span className={`relative w-2 h-2 rounded-full ${dot}`} />
     </span>
   );

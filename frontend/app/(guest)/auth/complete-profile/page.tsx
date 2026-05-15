@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, EyeOff, Lock, User, Phone } from "lucide-react";
-import { useState } from "react";
+import { Eye, EyeOff, Lock, User, Phone, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,13 +10,18 @@ import * as z from "zod";
 import { FormInput } from "@/components/utils/FormInput";
 import Logo from "@/components/utils/Logo";
 import Button3DV2 from "@/components/utils/Button3DV2";
+import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useAuth } from "@/providers/AuthProvider";
 
 // 1. Schéma de validation
 const completeProfileSchema = z
   .object({
-    firstName: z.string().min(2, "Prénom requis"),
-    lastName: z.string().min(2, "Nom requis"),
-    tel: z.string().min(10, "Numéro de téléphone invalide"),
+    first_name: z.string().min(2, "Prénom requis"),
+    last_name: z.string().min(2, "Nom requis"),
+    email: z.string().email("Email invalide"),
+    phone: z.string().min(10, "Numéro de téléphone invalide"),
     password: z.string().min(6, "Minimum 6 caractères"),
     password_confirmation: z.string(),
   })
@@ -26,37 +31,107 @@ const completeProfileSchema = z
   });
 
 type CompleteProfileValues = z.infer<typeof completeProfileSchema>;
-
-interface Props {
-  socialUser?: {
-    firstName: string;
-    lastName: string;
-  };
+interface SocialUserInterface {
+  email: string | null;
+  last_name: string | null;
+  first_name: string | null;
+  avatar: string | null;
 }
 
-export default function CompleteProfilePage({ socialUser }: Props) {
+export default function CompleteProfilePage() {
+  const router = useRouter();
+  const { refreshUser } = useAuth();
+
   const [showPwd, setShowPwd] = useState(false);
 
-  // 2. React Hook Form
+  const [socialUser, setSocialUser] = useState<SocialUserInterface | null>(
+    null,
+  );
+
   const {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<CompleteProfileValues>({
     resolver: zodResolver(completeProfileSchema),
     defaultValues: {
-      firstName: socialUser?.firstName || "",
-      lastName: socialUser?.lastName || "",
-      tel: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
       password: "",
       password_confirmation: "",
     },
   });
 
+  useEffect(() => {
+    const fetchSocial = async () => {
+      try {
+        const { data } = await api.get("/api/auth/social/me");
+
+        if (!data) {
+          router.push("/auth");
+          return;
+        }
+
+        reset({
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          email: data.email || "",
+          phone: "",
+          password: "",
+          password_confirmation: "",
+        });
+
+        setSocialUser(data);
+      } catch {
+        router.push("/auth");
+      }
+    };
+
+    fetchSocial();
+  }, [router, reset]);
+
   const onSubmit = async (values: CompleteProfileValues) => {
-    console.log("Submit profile:", values);
-    // await fetch('/api/auth/complete-profile', { method: 'POST', body: JSON.stringify(values) });
+    try {
+      await api.get("/sanctum/csrf-cookie");
+
+      const res = await api.post("/api/auth/complete-profile", values);
+
+      if (res.status === 200 || res.status === 201) {
+        toast.success("Profil complété !");
+
+        await refreshUser();
+
+        router.push("/home");
+      }
+    } catch (error: any) {
+      // Validation Laravel (422)
+      if (error.response?.status === 422) {
+        toast.error("Données invalides. Vérifier le formulaire.");
+        return;
+      }
+
+      // Non autorisé / session expirée
+      if (error.response?.status === 401) {
+        toast.error("Session expirée. Reconnecte-toi.");
+        router.push("/auth");
+        return;
+      }
+
+      // Cas social cookie expiré (ton backend)
+      if (error.response?.status === 404) {
+        toast.error("Session sociale introuvable.");
+        router.push("/auth");
+        return;
+      }
+
+      // Erreur générique
+      toast.error("Une erreur inattendue est survenue.");
+      console.error(error);
+    }
   };
 
   return (
@@ -84,19 +159,19 @@ export default function CompleteProfilePage({ socialUser }: Props) {
               <FormInput
                 label="Prénom"
                 icon={User}
-                placeholder="Jean"
+                placeholder="Votre prénom"
                 autoComplete="given-name"
-                error={errors.firstName?.message}
-                {...register("firstName")}
+                error={errors.first_name?.message}
+                {...register("first_name")}
               />
 
               <FormInput
                 label="Nom"
                 icon={User}
-                placeholder="Dupont"
+                placeholder="Votre nom"
                 autoComplete="family-name"
-                error={errors.lastName?.message}
-                {...register("lastName")}
+                error={errors.last_name?.message}
+                {...register("last_name")}
               />
             </div>
 
@@ -106,9 +181,21 @@ export default function CompleteProfilePage({ socialUser }: Props) {
               icon={Phone}
               placeholder="+33 6 00 00 00 00"
               autoComplete="tel"
-              error={errors.tel?.message}
-              {...register("tel")}
+              error={errors.phone?.message}
+              {...register("phone")}
             />
+
+            {!socialUser?.email && (
+              <FormInput
+                label="Email"
+                type="email"
+                icon={Mail}
+                placeholder="email@domain.com"
+                autoComplete="email"
+                error={errors.email?.message}
+                {...register("email")}
+              />
+            )}
 
             <FormInput
               label="Mot de passe"
@@ -146,14 +233,14 @@ export default function CompleteProfilePage({ socialUser }: Props) {
             <Button3DV2
               type="submit"
               disabled={isSubmitting}
-              label={isSubmitting ? "Accèssion..." : "Continuer"}
+              label={isSubmitting ? "Accès..." : "Continuer"}
               fullWidth
               breakpoints={[{ tw: "sm", width: 80, height: 48, fontSize: 16 }]}
             />
           </form>
 
           <p className="font-body mt-2 text-center text-xs text-muted-foreground px-4">
-            En vous inscrivant, vous acceptez nos{" "}
+            En continuant, vous acceptez nos{" "}
             <Link href="/legal#cgu" className="text-accent hover:underline">
               CGU
             </Link>{" "}

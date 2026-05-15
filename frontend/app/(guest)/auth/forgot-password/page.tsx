@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
                 label="Email"
                 type="email"
                 icon={Mail}
-                placeholder="jean@email.com"
+                placeholder="email@domain.com"
                 autoComplete="email"
                 error={errors.email?.message}
                 {...register("email")}
