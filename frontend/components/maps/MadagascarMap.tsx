@@ -146,7 +146,7 @@ export default function MadagascarMapEngine() {
                 selectedRegion === id
                   ? "#dbeafe"
                   : hoveredRegion === id
-                    ? "#e0f2fe"
+                    ? "#ff42a5"
                     : "#f1f5f9"
               }
               stroke="#cbd5e1"

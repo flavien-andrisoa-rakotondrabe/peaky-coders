@@ -14,22 +14,6 @@ import {
 } from "@/components/ui/tooltip";
 import { EventInterface } from "@/types/event.interface";
 
-// ─── Types ────────────────────────────────────────────────────
-interface ReportCardProps {
-  category?: string;
-  title?: string;
-  location?: string;
-  date?: string;
-  time?: string;
-  description?: string;
-  /** Chemin Next.js Image (ex: "/images/depot.jpg") */
-  coverImage?: string;
-  /** Score de priorité 1–5 */
-  priorityScore?: number;
-  isFavorited?: boolean;
-  reportCode?: string;
-}
-
 // ─── Configs ──────────────────────────────────────────────────
 const PRIORITY: Record<number, { label: string; bar: string; text: string }> = {
   1: { label: "Faible", bar: "bg-emerald-500", text: "text-emerald-600" },
@@ -37,13 +21,6 @@ const PRIORITY: Record<number, { label: string; bar: string; text: string }> = {
   3: { label: "Moyenne", bar: "bg-amber-500", text: "text-amber-600" },
   4: { label: "Élevée", bar: "bg-orange-500", text: "text-orange-600" },
   5: { label: "Critique", bar: "bg-red-500", text: "text-red-600" },
-};
-
-const CATEGORY: Record<string, { dot: string }> = {
-  urgence: { dot: "bg-red-500" },
-  infra: { dot: "bg-yellow-500" },
-  dechet: { dot: "bg-violet-500" },
-  actu: { dot: "bg-blue-500" },
 };
 
 // ─── PriorityBars ─────────────────────────────────────────────
@@ -108,40 +85,16 @@ export default function HoverCards({ item }: { item: EventInterface }) {
     <Card className="w-[300px] overflow-hidden rounded-2xl p-0 gap-0 ring-0 bg-white">
       {/* ── Cover image ───────────────────────────────────── */}
       <div className="relative h-[136px] bg-gray-100">
-        {item.image_urls?.length > 0 ? (
+        {
           <Image
-            src={item.image_urls[0]}
+            src={"/default.jfif"}
             alt={item.title}
             fill
             sizes="300px"
             className="object-cover"
             priority
           />
-        ) : (
-          <div
-            className="w-full h-full flex flex-col items-center justify-center gap-2 opacity-35"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(135deg,#e5e7eb 0,#e5e7eb 1px,transparent 1px,transparent 10px)",
-              backgroundSize: "14px 14px",
-            }}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="w-6 h-6 text-gray-400"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="3" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="M21 15l-5-5L5 21" />
-            </svg>
-            <span className="font-mono text-[9px] text-gray-400 tracking-widest">
-              photo · {item.type?.toLowerCase()}
-            </span>
-          </div>
-        )}
+        }
       </div>
 
       {/* ── Corps ─────────────────────────────────────────── */}
@@ -229,9 +182,9 @@ export default function HoverCards({ item }: { item: EventInterface }) {
                   </svg>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top" className="text-[11px] px-2 py-0.5">
+              {/* <TooltipContent side="top" className="text-[11px] px-2 py-0.5">
                 {favorited ? "Retirer des favoris" : "Ajouter aux favoris"}
-              </TooltipContent>
+              </TooltipContent> */}
             </Tooltip>
           </TooltipProvider>
         </div>

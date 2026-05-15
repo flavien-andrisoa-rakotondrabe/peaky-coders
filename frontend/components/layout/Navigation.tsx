@@ -23,6 +23,8 @@ import {
 import { cn } from "@/lib/utils";
 import Logo from "@/components/utils/Logo";
 import Button3DV2 from "@/components/utils/Button3DV2";
+import Link from "next/link";
+import { useAuth } from "@/providers/AuthProvider";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
@@ -152,6 +154,7 @@ function MobileNavItem({
 // ─── Header ──────────────────────────────────────────────────────────────────
 
 export default function Header() {
+  const { authenticated } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -187,7 +190,9 @@ export default function Header() {
 
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-[62px] flex items-center justify-between gap-4">
         {/* ── Logo ── */}
-        <Logo />
+        <Link href="/">
+          <Logo />
+        </Link>
 
         {/* ── Desktop Nav ── */}
         <nav className="hidden md:flex items-center gap-0.5">
@@ -203,27 +208,15 @@ export default function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden sm:flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 px-4 rounded-lg text-[13.5px] font-medium hover:bg-muted/70"
-            >
-              Connexion
-            </Button>
-
             <motion.div whileTap={{ scale: 0.96 }} whileHover={{ y: -1 }}>
-              <Button
-                size="sm"
-                className={cn(
-                  "h-9 px-4 rounded-lg text-[13.5px] font-semibold gap-1.5",
-                  "bg-[#007a38] hover:bg-[#005a2a] text-white",
-                  "shadow-md shadow-[#007a38]/30 hover:shadow-[#007a38]/50",
-                  "transition-all duration-200 btn-shimmer",
-                )}
-              >
-                Commencer
-                <ArrowRight className="size-3.5" />
-              </Button>
+              <Link href={authenticated ? "/home" : "/auth"}>
+                <Button3DV2
+                  label={"Explorer"}
+                  breakpoints={[
+                    { tw: "sm", width: 120, height: 40, fontSize: 14 },
+                  ]}
+                />
+              </Link>
             </motion.div>
           </div>
 
@@ -267,9 +260,9 @@ export default function Header() {
             </SheetTrigger>
 
             <SheetContent side="right" className="w-72 p-0">
-              <div className="flex items-center px-5 pt-5 pb-4">
+              <Link href="/" className="flex items-center px-5 pt-5 pb-4">
                 <Logo />
-              </div>
+              </Link>
               <Separator />
 
               <div className="px-3 py-4 space-y-1">

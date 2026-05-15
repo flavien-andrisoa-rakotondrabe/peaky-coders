@@ -1,6 +1,5 @@
 "use client";
 
-import Logo from "@/components/utils/Logo";
 import { useState } from "react";
 import CardEvent from "@/components/utils/CardEvent";
 import Button3DV2 from "@/components/utils/Button3DV2";
@@ -15,6 +14,10 @@ import { useParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import SignalForm from "@/components/utils/SignalForm";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Navigation";
 
 const FILTERS = [
   { value: "actu", label: "Evénements", className: "bg-blue-500" },
@@ -24,6 +27,7 @@ const FILTERS = [
 ];
 
 export default function RegionPage() {
+  const { events } = useSelector((state: RootState) => state.event);
   const params = useParams();
 
   const [filter, setFilter] = useState(FILTERS[0].value);
@@ -32,8 +36,8 @@ export default function RegionPage() {
   if (params.id)
     return (
       <div className="p-8">
-        <Logo />
-        <div className="relative flex gap-8 p-8 h-dvh">
+        <Header />
+        <div className="relative flex gap-8 p-8 min-h-dvh mt-10">
           <div className="flex-1">
             <RegionMap id={params.id} />
           </div>
@@ -69,14 +73,10 @@ export default function RegionPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <CardEvent />
-              <CardEvent />
-              <CardEvent />
-              <CardEvent />
-              <CardEvent />
-              <CardEvent />
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
 }

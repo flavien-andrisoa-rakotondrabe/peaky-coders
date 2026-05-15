@@ -57,10 +57,10 @@ export default function Hero() {
             variants={itemVariants}
             className="text-6xl md:text-6xl font-bold leading-tight text-foreground py-3"
           >
-            Pour une ville de demain{" "} <br/>
+            Pour une ville de demain <br />
             {/* <span className="text-red-500 italic">intelligente</span>, connectée
             et{" "} <br/> */}
-            plus 
+            plus
             <span className="text-red-500">
               <TypingText
                 words={[
@@ -71,7 +71,7 @@ export default function Hero() {
                   " durable",
                   " interactive",
                   " intelligent",
-                  " connectée"
+                  " connectée",
                 ]}
               />
             </span>
@@ -126,37 +126,8 @@ export default function Hero() {
         </motion.div>
 
         {/* ================= RIGHT ================= */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          className="relative h-[580px] hidden lg:block"
-        >
-          {/* map card */}
-          <div
-            className="
-            absolute inset-0
-            rounded-3xl
-            bg-surface
-            border border-border
-            backdrop-blur-2xl
-            shadow-xl
-            overflow-hidden
-          "
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <span className="text-xs font-mono uppercase text-muted-foreground">
-                Madagascar Live
-              </span>
-              <LiveDot color="green" />
-            </div>
 
-            <MadagascarMap showPins animated className="h-full" />
-          </div>
-
-          {/* glow */}
-          <div className="absolute inset-0 bg-gradient-glow blur-2xl" />
-        </motion.div>
+        <MadagascarMap />
       </div>
     </section>
   );

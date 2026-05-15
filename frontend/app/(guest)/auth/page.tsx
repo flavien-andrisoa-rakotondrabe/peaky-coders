@@ -56,9 +56,9 @@ export default function AuthPage() {
       <div className="relative hidden flex-col justify-between overflow-hidden p-12 lg:flex lg:w-[45%] xl:w-1/2">
         {/* <div className="hero-overlay absolute inset-0 z-10" /> */}
 
-        <div className="relative z-20">
+        <Link href="/" className="relative z-20">
           <Logo />
-        </div>
+        </Link>
 
         <div className="absolute inset-0 z-0">
           <Canvas

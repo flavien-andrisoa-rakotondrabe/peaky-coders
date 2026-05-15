@@ -18,6 +18,9 @@ import { api } from "@/lib/api";
 import { useDispatch, useSelector } from "react-redux";
 import { setEventsReducer } from "@/redux/slices/event.slice";
 import { RootState } from "@/redux/store";
+import Link from "next/link";
+import Header from "@/components/layout/Navigation";
+import Footer from "@/components/layout/Footer";
 
 export default function HomePage() {
   const { events } = useSelector((state: RootState) => state.event);
@@ -36,19 +39,20 @@ export default function HomePage() {
 
   return (
     <div className="p-8">
-      <Logo />
-      <div className="relative flex gap-8 p-8 h-dvh">
+      <Header />
+      <div className="relative flex gap-8 p-8 min-h-dvh">
         <div className="flex-1">
           <MadagascarMap />
         </div>
+
         <div className="flex-1 flex flex-col gap-8">
           <div className="flex items-center justify-between">
             <h1 className="text-4xl font-semibold">Actualités</h1>
 
             <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
+              {/* <DialogTrigger asChild>
                 <Button3DV2 label={"Publier"} />
-              </DialogTrigger>
+              </DialogTrigger> */}
               <DialogContent className="p-0 border-0 ring-0">
                 <AddEventForm onClose={() => setOpen(false)} />
               </DialogContent>
@@ -62,6 +66,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

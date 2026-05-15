@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { EventInterface } from "@/types/event.interface";
+import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────
 type Category = "actu" | "dechet" | "infra" | "urgence";
@@ -25,6 +26,49 @@ interface MarkerPopupProps {
   isFavorited?: boolean;
   onClick?: () => void;
 }
+
+const DATA = [
+  {
+    category: "actu",
+    title: "Tech Meeting",
+    location: "Fianarantsoa",
+    description: "Rencontres, Forums, Concours autour du numérique.",
+    date: "16-05-2026",
+    img: "/default.jfif",
+  },
+  {
+    category: "urgence",
+    title: "Inondations signalées",
+    location: "Toamasina",
+    description: "Montée des eaux dans plusieurs quartiers.",
+    date: "15-05-2026",
+    img: "/innondation.jfif",
+  },
+  {
+    category: "sante",
+    title: "Campagne de vaccination",
+    location: "Mahajanga",
+    description: "Vaccination gratuite pour les enfants.",
+    date: "18-05-2026",
+    img: "/vaccination.jpg",
+  },
+  {
+    category: "education",
+    title: "Salon des étudiants",
+    location: "Antananarivo",
+    description: "Orientation et formations universitaires.",
+    date: "20-05-2026",
+    img: "/salon.jfif",
+  },
+  {
+    category: "transport",
+    title: "Route coupée",
+    location: "Antsirabe",
+    description: "Travaux de réhabilitation sur la RN7.",
+    date: "17-05-2026",
+    img: "/route.jfif",
+  },
+];
 
 // ─── Config catégories ────────────────────────────────────────
 export const CAT: Record<
@@ -58,14 +102,18 @@ export const CAT: Record<
 };
 
 // ─── MarkerPopup ──────────────────────────────────────────────
-export default function CardEvent({ item }: { item: EventInterface }) {
+export default function CardEvent() {
   const [favorited, setFavorited] = useState(0);
-  const cat = CAT[item?.category ?? "actu"];
 
   return (
     <TooltipProvider delayDuration={100}>
-      <Card
-        className={`
+      {DATA.map((item) => {
+        const cat = CAT[item?.category ?? "actu"];
+
+        return (
+          <Card
+            key={`item-${item.title}`}
+            className={`
           w-[340px] rounded-xl bg-white
           shadow-[0_4px_24px_rgba(0,0,0,0.09)]
           p-0 gap-0 overflow-hidden
@@ -73,32 +121,34 @@ export default function CardEvent({ item }: { item: EventInterface }) {
           transition-shadow duration-200 ring-0
           hover:shadow-[0_6px_28px_rgba(0,0,0,0.13)]
         `}
-      >
-        <div className="px-4 py-3.5 flex flex-col gap-2">
-          {/* ── Ligne 1 : titre + temps ── */}
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="font-semibold text-[16px] leading-snug tracking-tight text-gray-900 flex-1">
-              {item?.title}
-            </h3>
-            <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-              <span className="text-[11px] text-gray-400 tabular-nums">
-                {item?.date}
-              </span>
+          >
+            <div className="px-4 py-3.5 flex flex-col gap-2">
+              {/* ── Ligne 1 : titre + temps ── */}
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="font-semibold text-[16px] leading-snug tracking-tight text-gray-900 flex-1">
+                  {item?.title}
+                </h3>
+                <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                  <span className="text-[11px] text-gray-400 tabular-nums">
+                    {item?.date}
+                  </span>
 
-              {/* Bouton favoris */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // setFavorited((f) => !f);
-                    }}
-                    aria-label={
-                      favorited ? "Retirer des favoris" : "Ajouter aux favoris"
-                    }
-                    className={`
+                  {/* Bouton favoris */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // setFavorited((f) => !f);
+                        }}
+                        aria-label={
+                          favorited
+                            ? "Retirer des favoris"
+                            : "Ajouter aux favoris"
+                        }
+                        className={`
                       h-6 w-6 cursor-pointer rounded-full -mr-1 transition-all duration-200
                       ${
                         favorited
@@ -106,62 +156,79 @@ export default function CardEvent({ item }: { item: EventInterface }) {
                           : "text-gray-300 hover:text-red-400 hover:bg-red-50"
                       }
                     `}
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="w-3.5 h-3.5"
-                      fill={favorited ? "currentColor" : "none"}
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                  </Button>
-                </TooltipTrigger>
-                {/* <TooltipContent side="top" className="text-[11px] px-2 py-0.5">
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="w-3.5 h-3.5"
+                          fill={favorited ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                      </Button>
+                    </TooltipTrigger>
+                    {/* <TooltipContent side="top" className="text-[11px] px-2 py-0.5">
                   {favorited ? "Retirer des favoris" : "Ajouter aux favoris"}
                 </TooltipContent> */}
-              </Tooltip>
-            </div>
-          </div>
+                  </Tooltip>
+                </div>
+              </div>
 
-          {/* ── Ligne 2 : localisation ── */}
-          <div className="flex items-center gap-1 text-[11.5px] text-gray-400">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="w-3 h-3 shrink-0 text-gray-400"
-            >
-              <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" />
-              <circle cx="12" cy="9" r="2.5" />
-            </svg>
-            {/* <span className="font-medium text-gray-500">{item.location}</span> */}
-          </div>
+              {/* ── Ligne 2 : localisation ── */}
+              <div className="flex items-center gap-1 text-[11.5px] text-gray-400">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="w-3 h-3 shrink-0 text-gray-400"
+                >
+                  <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" />
+                  <circle cx="12" cy="9" r="2.5" />
+                </svg>
+                <span className="font-medium text-gray-500">
+                  {item.location}
+                </span>
+              </div>
 
-          {/* ── Ligne 3 : description ── */}
-          <p className="text-[12px] text-gray-500 leading-relaxed line-clamp-2">
-            {item?.description}
-          </p>
+              <div className="relative h-[136px] bg-gray-100">
+                {
+                  <Image
+                    src={item.img}
+                    alt={item.title}
+                    fill
+                    sizes="300px"
+                    className="object-cover rounded-lg"
+                    priority
+                  />
+                }
+              </div>
 
-          {/* ── Ligne 4 : badge catégorie ── */}
-          <div className="pt-0.5">
-            <span
-              className={`
+              {/* ── Ligne 3 : description ── */}
+              <p className="text-[12px] text-gray-500 leading-relaxed line-clamp-2">
+                {item?.description}
+              </p>
+
+              {/* ── Ligne 4 : badge catégorie ── */}
+              {/* <div className="pt-0.5">
+                <span
+                  className={`
                 inline-flex items-center gap-1.5 px-2 py-[3px]
                 rounded-full border text-[10px] font-bold tracking-widest
                 ${cat.badge}
               `}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`} />
-              {cat.badgeText}
-            </span>
-          </div>
-        </div>
-      </Card>
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`} />
+                  {cat.badgeText}
+                </span>
+              </div> */}
+            </div>
+          </Card>
+        );
+      })}
     </TooltipProvider>
   );
 }

@@ -308,9 +308,9 @@ export default function SignalForm({ onClose }: { onClose: () => void }) {
             label="Catégories"
             name="category"
             options={CATEGORIES}
-            value={type}
+            value={category}
             onValueChange={(val) => setCategory(val)}
-            error={errors.type?.message}
+            error={errors.category?.message}
             className="grid-cols-2"
           />
 
