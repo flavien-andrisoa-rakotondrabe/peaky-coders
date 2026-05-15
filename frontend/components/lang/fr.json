@@ -1,0 +1,137 @@
+{
+  "site": {
+    "name": "Mada Smart",
+    "tagline": "Service public numérique",
+    "description": "Plateforme citoyenne intelligente pour visualiser, signaler et suivre les événements urbains à Madagascar."
+  },
+
+  "navigation": {
+    "home": "Accueil",
+    "services": "Services",
+    "map": "Carte",
+    "pricing": "Tarifs",
+    "about": "À propos",
+    "contact": "Contact",
+    "login": "Connexion",
+    "openMap": "Ouvrir la carte"
+  },
+
+  "hero": {
+    "badge": "Service agréé · Plateforme temps réel",
+    "titleLine1": "L'île",
+    "titleLine2": "intelligente.",
+    "titleLine3": "Un seul geste.",
+    "description": "Mada Smart réunit signalement citoyen, transport, infrastructures et gestion urbaine dans une seule plateforme moderne.",
+    "primaryButton": "Explorer la carte",
+    "secondaryButton": "Comment ça marche",
+    "live": "Temps réel",
+    "stats": {
+      "reports": "Signalements",
+      "cities": "Communes",
+      "users": "Utilisateurs"
+    }
+  },
+
+  "categories": {
+    "sectionTitle": "Catégories",
+    "title": "Tout comprendre d'un seul regard.",
+    "description": "Chaque catégorie possède sa propre couleur et ses indicateurs pour une meilleure visualisation des événements urbains.",
+
+    "items": {
+      "news": {
+        "label": "Actualité",
+        "title": "Actualités & vie de la cité",
+        "description": "Festivals, conseils municipaux, ouvertures, manifestations culturelles ou sportives. Tout ce qui anime la province.",
+        "count": "312",
+        "code": "CODE . BLEU"
+      },
+
+      "infra": {
+        "label": "Infrastructure",
+        "title": "Travaux & réseaux",
+        "description": "Voirie, eau, électricité, ponts, télécoms. Les chantiers en cours, les coupures planifiées, les déviations.",
+        "count": "486",
+        "code":"CODE . JAUNE"
+      },
+
+      "urg": {
+        "label": "Urgence",
+        "title": "Incidents & accidents",
+        "description": "Incendies, accidents, coupures et événements critiques en temps réel.",
+        "count": "154",
+        "code":"CODE . ROUGE"
+      },
+
+      "waste": {
+        "label": "Déchets",
+        "title": "Déchets & Propreté urbaine",
+        "description": "Collecte, tri sélectif, points d'apport volontaire, dépôts sauvages. Pour une ville plus propre.",
+        "count": "296",
+        "code":"CODE . VIOLET"
+      }
+    }
+  },
+
+  "map": {
+    "title": "Carte interactive",
+    "description": "Explorez Madagascar grâce à une carte moderne et interactive mise à jour en temps réel.",
+    "live": "Actif",
+    "reports": "signalements actifs"
+  },
+
+  "howItWorks": {
+    "title": "Fonctionnement",
+    "description": "Trois gestes simples, de la rue au tableau de bord.",
+
+    "steps": {
+      "step1": {
+        "title": "Signaler en un clic",
+        "description": "Choisissez la catégorie, posez un point sur la carte ou laissez la géolocalisation s'en charger. Une photo, un titre, c'est parti."
+      },
+
+      "step2": {
+        "title": "Voir s'afficher en temps réel",
+        "description": "Le marqueur apparaît immédiatement sur la carte des 6 provinces, visible par tout le monde, modérable par les services publics."
+      },
+
+      "step3": {
+        "title": "Suivre la résolution",
+        "description": "Statut, intervenants, délais, photos après intervention. Chaque signalement raconte son histoire complète jusqu'à clôture."
+      }
+    }
+  },
+
+  "testimonials": {
+    "title": "Une seule carte partagée pour intervenir plus vite. ",
+    "items": {
+      "name": "Rivo Rakotomalala",
+      "role": "Adjoint au maire · Fokontany Analakely, Antananarivo",
+      "message": "Une seule carte partagée pour intervenir plus vite. "
+    }
+  },
+
+  "cta": {
+    "title": "Construisons une ville plus intelligente",
+    "description": "Rejoignez Mada Smart et participez à la transformation numérique de Madagascar.",
+    "button": "Commencer maintenant"
+  },
+
+  "footer": {
+    "copyright": "© 2026 Mada Smart. Tous droits réservés.",
+    "privacy": "Confidentialité",
+    "terms": "Conditions d'utilisation",
+    "contact": "Contact"
+  },
+
+  "common": {
+    "loading": "Chargement...",
+    "search": "Rechercher",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "send": "Envoyer",
+    "readMore": "Voir plus",
+    "back": "Retour",
+    "next": "Suivant"
+  }
+}
