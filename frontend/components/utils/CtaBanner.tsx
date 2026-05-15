@@ -17,7 +17,7 @@ export default function CtaBanner() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-24 bg-background">
+    <section id="func" className="py-24 bg-background">
       <div className="max-w-[1240px] mx-auto px-6 lg:px-8">
         <motion.div
           ref={ref}

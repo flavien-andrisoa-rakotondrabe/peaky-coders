@@ -191,8 +191,8 @@ export const CTA_ROLES = [
 export const NAV_LINKS = [
   { href: "#cats", label: "Catégories" },
   { href: "#how", label: "Comment ça marche" },
-  { href: "#cov", label: "Couverture" },
-  { href: "#feat", label: "Fonctionnalités" },
+  { href: "#temoin", label: "temoinage" },
+  { href: "#func", label: "Fonctionnalités" },
 ];
 
 // ---------- FOOTER LINKS ----------

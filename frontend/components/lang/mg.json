@@ -1,0 +1,137 @@
+{
+  "site": {
+    "name": "Mada Smart",
+    "tagline": "Tolotra nomerika ho an’ny daholobe",
+    "description": "Sehatra marani-tsaina ho an’ny olom-pirenena ahafahana mijery, mitatitra ary manaraka ireo zava-mitranga an-tanàn-dehibe eto Madagasikara."
+  },
+
+  "navigation": {
+    "home": "Fandraisana",
+    "services": "Tolotra",
+    "map": "Sarintany",
+    "pricing": "Vidiny",
+    "about": "Momba anay",
+    "contact": "Hifandray",
+    "login": "Hiditra",
+    "openMap": "Hanokatra ny sarintany"
+  },
+
+  "hero": {
+    "badge": "Tolotra nahazo alalana · Sehatra tena ara-potoana",
+    "titleLine1": "Ilay nosy",
+    "titleLine2": "marani-tsaina.",
+    "titleLine3": "Fihetsika iray monja.",
+    "description": "Mada Smart dia mampivondrona ny tatitra ataon’ny olom-pirenena, ny fitaterana, ny fotodrafitrasa ary ny fitantanana an-tanàn-dehibe ao anaty sehatra maoderina tokana.",
+    "primaryButton": "Hijery ny sarintany",
+    "secondaryButton": "Ahoana ny fiasany",
+    "live": "Mivantana",
+    "stats": {
+      "reports": "Tatitra",
+      "cities": "Kaominina",
+      "users": "Mpampiasa"
+    }
+  },
+
+  "categories": {
+    "sectionTitle": "Sokajy",
+    "title": "Fantaro indray mipi-maso ny zava-drehetra.",
+    "description": "Ny sokajy tsirairay dia manana ny lokony sy ny famantarany mba hanamorana ny fijerena ireo zava-mitranga an-tanàn-dehibe.",
+
+    "items": {
+      "news": {
+        "label": "Vaovao",
+        "title": "Vaovao & fiainan’ny tanàna",
+        "description": "Fetin’ny tanàna, filankevitra monisipaly, fanokafana, hetsika ara-kolontsaina na ara-panatanjahantena. Izay rehetra mampihetsika ny faritra.",
+        "count": "312",
+        "code": "KAODY . MANGA"
+      },
+
+      "infra": {
+        "label": "Fotodrafitrasa",
+        "title": "Asa & tambajotra",
+        "description": "Lalana, rano, herinaratra, tetezana, fifandraisan-davitra. Asa an-dalam-panorenana, fahatapahana voalahatra ary fanodinana lalana.",
+        "count": "486",
+        "code": "KAODY . MAVO"
+      },
+
+      "urg": {
+        "label": "Hamehana",
+        "title": "Loza & tranga tampoka",
+        "description": "Hain-trano, lozam-pifamoivoizana, fahatapahana ary tranga lehibe ara-potoana.",
+        "count": "154",
+        "code": "KAODY . MENA"
+      },
+
+      "waste": {
+        "label": "Fako",
+        "title": "Fako & fahadiovan’ny tanàna",
+        "description": "Fanangonana fako, fanasokajiana, toerana fanariana fako ary fanariam-pako tsy ara-dalàna. Ho an’ny tanàna madio kokoa.",
+        "count": "296",
+        "code": "KAODY . VOLON-DAVY"
+      }
+    }
+  },
+
+  "map": {
+    "title": "Sarintany ifandraisana",
+    "description": "Tsidiho i Madagasikara amin’ny alalan’ny sarintany maoderina sy havaozina ara-potoana.",
+    "live": "Mavitrika",
+    "reports": "tatitra mavitrika"
+  },
+
+  "howItWorks": {
+    "title": "Fomba fiasany",
+    "description": "Dingana telo tsotra, avy eny an-dalambe ka hatrany amin’ny tabilao fanaraha-maso.",
+
+    "steps": {
+      "step1": {
+        "title": "Mitatitra amin’ny tsindry iray",
+        "description": "Safidio ny sokajy, asio teboka eo amin’ny sarintany na avelao ny jeolokalizasiona hanao izany. Sary iray sy lohateny iray dia ampy."
+      },
+
+      "step2": {
+        "title": "Miseho avy hatrany",
+        "description": "Miseho avy hatrany eo amin’ny sarintanin’ny faritany 6 ilay marika, hitan’ny rehetra ary tantanin’ny sampan-draharaham-panjakana."
+      },
+
+      "step3": {
+        "title": "Araho ny famahana azy",
+        "description": "Sata, mpandray anjara, fotoana ary sary aorian’ny fandraisana andraikitra. Ny tatitra tsirairay dia mitantara ny fizotrany manontolo mandra-pahavita."
+      }
+    }
+  },
+
+  "testimonials": {
+    "title": "Sarintany tokana iombonana mba hidirana an-tsehatra haingana kokoa.",
+    "items": {
+      "name": "Rivo Rakotomalala",
+      "role": "Lefitra ben’ny tanàna · Fokontany Analakely, Antananarivo",
+      "message": "Sarintany tokana iombonana mba hidirana an-tsehatra haingana kokoa."
+    }
+  },
+
+  "cta": {
+    "title": "Andao hanorina tanàna marani-tsaina kokoa",
+    "description": "Midira ao amin’ny Mada Smart ary mandraisa anjara amin’ny fanovàna nomerika eto Madagasikara.",
+    "button": "Hanomboka izao"
+  },
+
+  "footer": {
+    "copyright": "© 2026 Mada Smart. Zo rehetra voatokana.",
+    "privacy": "Fiarovana ny tsiambaratelo",
+    "terms": "Fepetra fampiasana",
+    "contact": "Hifandray"
+  },
+
+  "common": {
+    "loading": "Mampiditra...",
+    "search": "Hitady",
+    "save": "Hitahiry",
+    "cancel": "Hanafoana",
+    "close": "Hikatona",
+    "send": "Handefa",
+    "readMore": "Hijery bebe kokoa",
+    "back": "Hiverina",
+    "next": "Manaraka"
+  }
+}

@@ -22,7 +22,7 @@ const itemVariants = {
 const data = ["connecté", "intelligent", "évolué"];
 export default function Hero() {
   return (
-    <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-background pt-[85px]">
+    <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-background pt-[95px]">
       {/* 🌫️ BACKGROUND GLOW (global theme) */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-red-500/10 blur-[120px] rounded-full" />
@@ -55,20 +55,23 @@ export default function Hero() {
           {/* title */}
           <motion.h1
             variants={itemVariants}
-            className="text-6xl md:text-6xl font-bold leading-tight text-foreground py-5"
+            className="text-6xl md:text-6xl font-bold leading-tight text-foreground py-3"
           >
-            Une ville plus{" "}
-            <span className="text-red-500 italic">intelligente</span>, connectée
-            et{" "}
-            <span className="text-green-500">
+            Pour une ville de demain{" "} <br/>
+            {/* <span className="text-red-500 italic">intelligente</span>, connectée
+            et{" "} <br/> */}
+            plus 
+            <span className="text-red-500">
               <TypingText
                 words={[
-                  "propre",
-                  "sécurisée",
-                  "moderne",
-                  "organisée",
-                  "durable",
-                  "interactive",
+                  " propre",
+                  " sécurisée",
+                  " moderne",
+                  " organisée",
+                  " durable",
+                  " interactive",
+                  " intelligent",
+                  " connectée"
                 ]}
               />
             </span>
@@ -98,7 +101,7 @@ export default function Hero() {
             <Btn
               variant="ghost"
               href="#how"
-              className="bg-surface border border-border text-foreground hover:bg-muted"
+              className="bg-surface border border-border text-foreground hover:bg-gray-500"
             >
               Comment ça marche
             </Btn>
