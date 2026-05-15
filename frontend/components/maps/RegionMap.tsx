@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { geoIdentity, geoPath } from "d3-geo";
 import { CATEGORIES, TEST_DATA } from "@/lib/constants";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function RegionMap({ id }: { id: string }) {
   const router = useRouter();
@@ -80,9 +82,17 @@ export default function RegionMap({ id }: { id: string }) {
     <div className="w-full h-full flex flex-col p-6">
       {/* HEADER */}
       <div className="w-full max-w-4xl flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-blue-600">
-          {regionFeature.properties.shapeName}
-        </h1>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/home"
+            className="text-white bg-blue-500 rounded-full h-8 w-8 flex justify-center items-center"
+          >
+            <ArrowLeft />
+          </Link>
+          <h1 className="text-2xl font-bold text-blue-600">
+            {regionFeature.properties.shapeName}
+          </h1>
+        </div>
       </div>
 
       {/* MAP */}

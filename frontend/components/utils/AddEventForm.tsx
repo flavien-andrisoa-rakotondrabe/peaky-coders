@@ -139,6 +139,7 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
     handleSubmit,
     control,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
@@ -200,6 +201,11 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
   };
 
   const onSubmit = async (values: EventFormValues) => {
+    if (values.type === "event" && !values.date) {
+      setError("date", { message: "Date requise" });
+      return;
+    }
+
     if (values.type === "event" && (!location?.lat || !location.lng)) {
       setLocationError("Localisation requise");
       return;
