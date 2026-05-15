@@ -23,7 +23,7 @@ class NewsController extends Controller
     public function index(): JsonResponse
     {
         return response()->json([
-            'data' => NewsResource::collection($this->repository->all()),
+             NewsResource::collection($this->repository->all()),
         ]);
     }
 

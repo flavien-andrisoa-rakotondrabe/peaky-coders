@@ -40,6 +40,8 @@ import { MAX_SIZE } from "@/lib/photos";
 import Button3DV2 from "./Button3DV2";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { addEventReducer } from "@/redux/slices/event.slice";
 
 const CATEGORIES = [
   {
@@ -119,6 +121,8 @@ function SortablePhoto({
 
 // ─── Component ────────────────────────────────────────────────
 export default function AddEventForm({ onClose }: { onClose: () => void }) {
+  const dispatch = useDispatch();
+
   const [type, setType] = useState(CATEGORIES[0].value);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -201,6 +205,7 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
   };
 
   const onSubmit = async (values: EventFormValues) => {
+    console.log(values);
     if (values.type === "event" && !values.date) {
       setError("date", { message: "Date requise" });
       return;
@@ -241,6 +246,7 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
       });
 
       if (res.status === 201 || res.status === 200) {
+        dispatch(addEventReducer(res.data));
       }
 
       toast.success("Evénement créé !");
@@ -318,7 +324,7 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
             <FormInput
               label={"Date*"}
               type="date"
-              required
+              error={errors.date?.message}
               {...register("date")}
             />
           )}

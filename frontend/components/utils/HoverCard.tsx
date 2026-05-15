@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { EventInterface } from "@/types/event.interface";
 
 // ─── Types ────────────────────────────────────────────────────
 interface ReportCardProps {
@@ -39,10 +40,10 @@ const PRIORITY: Record<number, { label: string; bar: string; text: string }> = {
 };
 
 const CATEGORY: Record<string, { dot: string }> = {
-  Déchets: { dot: "bg-violet-500" },
-  Infrastructure: { dot: "bg-amber-500" },
-  Urgence: { dot: "bg-red-500" },
-  Actualité: { dot: "bg-blue-500" },
+  urgence: { dot: "bg-red-500" },
+  infra: { dot: "bg-yellow-500" },
+  dechet: { dot: "bg-violet-500" },
+  actu: { dot: "bg-blue-500" },
 };
 
 // ─── PriorityBars ─────────────────────────────────────────────
@@ -97,31 +98,20 @@ function PriorityBars({
 }
 
 // ─── ReportCard ───────────────────────────────────────────────
-export default function HoverCards({
-  category = "Déchets",
-  title = "Dépôt sauvage signalé",
-  location = "Tanambao IV, Antsiranana",
-  date = "13 mai",
-  time = "18:50",
-  description = "Citoyen lambda a signalé un dépôt important — équipe d'enlèvement mobilisée.",
-  coverImage,
-  priorityScore: initScore = 4,
-  isFavorited: initFav = false,
-  reportCode = "RPT-2024-0342",
-}: ReportCardProps) {
-  const [favorited, setFavorited] = useState(initFav);
-  const [score, setScore] = useState(initScore);
+export default function HoverCards({ item }: { item: EventInterface }) {
+  const [favorited, setFavorited] = useState(0);
+  const [score, setScore] = useState(1);
 
-  const cat = CATEGORY[category] ?? CATEGORY["Déchets"];
+  // const cat = CATEGORY[item.type] ?? CATEGORY["Déchets"];
 
   return (
-    <Card className="w-[300px] overflow-hidden rounded-2xl border border-gray-200/80 shadow-md p-0 gap-0">
+    <Card className="w-[300px] overflow-hidden rounded-2xl p-0 gap-0 ring-0 bg-white">
       {/* ── Cover image ───────────────────────────────────── */}
       <div className="relative h-[136px] bg-gray-100">
-        {coverImage ? (
+        {item.image_urls?.length > 0 ? (
           <Image
-            src={coverImage}
-            alt={title}
+            src={item.image_urls[0]}
+            alt={item.title}
             fill
             sizes="300px"
             className="object-cover"
@@ -148,18 +138,16 @@ export default function HoverCards({
               <path d="M21 15l-5-5L5 21" />
             </svg>
             <span className="font-mono text-[9px] text-gray-400 tracking-widest">
-              photo · {reportCode.toLowerCase()}
+              photo · {item.type?.toLowerCase()}
             </span>
           </div>
         )}
-
-        
       </div>
 
       {/* ── Corps ─────────────────────────────────────────── */}
       <CardContent className="px-4 pt-3.5 pb-3 flex flex-col gap-2.5">
         <h3 className="font-semibold text-[14.5px] leading-snug tracking-tight text-gray-900">
-          {title}
+          {item.title}
         </h3>
 
         <div className="flex items-center gap-3 text-[11.5px] text-gray-400">
@@ -174,7 +162,7 @@ export default function HoverCards({
               <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" />
               <circle cx="12" cy="9" r="2.5" />
             </svg>
-            {location}
+            {item.description}
           </span>
           <span className="flex items-center gap-1 ml-auto shrink-0">
             <svg
@@ -187,12 +175,12 @@ export default function HoverCards({
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 3" />
             </svg>
-            {date}, {time}
+            {item.date}
           </span>
         </div>
 
         <p className="text-[12.5px] text-gray-500 leading-relaxed line-clamp-2">
-          {description}
+          {item.description}
         </p>
       </CardContent>
 
@@ -206,7 +194,7 @@ export default function HoverCards({
         {/* Code rapport + bouton favoris */}
         <div className="flex items-center gap-2">
           <span className="font-mono text-[9px] text-gray-300 tracking-widest">
-            {reportCode}
+            {item.type}
           </span>
 
           <TooltipProvider delayDuration={80}>
@@ -215,7 +203,7 @@ export default function HoverCards({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setFavorited((f) => !f)}
+                  // onClick={() => setFavorited((f) => !f)}
                   aria-label={
                     favorited ? "Retirer des favoris" : "Ajouter aux favoris"
                   }

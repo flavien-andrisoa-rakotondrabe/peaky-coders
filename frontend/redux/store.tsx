@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
-import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
+import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 
-import persistSlice from './slices/persist.slice';
-import userSlice from './slices/user.slice';
+import persistSlice from "./slices/persist.slice";
+import userSlice from "./slices/user.slice";
+import eventSlice from "./slices/event.slice";
 
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import { persistStore, persistReducer } from 'redux-persist';
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
 
 const createNoopStorage = (): {
   getItem: () => Promise<null>;
@@ -27,18 +28,19 @@ const createNoopStorage = (): {
 };
 
 const storage =
-  typeof window !== 'undefined'
-    ? createWebStorage('local')
+  typeof window !== "undefined"
+    ? createWebStorage("local")
     : createNoopStorage();
 
 const persistConfig = {
-  key: 'root',
+  key: "root",
   storage,
-  whitelist: ['persistInfos'],
+  whitelist: ["persistInfos"],
 };
 
 const rootReducer = combineReducers({
   user: userSlice,
+  event: eventSlice,
   persistInfos: persistSlice,
 });
 

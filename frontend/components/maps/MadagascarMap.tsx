@@ -1,53 +1,58 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { geoIdentity, geoPath } from "d3-geo";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 import { CATEGORIES, TEST_DATA } from "@/lib/constants";
+import HoverCards from "../utils/HoverCard";
 
-export default function MadagascarMap() {
+type HoverState = {
+  event: any;
+  x: number;
+  y: number;
+} | null;
+
+export default function MadagascarMapEngine() {
   const router = useRouter();
+  const { events } = useSelector((state: RootState) => state.event);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const [geoData, setGeoData] = useState<any>(null);
-  const [selectedID, setSelectedID] = useState<string | null>(null);
+  const [size, setSize] = useState({ width: 400, height: 500 });
 
-  const [tooltip, setTooltip] = useState<{
-    x: number;
-    y: number;
-    content: string;
-  } | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
 
-  const [size, setSize] = useState({
-    width: 400,
-    height: 500,
-  });
+  const [hover, setHover] = useState<HoverState>(null);
 
-  // 🌍 ResizeObserver
+  // 📏 Resize engine
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const obs = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      setSize({ width, height });
+    const obs = new ResizeObserver(([entry]) => {
+      setSize(entry.contentRect);
     });
 
     obs.observe(containerRef.current);
-
     return () => obs.disconnect();
   }, []);
 
-  // 📦 load GeoJSON
+  // 📦 Geo data
   useEffect(() => {
     fetch("/data/madagascar.geojson")
-      .then((res) => res.json())
-      .then((data) => setGeoData(data));
+      .then((r) => r.json())
+      .then(setGeoData);
   }, []);
 
-  // 🗺️ projection
-  const { projection, globalPath } = useMemo(() => {
-    if (!geoData) return { projection: null, globalPath: null };
+  // 🗺️ Projection engine
+  const { projection, path } = useMemo(() => {
+    if (!geoData) return { projection: null, path: null };
 
     const proj = geoIdentity()
       .reflectY(true)
@@ -55,78 +60,108 @@ export default function MadagascarMap() {
 
     return {
       projection: proj,
-      globalPath: geoPath(proj),
+      path: geoPath(proj),
     };
   }, [geoData, size]);
 
-  if (!geoData || !globalPath || !projection) {
-    return <div>Chargement...</div>;
+  // 🧠 SVG → SCREEN (engine core)
+  const toScreen = useCallback((x: number, y: number) => {
+    if (!svgRef.current) return { x: 0, y: 0 };
+
+    const pt = svgRef.current.createSVGPoint();
+    pt.x = x;
+    pt.y = y;
+
+    const ctm = svgRef.current.getScreenCTM();
+    if (!ctm) return { x: 0, y: 0 };
+
+    const res = pt.matrixTransform(ctm);
+
+    return { x: res.x, y: res.y };
+  }, []);
+
+  // 🧠 hover engine (anti-flicker + intent)
+  const openHover = useCallback(
+    (event: any, x: number, y: number) => {
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+
+      const screen = toScreen(x, y);
+
+      setHover({
+        event,
+        x: screen.x,
+        y: screen.y,
+      });
+    },
+    [toScreen],
+  );
+
+  const closeHover = useCallback(() => {
+    hoverTimeout.current = setTimeout(() => {
+      setHover(null);
+    }, 120);
+  }, []);
+
+  if (!geoData || !projection || !path) {
+    return <div>Loading map...</div>;
   }
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
-      {/* TOOLTIP */}
-      {tooltip && (
+      {/* 🧾 OVERLAY CARD ENGINE */}
+      {hover && (
         <div
+          className="fixed z-50"
           style={{
-            position: "fixed",
-            top: tooltip.y - 40,
-            left: tooltip.x + 10,
-            zIndex: 1000,
+            left: hover.x,
+            top: hover.y,
+            transform: "translate(-50%, -120%)",
           }}
-          className="text-foreground text-xl uppercase pointer-events-none"
+          onMouseEnter={() => {
+            if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+          }}
+          onMouseLeave={closeHover}
         >
-          {tooltip.content}
+          <HoverCards item={hover.event} />
         </div>
       )}
 
-      {/* SVG */}
+      {/* 🗺️ SVG ENGINE */}
       <svg
+        ref={svgRef}
         width="100%"
         height="100%"
         viewBox={`0 0 ${size.width} ${size.height}`}
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* REGIONS */}
+        {/* REGIONS LAYER */}
         {geoData.features.map((f: any) => {
           const id = f.properties.shapeID;
-          const name = f.properties.shapeName;
 
           return (
             <path
               key={id}
-              d={globalPath(f) || ""}
-              fillRule="evenodd"
-              fill={selectedID === id ? "#dbeafe" : "#f1f5f9"}
+              d={path(f) || ""}
+              fill={
+                selectedRegion === id
+                  ? "#dbeafe"
+                  : hoveredRegion === id
+                    ? "#e0f2fe"
+                    : "#f1f5f9"
+              }
               stroke="#cbd5e1"
-              style={{
-                cursor: "pointer",
-                transition: "fill 0.2s",
-              }}
+              style={{ cursor: "pointer" }}
               onClick={() => {
-                setSelectedID(id);
+                setSelectedRegion(id);
                 router.push(`/region/${id}`);
               }}
-              onMouseEnter={(e) =>
-                setTooltip({
-                  x: e.clientX,
-                  y: e.clientY,
-                  content: name,
-                })
-              }
-              onMouseMove={(e) =>
-                setTooltip({
-                  x: e.clientX,
-                  y: e.clientY,
-                  content: name,
-                })
-              }
-              onMouseLeave={() => setTooltip(null)}
+              onMouseEnter={() => setHoveredRegion(id)}
+              onMouseLeave={() => setHoveredRegion(null)}
             />
           );
         })}
 
-        {/* POINTS */}
+        {/* MARKERS LAYER */}
         {TEST_DATA.map((pt) => {
           const coords = projection([pt.lng, pt.lat]);
           if (!coords) return null;
@@ -140,44 +175,20 @@ export default function MadagascarMap() {
             <g
               key={pt.id}
               style={{ cursor: "pointer" }}
-              onMouseEnter={(e) =>
-                setTooltip({
-                  x: e.clientX,
-                  y: e.clientY,
-                  content: pt.title,
-                })
-              }
-              onMouseMove={(e) =>
-                setTooltip({
-                  x: e.clientX,
-                  y: e.clientY,
-                  content: pt.title,
-                })
-              }
-              onMouseLeave={() => setTooltip(null)}
+              onMouseEnter={() => openHover(pt, x, y)}
+              onMouseLeave={closeHover}
             >
-              {/* ping */}
+              {/* pulse */}
               <circle
                 cx={x}
                 cy={y}
-                r={4}
+                r={5}
                 fill={color}
                 className="animate-ping"
-                style={{ pointerEvents: "none" }}
               />
 
               {/* pin */}
-              <g transform={`translate(${x - 6}, ${y - 12}) scale(0.5)`}>
-                <path
-                  d="M12 0c-4.198 0-8 3.403-8 7.602 0 4.198 3.469 9.21 8 16.398 4.531-7.188 8-12.2 8-16.398 0-4.199-3.801-7.602-8-7.602zm0 11c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"
-                  fill={color}
-                  stroke="#fff"
-                  strokeWidth="1.5"
-                />
-              </g>
-
-              {/* center dot */}
-              <circle cx={x} cy={y - 8.5} r={1.2} fill="#fff" />
+              <circle cx={x} cy={y} r={6} fill={color} />
             </g>
           );
         })}

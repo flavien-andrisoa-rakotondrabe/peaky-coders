@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { EventInterface } from "@/types/event.interface";
 
 // ─── Types ────────────────────────────────────────────────────
 type Category = "actu" | "dechet" | "infra" | "urgence";
@@ -57,23 +58,13 @@ export const CAT: Record<
 };
 
 // ─── MarkerPopup ──────────────────────────────────────────────
-export default function CardEvent({
-  category = "actu",
-  title = "Festival des Baleines à Antsiranana",
-  location = "Antsiranana",
-  sublocation = "Baie de Diego",
-  description = "Édition annuelle d'observation des baleines à bosse — programmation culturelle sur le port.",
-  timeAgo = "1 min",
-  isFavorited: initFav = false,
-  onClick,
-}: MarkerPopupProps) {
-  const [favorited, setFavorited] = useState(initFav);
-  const cat = CAT[category];
+export default function CardEvent({ item }: { item: EventInterface }) {
+  const [favorited, setFavorited] = useState(0);
+  const cat = CAT[item?.category ?? "actu"];
 
   return (
     <TooltipProvider delayDuration={100}>
       <Card
-        onClick={onClick}
         className={`
           w-[340px] rounded-xl bg-white
           shadow-[0_4px_24px_rgba(0,0,0,0.09)]
@@ -87,11 +78,11 @@ export default function CardEvent({
           {/* ── Ligne 1 : titre + temps ── */}
           <div className="flex items-start justify-between gap-3">
             <h3 className="font-semibold text-[16px] leading-snug tracking-tight text-gray-900 flex-1">
-              {title}
+              {item.title}
             </h3>
             <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
               <span className="text-[11px] text-gray-400 tabular-nums">
-                {timeAgo}
+                {item.date}
               </span>
 
               {/* Bouton favoris */}
@@ -102,13 +93,13 @@ export default function CardEvent({
                     size="icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setFavorited((f) => !f);
+                      // setFavorited((f) => !f);
                     }}
                     aria-label={
                       favorited ? "Retirer des favoris" : "Ajouter aux favoris"
                     }
                     className={`
-                      h-6 w-6 rounded-full -mr-1 transition-all duration-200
+                      h-6 w-6 cursor-pointer rounded-full -mr-1 transition-all duration-200
                       ${
                         favorited
                           ? "text-red-500 bg-red-50"
@@ -129,9 +120,9 @@ export default function CardEvent({
                     </svg>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="text-[11px] px-2 py-0.5">
+                {/* <TooltipContent side="top" className="text-[11px] px-2 py-0.5">
                   {favorited ? "Retirer des favoris" : "Ajouter aux favoris"}
-                </TooltipContent>
+                </TooltipContent> */}
               </Tooltip>
             </div>
           </div>
@@ -148,18 +139,12 @@ export default function CardEvent({
               <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" />
               <circle cx="12" cy="9" r="2.5" />
             </svg>
-            <span className="font-medium text-gray-500">{location}</span>
-            {sublocation && (
-              <>
-                <span className="text-gray-300 mx-0.5">·</span>
-                <span>{sublocation}</span>
-              </>
-            )}
+            {/* <span className="font-medium text-gray-500">{item.location}</span> */}
           </div>
 
           {/* ── Ligne 3 : description ── */}
           <p className="text-[12px] text-gray-500 leading-relaxed line-clamp-2">
-            {description}
+            {item.description}
           </p>
 
           {/* ── Ligne 4 : badge catégorie ── */}
