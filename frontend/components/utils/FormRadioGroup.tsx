@@ -64,7 +64,7 @@ export const FormRadioGroup = ({
                 className={cn(
                   "rounded-xl border border-foreground/10 p-2 transition-colors",
                   isSelected
-                    ? "border-transparent bg-primary text-primary-foreground" // bg-primary au lieu de bg-accent! pour suivre shadcn
+                    ? "border-green-500 bg-primary text-primary-foreground" // bg-primary au lieu de bg-accent! pour suivre shadcn
                     : ["cursor-pointer", edit && "hover:bg-muted/30"],
                   !active && "pointer-events-none opacity-50",
                 )}
@@ -81,8 +81,10 @@ export const FormRadioGroup = ({
                     disabled={!active}
                     value={item.value}
                     className={cn(
-                      "mt-1 border-foreground/10 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-primary",
-                      isSelected ? "" : "cursor-pointer",
+                      "mt-1 border-foreground/10 data-[state=checked]:border-green-500 data-[state=checked]:bg-green-500 data-[state=checked]:text-green-500",
+                      isSelected
+                        ? "border-green-500 data-[state=checked]:border-green-500"
+                        : "cursor-pointer",
                     )}
                   />
                   <div className="relative flex flex-1 flex-col gap-1">
@@ -90,7 +92,7 @@ export const FormRadioGroup = ({
                       htmlFor={`${name}-${item.value}`}
                       className={cn(
                         "font-semibold",
-                        isSelected ? "" : "cursor-pointer",
+                        isSelected ? "text-green-500" : "cursor-pointer",
                         !edit && "opacity-50",
                       )}
                     >
