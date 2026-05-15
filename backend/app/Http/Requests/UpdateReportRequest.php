@@ -15,7 +15,7 @@ class UpdateReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category'      => ['sometimes', 'string', Rule::in(['dechet', 'infra', 'incendie'])],
+            'category'      => ['sometimes', 'string', Rule::in(['dechet', 'infra', 'urgence', 'other'])],
             'images'        => ['nullable', 'array', 'max:5'],
             'images.*'      => ['image', 'max:5120'],
             'location'      => ['nullable', 'array'],
