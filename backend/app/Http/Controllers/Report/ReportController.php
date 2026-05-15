@@ -23,7 +23,7 @@ class ReportController extends Controller
     public function index(): JsonResponse
     {
         return response()->json([
-            'data' => ReportResource::collection($this->repository->all(auth()->id())),
+            ReportResource::collection($this->repository->all(auth()->id())),
         ]);
     }
 
@@ -32,19 +32,19 @@ class ReportController extends Controller
         $report = $this->repository->find($report->id, auth()->id());
 
         return response()->json([
-            'data' => new ReportResource($report),
+            new ReportResource($report),
         ]);
     }
 
     public function store(StoreReportRequest $request): JsonResponse
     {
         $dto = new CreateReportDTO(
-            userId:   $request->user()->id,
+            userId: $request->user()->id,
             category: $request->validated('category'),
-            type:     $request->validated('type'),
-            status:   $request->validated('status'),
-            lat:      $request->validated('location.lat'),
-            lng:     $request->validated('location.lng'),
+            type: $request->validated('type'),
+            status: $request->validated('status'),
+            lat: $request->validated('location.lat'),
+            lng: $request->validated('location.lng'),
         );
 
         $report = $this->service->create($dto, $request->file('images', []));
@@ -60,10 +60,10 @@ class ReportController extends Controller
 
         $dto = new UpdateReportDTO(
             category: $request->validated('category'),
-            type:     $request->validated('type'),
-            status:   $request->validated('status'),
-            lat:      $request->validated('location.lat'),
-            lng:     $request->validated('location.lng'),
+            type: $request->validated('type'),
+            status: $request->validated('status'),
+            lat: $request->validated('location.lat'),
+            lng: $request->validated('location.lng'),
         );
 
         $updated = $this->service->update($report, $dto, $request->file('images', []));

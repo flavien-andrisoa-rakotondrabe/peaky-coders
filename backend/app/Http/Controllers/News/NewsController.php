@@ -23,7 +23,7 @@ class NewsController extends Controller
     public function index(): JsonResponse
     {
         return response()->json([
-            'data' => NewsResource::collection($this->repository->all()),
+            NewsResource::collection($this->repository->all()),
         ]);
     }
 
@@ -32,27 +32,26 @@ class NewsController extends Controller
         $news->load('user');
 
         return response()->json([
-            'data' => new NewsResource($news),
+            new NewsResource($news),
         ]);
     }
 
     public function store(StoreNewsRequest $request): JsonResponse
     {
         $dto = new CreateNewsDTO(
-            userId:      $request->user()->id,
-            type:        $request->validated('type'),
-            date:        $request->validated('date'),
-            title:       $request->validated('title'),
+            userId: $request->user()->id,
+            type: $request->validated('type'),
+            date: $request->validated('date'),
+            title: $request->validated('title'),
             description: $request->validated('description'),
-            lat:         $request->validated('location.lat'),
-            lng:        $request->validated('location.lng'),
+            lat: $request->validated('location.lat'),
+            lng: $request->validated('location.lng'),
         );
 
         $news = $this->service->create($dto, $request->file('images', []));
 
         return response()->json([
             'message' => 'News created.',
-            'data'    => new NewsResource($news->load('user')),
         ], 201);
     }
 
@@ -61,19 +60,18 @@ class NewsController extends Controller
         $this->authorize('update', $news);
 
         $dto = new UpdateNewsDTO(
-            type:        $request->validated('type'),
-            date:        $request->validated('date'),
-            title:       $request->validated('title'),
+            type: $request->validated('type'),
+            date: $request->validated('date'),
+            title: $request->validated('title'),
             description: $request->validated('description'),
-            lat:         $request->validated('location.lat'),
-            lng:        $request->validated('location.lng'),
+            lat: $request->validated('location.lat'),
+            lng: $request->validated('location.lng'),
         );
 
         $updated = $this->service->update($news, $dto, $request->file('images', []));
 
         return response()->json([
             'message' => 'News updated.',
-            'data'    => new NewsResource($updated->load('user')),
         ]);
     }
 
