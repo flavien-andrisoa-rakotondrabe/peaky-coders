@@ -24,10 +24,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { CAT } from "@/components/utils/CardEvent";
-import { FormRadioGroup } from "@/components/utils/FormRadioGroup";
-import { FormInput } from "@/components/utils/FormInput";
-import { FormTextArea } from "./FormTextarea";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { MAX_SIZE } from "@/lib/photos";
+import MadagascarLeaflet from "@/components/maps/MadagascarLeaflet";
 import { Star, Trash2, Upload } from "lucide-react";
 import {
   Field,
@@ -35,22 +35,47 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import MadagascarLeaflet from "@/components/maps/MadagascarLeaflet";
-import { MAX_SIZE } from "@/lib/photos";
-import Button3DV2 from "./Button3DV2";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
+import Button3DV2 from "@/components/utils/Button3DV2";
+import { FormInput } from "./FormInput";
+import { FormRadioGroup } from "./FormRadioGroup";
 
 const CATEGORIES = [
   {
-    value: "event",
-    label: "Evénement",
-    date: true,
+    value: "urgence",
+    label: "Urgence / Incident",
+    sub: "Accident, sinistre",
+    dot: "bg-red-500",
+    ring: "ring-red-200",
+    activeBg: "bg-red-50",
+    activeBorder: "border-red-400",
   },
   {
-    value: "divers",
-    label: "Divers",
-    date: false,
+    value: "infra",
+    label: "Infrastructure",
+    sub: "Travaux, réseau, voirie",
+    dot: "bg-yellow-500",
+    ring: "ring-yellow-200",
+    activeBg: "bg-yellow-50",
+    activeBorder: "border-yellow-400",
+    type: true,
+  },
+  {
+    value: "dechet",
+    label: "Dechets",
+    sub: "Cumuls de déchets",
+    dot: "bg-purple-500",
+    ring: "ring-purple-200",
+    activeBg: "bg-purple-50",
+    activeBorder: "border-purple-400",
+  },
+  {
+    value: "other",
+    label: "Autre",
+    sub: "Autre types",
+    dot: "bg-blue-500",
+    ring: "ring-blue-200",
+    activeBg: "bg-blue-50",
+    activeBorder: "border-blue-400",
   },
 ];
 
@@ -62,10 +87,9 @@ type Photo = {
 };
 
 const eventSchema = z.object({
-  type: z.string(),
-  title: z.string().min(2, "Titre requis"),
-  description: z.string().min(5, "Description requise"),
-  date: z.string(),
+  category: z.string(),
+  type: z.string().nullable(),
+  status: z.string().nullable(),
   location: z.object({ lat: z.string(), lng: z.string() }),
 });
 
@@ -118,35 +142,34 @@ function SortablePhoto({
 }
 
 // ─── Component ────────────────────────────────────────────────
-export default function AddEventForm({ onClose }: { onClose: () => void }) {
-  const [type, setType] = useState(CATEGORIES[0].value);
+export default function SignalForm({ onClose }: { onClose: () => void }) {
   const [photos, setPhotos] = useState<Photo[]>([]);
+
+  const [category, setCategory] = useState(CATEGORIES[0].value);
   const [isDragging, setIsDragging] = useState(false);
   const [location, setLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
     }),
   );
-
   const {
     register,
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      type: "event",
-      title: "",
-      description: "",
-      date: "",
+      category: CATEGORIES[0].value,
+      type: null,
+      status: null,
       location: {
         lat: "",
         lng: "",
@@ -199,22 +222,23 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
     setPhotos((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const type = watch("category");
+
   const onSubmit = async (values: EventFormValues) => {
-    if (values.type === "event" && (!location?.lat || !location.lng)) {
+    if (!location?.lat || !location.lng) {
       setLocationError("Localisation requise");
       return;
     }
 
-    if (photos.length === 0 || !type || !location?.lat || !location.lng) {
+    if (!category || !location?.lat || !location.lng) {
       return;
     }
 
     const formData = new FormData();
 
-    formData.append("type", values.type);
-    formData.append("title", values.title);
-    formData.append("description", values.description);
-    formData.append("date", values.date);
+    formData.append("category", category ?? "");
+    formData.append("type", values.type ?? "");
+    formData.append("status", values.status ?? "");
     formData.append("location[lat]", (location?.lat).toString());
     formData.append("location[lng]", (location?.lng).toString());
 
@@ -228,7 +252,7 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
     try {
       await api.get("/sanctum/csrf-cookie");
 
-      const res = await api.post("/api/news", formData, {
+      const res = await api.post("/api/reports", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -237,7 +261,7 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
       if (res.status === 201 || res.status === 200) {
       }
 
-      toast.success("Evénement créé !");
+      toast.success("Signalement effectué !");
     } catch (error: any) {
       if (error.response && error.response.status === 422) {
         toast.error("Echec de création :", error.response.data.errors);
@@ -260,18 +284,16 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
                 className={`
                 inline-flex items-center gap-1.5 px-2 py-[3px]
                 rounded-full border text-[10px] font-bold tracking-widest
-                ${CAT["actu"].className}
+                border-red-500 text-red-500
               `}
               >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${CAT["actu"].dot}`}
-                />
-                Actualité
+                <span className={`w-1.5 h-1.5 rounded-full bg-red-500`} />
+                Incident / Urgence
               </span>
             </div>
 
             <h2 className="text-[18px] font-bold tracking-tight text-gray-900">
-              Actualité / divers
+              Signaler / Avertir
             </h2>
           </div>
         </CardHeader>
@@ -283,41 +305,34 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
           {/* Catégorie */}
 
           <FormRadioGroup
-            label="Type"
-            name="type"
+            label="Catégories"
+            name="category"
             options={CATEGORIES}
             value={type}
-            onValueChange={(val) => setType(val)}
+            onValueChange={(val) => setCategory(val)}
             error={errors.type?.message}
             className="grid-cols-2"
           />
 
-          <FormInput
-            label={"Titre*"}
-            type="text"
-            placeholder="Titre de l'annonce"
-            required
-            {...register("title")}
-          />
+          {category === "infra" && (
+            <div className="grid grid-cols-2 gap-4">
+              <FormInput
+                label={"Type*"}
+                type="text"
+                placeholder="Type de l'infrastructure"
+                required
+                {...register("type")}
+              />
 
-          <FormTextArea
-            label={"Description*"}
-            placeholder="Description..."
-            className="min-h-20"
-            {...register("description")}
-          />
-
-          {/* Date + Niveau */}
-          {type === "event" && (
-            <FormInput
-              label={"Date*"}
-              type="date"
-              required
-              {...register("date")}
-            />
+              <FormInput
+                label={"Statut*"}
+                type="text"
+                placeholder="Statut de l'infrastructure"
+                required
+                {...register("status")}
+              />
+            </div>
           )}
-
-          {/* Upload image */}
 
           <FieldGroup>
             <Field>
@@ -428,7 +443,7 @@ export default function AddEventForm({ onClose }: { onClose: () => void }) {
 
             <Button3DV2
               type="submit"
-              label={"Publier l'événement"}
+              label={"Signaler / Avertir"}
               fullWidth
               breakpoints={[{ tw: "sm", width: 80, height: 42, fontSize: 12 }]}
             />

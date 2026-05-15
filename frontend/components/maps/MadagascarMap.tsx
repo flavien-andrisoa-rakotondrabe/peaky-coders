@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { geoIdentity, geoPath } from "d3-geo";
 import { CATEGORIES, TEST_DATA } from "@/lib/constants";
 
 export default function MadagascarMap() {
+  const router = useRouter();
+
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [geoData, setGeoData] = useState<any>(null);
@@ -21,7 +24,7 @@ export default function MadagascarMap() {
     height: 500,
   });
 
-  // 🌍 ResizeObserver → taille dynamique du parent
+  // 🌍 ResizeObserver
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -42,7 +45,7 @@ export default function MadagascarMap() {
       .then((data) => setGeoData(data));
   }, []);
 
-  // 🗺️ projection dynamique (responsive)
+  // 🗺️ projection
   const { projection, globalPath } = useMemo(() => {
     if (!geoData) return { projection: null, globalPath: null };
 
@@ -77,7 +80,7 @@ export default function MadagascarMap() {
         </div>
       )}
 
-      {/* SVG RESPONSIVE */}
+      {/* SVG */}
       <svg
         width="100%"
         height="100%"
@@ -85,32 +88,43 @@ export default function MadagascarMap() {
         preserveAspectRatio="xMidYMid meet"
       >
         {/* REGIONS */}
-        {geoData.features.map((f: any) => (
-          <path
-            key={f.properties.shapeID}
-            d={globalPath(f) || ""}
-            fillRule="evenodd"
-            fill={selectedID === f.properties.shapeID ? "#dbeafe" : "#f1f5f9"}
-            stroke="#cbd5e1"
-            onClick={() => setSelectedID(f.properties.shapeID)}
-            onMouseEnter={(e) =>
-              setTooltip({
-                x: e.clientX,
-                y: e.clientY,
-                content: f.properties.shapeName,
-              })
-            }
-            onMouseMove={(e) =>
-              setTooltip({
-                x: e.clientX,
-                y: e.clientY,
-                content: f.properties.shapeName,
-              })
-            }
-            onMouseLeave={() => setTooltip(null)}
-            style={{ cursor: "pointer", transition: "fill 0.2s" }}
-          />
-        ))}
+        {geoData.features.map((f: any) => {
+          const id = f.properties.shapeID;
+          const name = f.properties.shapeName;
+
+          return (
+            <path
+              key={id}
+              d={globalPath(f) || ""}
+              fillRule="evenodd"
+              fill={selectedID === id ? "#dbeafe" : "#f1f5f9"}
+              stroke="#cbd5e1"
+              style={{
+                cursor: "pointer",
+                transition: "fill 0.2s",
+              }}
+              onClick={() => {
+                setSelectedID(id);
+                router.push(`/region/${id}`);
+              }}
+              onMouseEnter={(e) =>
+                setTooltip({
+                  x: e.clientX,
+                  y: e.clientY,
+                  content: name,
+                })
+              }
+              onMouseMove={(e) =>
+                setTooltip({
+                  x: e.clientX,
+                  y: e.clientY,
+                  content: name,
+                })
+              }
+              onMouseLeave={() => setTooltip(null)}
+            />
+          );
+        })}
 
         {/* POINTS */}
         {TEST_DATA.map((pt) => {
@@ -125,6 +139,7 @@ export default function MadagascarMap() {
           return (
             <g
               key={pt.id}
+              style={{ cursor: "pointer" }}
               onMouseEnter={(e) =>
                 setTooltip({
                   x: e.clientX,
@@ -140,9 +155,8 @@ export default function MadagascarMap() {
                 })
               }
               onMouseLeave={() => setTooltip(null)}
-              style={{ cursor: "pointer" }}
             >
-              {/* animation ping */}
+              {/* ping */}
               <circle
                 cx={x}
                 cy={y}

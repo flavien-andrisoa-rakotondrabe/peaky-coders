@@ -1,7 +1,7 @@
 export const CATEGORIES = {
   URGENT: { color: "#ef4444", label: "Urgent", icon: "🚨" },
   INFRA: { color: "#eab308", label: "Infra", icon: "🏗️" },
-  SANTE: { color: "#22c55e", label: "Santé", icon: "🏥" },
+  SANTE: { color: "#a855f7", label: "Santé", icon: "🏥" },
   EVENT: { color: "#a855f7", label: "Event", icon: "✨" },
 };
 
