@@ -1,8 +1,8 @@
 <?php
 
-namespace App\DTOs\Article;
+namespace App\DTOs\News;
 
-readonly class CreateArticleDTO
+readonly class CreateNewsDTO
 {
     public function __construct(
         public int $userId,
@@ -10,8 +10,7 @@ readonly class CreateArticleDTO
         public ?string $date,
         public string $title,
         public string $description,
-        public ?float $latitude,
-        public ?float $longitude,
-        public ?string $locationName,
+        public ?float $lat,
+        public ?float $lng,
     ) {}
 }

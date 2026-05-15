@@ -8,8 +8,7 @@ readonly class UpdateReportDTO
         public ?string $category,
         public ?string $type,
         public ?string $status,
-        public ?float $latitude,
-        public ?float $longitude,
-        public ?string $locationName,
+        public ?float $lat,
+        public ?float $lng,
     ) {}
 }
